@@ -11,4 +11,4 @@ Disallow: /includes/
 Disallow: /.ssh/
 Disallow: /README.md
 
-Sitemap: https://codeq.cloud/sitemap.xml
+Sitemap: https://medic.bd/sitemap.xml
