@@ -1,0 +1,14 @@
+Tiro Bangla + 1500px Interface Update
+====================================
+
+1. Tiro Bangla is loaded from Google Fonts on all normal Prescription module pages.
+2. Bengali Unicode text is detected automatically and receives the Tiro Bangla font.
+3. The detector also handles dynamically added prescription rows, library dropdowns, inputs and textareas.
+4. Main header, content and footer containers now use a shared maximum width of 1500px.
+5. The live prescription editor can expand to the same 1500px width.
+6. print.php is intentionally unchanged, as requested.
+
+Replace the complete /prescription/ folder or only these files:
+- prescription/includes/header.php
+- prescription/assets/css/prescription.css
+- prescription/assets/js/prescription.js

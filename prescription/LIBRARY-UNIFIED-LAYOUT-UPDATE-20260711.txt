@@ -1,0 +1,38 @@
+Prescription Library Unified Layout Update
+Date: 2026-07-11
+
+What changed
+------------
+1. The Library Dashboard, every library list page, and every *_form.php page now use the same Library Menu layout.
+2. Clicking a library name in the left menu opens its matching form directly:
+   - Medicine Names -> Library/Medicine_form.php
+   - Strength -> Library/Strength_form.php
+   - Dosage -> Library/Dosage_form.php
+   - Frequency -> Library/Frequency_form.php
+   - Duration -> Library/Duration_form.php
+   - Medicine Instructions -> Library/Medicine_instruction_form.php
+   - Tests / Investigations -> Library/Tests_form.php
+   - Diagnosis -> Library/Diagnosis_form.php
+   - Chief Complaints -> Library/Chief_complaints_form.php
+   - Examination Findings -> Library/Examination_findings_form.php
+   - Advice -> Library/Advice_form.php
+3. Advice_form.php and all other forms retain the same prescription header, Library Menu, content shell, and footer.
+4. Each dashboard row now opens the matching form. A separate Manage Items button opens the list page.
+5. New Prescription field dropdown links now open the correct matching library form instead of always opening Medicine.
+6. No external UI framework was added.
+
+Important files
+---------------
+- prescription/librarys.php
+- prescription/includes/library-admin-shell.php
+- prescription/includes/library-form-page.php
+- prescription/includes/library-list-page.php
+- prescription/includes/header.php
+- prescription/includes/footer.php
+- prescription/assets/css/prescription.css
+- prescription/assets/js/prescription.js
+
+Validation
+----------
+- All PHP files passed PHP syntax validation.
+- prescription.js passed JavaScript syntax validation.

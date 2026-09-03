@@ -1,0 +1,436 @@
+<?php
+/*
+|--------------------------------------------------------------------------
+| Doctor Profile Schema
+|--------------------------------------------------------------------------
+| This file outputs JSON-LD structured data for doctor profile pages.
+| It depends on the $doctor array loaded from the main doctor profile page.
+|--------------------------------------------------------------------------
+*/
+
+if (!isset($doctor) || !is_array($doctor)) {
+    return;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Helpers
+|--------------------------------------------------------------------------
+*/
+
+if (!function_exists('doctor_schema_clean')) {
+    function doctor_schema_clean($value): string
+    {
+        return trim(strip_tags((string)$value));
+    }
+}
+
+if (!function_exists('doctor_schema_url')) {
+    function doctor_schema_url(string $path = ''): string
+    {
+        if (function_exists('site_url')) {
+            return site_url($path);
+        }
+
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? '';
+
+        return rtrim($scheme . '://' . $host, '/') . '/' . ltrim($path, '/');
+    }
+}
+
+if (!function_exists('doctor_schema_current_url')) {
+    function doctor_schema_current_url(): string
+    {
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? '';
+        $uri = $_SERVER['REQUEST_URI'] ?? '';
+
+        return $scheme . '://' . $host . $uri;
+    }
+}
+
+if (!function_exists('doctor_schema_image_url')) {
+    function doctor_schema_image_url($image): string
+    {
+        $image = trim((string)$image);
+
+        if ($image === '') {
+            return '';
+        }
+
+        if (preg_match('/^https?:\/\//i', $image)) {
+            return $image;
+        }
+
+        return doctor_schema_url($image);
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Basic Doctor Data
+|--------------------------------------------------------------------------
+*/
+
+$current_url = doctor_schema_current_url();
+
+$doctor_name = doctor_schema_clean($doctor['name'] ?? 'Doctor');
+
+if (defined('CURRENT_LANG') && CURRENT_LANG === 'bn' && doctor_schema_clean($doctor['name_bn'] ?? '') !== '') {
+    $doctor_name = doctor_schema_clean($doctor['name_bn']);
+}
+
+$doctor_slug = doctor_schema_clean($doctor['slug'] ?? ($_GET['slug'] ?? ''));
+
+$specialty_name = doctor_schema_clean($doctor['specialty_name'] ?? '');
+$designation = doctor_schema_clean($doctor['designation'] ?? '');
+$degree = doctor_schema_clean($doctor['degree'] ?? '');
+$about = doctor_schema_clean($doctor['about'] ?? ($doctor['bio'] ?? ''));
+$phone = doctor_schema_clean($doctor['phone'] ?? ($doctor['mobile'] ?? ''));
+$email = doctor_schema_clean($doctor['email'] ?? '');
+$image = doctor_schema_image_url($doctor['image'] ?? ($doctor['photo'] ?? ''));
+
+$seo_title = doctor_schema_clean($doctor['seo_title'] ?? '');
+$seo_description = doctor_schema_clean($doctor['seo_description'] ?? '');
+
+if ($seo_title === '') {
+    $seo_title = $doctor_name . ' | Doctor Profile';
+}
+
+if ($seo_description === '') {
+    $seo_description = trim($doctor_name . ' ' . $designation . ' ' . $specialty_name);
+
+    if ($seo_description === '') {
+        $seo_description = 'View doctor profile, chamber schedule, consultation information, contact details and related doctors.';
+    }
+}
+
+$language = 'en';
+
+if (defined('CURRENT_LANG') && CURRENT_LANG === 'bn') {
+    $language = 'bn';
+}
+
+/*
+|--------------------------------------------------------------------------
+| Rating Data
+|--------------------------------------------------------------------------
+*/
+
+$rating_value = 0;
+$review_count = 0;
+
+if (isset($doctor['rating']) && is_numeric($doctor['rating'])) {
+    $rating_value = (float)$doctor['rating'];
+}
+
+if (isset($doctor['average_rating']) && is_numeric($doctor['average_rating'])) {
+    $rating_value = (float)$doctor['average_rating'];
+}
+
+if (isset($doctor['reviews_count']) && is_numeric($doctor['reviews_count'])) {
+    $review_count = (int)$doctor['reviews_count'];
+}
+
+if (isset($doctor['review_count']) && is_numeric($doctor['review_count'])) {
+    $review_count = (int)$doctor['review_count'];
+}
+
+if ($rating_value < 0) {
+    $rating_value = 0;
+}
+
+if ($rating_value > 5) {
+    $rating_value = 5;
+}
+
+if ($review_count < 0) {
+    $review_count = 0;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Chamber / Clinic Data
+|--------------------------------------------------------------------------
+*/
+
+$chambers = [];
+
+if (function_exists('get_doctor_chambers')) {
+    $loaded_chambers = get_doctor_chambers((int)($doctor['id'] ?? 0));
+
+    if (is_array($loaded_chambers)) {
+        $chambers = $loaded_chambers;
+    }
+} elseif (!empty($doctor['chambers']) && is_array($doctor['chambers'])) {
+    $chambers = $doctor['chambers'];
+}
+
+$clinic_schema_items = [];
+
+foreach ($chambers as $index => $chamber) {
+    if (!is_array($chamber)) {
+        continue;
+    }
+
+    $clinic_name = doctor_schema_clean(
+        $chamber['hospital_name']
+        ?? $chamber['chamber_name']
+        ?? $chamber['name']
+        ?? 'Medical Chamber'
+    );
+
+    $clinic_address = doctor_schema_clean(
+        $chamber['address']
+        ?? $chamber['hospital_address']
+        ?? $chamber['chamber_address']
+        ?? ''
+    );
+
+    $clinic_phone = doctor_schema_clean(
+        $chamber['phone']
+        ?? $chamber['contact']
+        ?? $chamber['mobile']
+        ?? $phone
+    );
+
+    $clinic_area = doctor_schema_clean($chamber['area'] ?? '');
+    $clinic_city = doctor_schema_clean($chamber['city'] ?? '');
+    $clinic_country = doctor_schema_clean($chamber['country'] ?? 'Bangladesh');
+
+    $clinic_item = [
+        '@type' => 'MedicalClinic',
+        '@id' => $current_url . '#clinic-' . ($index + 1),
+        'name' => $clinic_name,
+        'medicalSpecialty' => $specialty_name !== '' ? $specialty_name : 'MedicalSpecialty',
+    ];
+
+    if ($clinic_phone !== '') {
+        $clinic_item['telephone'] = $clinic_phone;
+    }
+
+    if ($clinic_address !== '' || $clinic_area !== '' || $clinic_city !== '') {
+        $clinic_item['address'] = [
+            '@type' => 'PostalAddress',
+            'streetAddress' => $clinic_address,
+            'addressLocality' => $clinic_city !== '' ? $clinic_city : $clinic_area,
+            'addressCountry' => $clinic_country,
+        ];
+    }
+
+    $schedule_text = doctor_schema_clean(
+        $chamber['schedule']
+        ?? $chamber['visiting_time']
+        ?? $chamber['available_time']
+        ?? ''
+    );
+
+    if ($schedule_text !== '') {
+        $clinic_item['openingHours'] = $schedule_text;
+    }
+
+    $clinic_schema_items[] = array_filter($clinic_item, static function ($value) {
+        return $value !== '' && $value !== null && $value !== [];
+    });
+}
+
+/*
+|--------------------------------------------------------------------------
+| Main Schema Graph
+|--------------------------------------------------------------------------
+*/
+
+$graph = [];
+
+/*
+| WebPage Schema
+*/
+
+$web_page_schema = [
+    '@type' => 'WebPage',
+    '@id' => $current_url . '#webpage',
+    'url' => $current_url,
+    'name' => $seo_title,
+    'description' => $seo_description,
+    'inLanguage' => $language,
+];
+
+$graph[] = $web_page_schema;
+
+/*
+| Breadcrumb Schema
+*/
+
+$breadcrumb_schema = [
+    '@type' => 'BreadcrumbList',
+    '@id' => $current_url . '#breadcrumb',
+    'itemListElement' => [
+        [
+            '@type' => 'ListItem',
+            'position' => 1,
+            'name' => 'Home',
+            'item' => doctor_schema_url('/'),
+        ],
+        [
+            '@type' => 'ListItem',
+            'position' => 2,
+            'name' => 'Doctors',
+            'item' => doctor_schema_url('doctors'),
+        ],
+        [
+            '@type' => 'ListItem',
+            'position' => 3,
+            'name' => $doctor_name,
+            'item' => $current_url,
+        ],
+    ],
+];
+
+$graph[] = $breadcrumb_schema;
+
+/*
+| Physician / Doctor Schema
+*/
+
+$physician_schema = [
+    '@type' => 'Physician',
+    '@id' => $current_url . '#doctor',
+    'name' => $doctor_name,
+    'url' => $current_url,
+    'description' => $seo_description,
+    'medicalSpecialty' => $specialty_name !== '' ? $specialty_name : 'MedicalSpecialty',
+];
+
+if ($image !== '') {
+    $physician_schema['image'] = $image;
+}
+
+if ($designation !== '') {
+    $physician_schema['jobTitle'] = $designation;
+}
+
+if ($degree !== '') {
+    $physician_schema['knowsAbout'] = $degree;
+}
+
+if ($phone !== '') {
+    $physician_schema['telephone'] = $phone;
+}
+
+if ($email !== '') {
+    $physician_schema['email'] = $email;
+}
+
+if ($about !== '') {
+    $physician_schema['description'] = $about;
+}
+
+if (!empty($clinic_schema_items)) {
+    $physician_schema['worksFor'] = [];
+
+    foreach ($clinic_schema_items as $clinic_item) {
+        $physician_schema['worksFor'][] = [
+            '@type' => 'MedicalClinic',
+            '@id' => $clinic_item['@id'],
+            'name' => $clinic_item['name'],
+        ];
+    }
+}
+
+if ($rating_value > 0 && $review_count > 0) {
+    $physician_schema['aggregateRating'] = [
+        '@type' => 'AggregateRating',
+        'ratingValue' => number_format($rating_value, 1, '.', ''),
+        'reviewCount' => $review_count,
+        'bestRating' => '5',
+        'worstRating' => '1',
+    ];
+}
+
+$graph[] = $physician_schema;
+
+/*
+| Clinic Schema Items
+*/
+
+foreach ($clinic_schema_items as $clinic_schema_item) {
+    $graph[] = $clinic_schema_item;
+}
+
+/*
+| FAQ Schema
+| This helps search engines understand common doctor profile questions.
+*/
+
+$faq_items = [];
+
+if ($doctor_name !== '') {
+    $faq_items[] = [
+        '@type' => 'Question',
+        'name' => 'Who is ' . $doctor_name . '?',
+        'acceptedAnswer' => [
+            '@type' => 'Answer',
+            'text' => $seo_description,
+        ],
+    ];
+}
+
+if ($specialty_name !== '') {
+    $faq_items[] = [
+        '@type' => 'Question',
+        'name' => 'What is the specialty of ' . $doctor_name . '?',
+        'acceptedAnswer' => [
+            '@type' => 'Answer',
+            'text' => $doctor_name . ' specializes in ' . $specialty_name . '.',
+        ],
+    ];
+}
+
+if (!empty($chambers)) {
+    $first_chamber = $chambers[0];
+
+    if (is_array($first_chamber)) {
+        $first_chamber_name = doctor_schema_clean(
+            $first_chamber['hospital_name']
+            ?? $first_chamber['chamber_name']
+            ?? $first_chamber['name']
+            ?? ''
+        );
+
+        if ($first_chamber_name !== '') {
+            $faq_items[] = [
+                '@type' => 'Question',
+                'name' => 'Where does ' . $doctor_name . ' see patients?',
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text' => $doctor_name . ' sees patients at ' . $first_chamber_name . '.',
+                ],
+            ];
+        }
+    }
+}
+
+if (!empty($faq_items)) {
+    $graph[] = [
+        '@type' => 'FAQPage',
+        '@id' => $current_url . '#faq',
+        'mainEntity' => $faq_items,
+    ];
+}
+
+/*
+|--------------------------------------------------------------------------
+| Output JSON-LD
+|--------------------------------------------------------------------------
+*/
+
+$schema = [
+    '@context' => 'https://schema.org',
+    '@graph' => $graph,
+];
+
+echo "\n<!-- Doctor schema.php loaded -->\n";
+echo '<script type="application/ld+json">' . PHP_EOL;
+echo json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+echo PHP_EOL . '</script>' . PHP_EOL;

@@ -1,0 +1,11 @@
+Appointment Patient Details update
+
+- Added appointment.php for patient registration before an appointment.
+- The page saves only patient details and does not create a prescription.
+- Existing patients can be searched by name, mobile number or patient code.
+- Selecting an existing patient fills saved details automatically.
+- Name and mobile are required. Age, gender, blood group and address are optional.
+- Matching mobile numbers update the existing patient instead of creating duplicates.
+- Added Appointment to the sidebar.
+- The Appointment page replaces the topbar action with Add Patient and hides New Prescription in the sidebar.
+- Added an Add Patient action to the Patient Directory page.

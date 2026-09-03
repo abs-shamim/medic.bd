@@ -1,0 +1,145 @@
+# ============================================================================
+# MedicBD .htaccess
+# For index.php + route.php frontend routing
+# ============================================================================
+
+Options -MultiViews -Indexes
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # =========================================================================
+    # 1. Dynamic robots.txt
+    # Public URL: /robots.txt
+    # Generator: robots.php
+    # =========================================================================
+
+    RewriteRule ^robots\.txt$ robots.php [L,QSA]
+
+    # Block direct browser access to robots.php
+    RewriteCond %{THE_REQUEST} \s/+robots\.php(?:[?\s]) [NC]
+    RewriteRule ^robots\.php$ - [F,L]
+
+    # =========================================================================
+    # 2. XML Sitemap Routes
+    # =========================================================================
+
+    # Main sitemap index
+    RewriteRule ^sitemap\.xml$ sitemap.php?type=index [L,QSA]
+
+    # Static/main sitemap
+    RewriteRule ^sitemap-main\.xml$ sitemap.php?type=main [L,QSA]
+
+    # Doctor profile sitemaps
+    RewriteRule ^sitemap-doctors-([1-9][0-9]*)\.xml$ sitemap.php?type=doctors&page=$1 [L,QSA]
+    RewriteRule ^sitemap-doctors\.xml$ sitemap.php?type=doctors&page=1 [L,QSA]
+
+    # Hospital profile sitemaps
+    RewriteRule ^sitemap-hospitals-([1-9][0-9]*)\.xml$ sitemap.php?type=hospitals&page=$1 [L,QSA]
+    RewriteRule ^sitemap-hospitals\.xml$ sitemap.php?type=hospitals&page=1 [L,QSA]
+
+    # Specialty article sitemaps
+    RewriteRule ^sitemap-specialties-([1-9][0-9]*)\.xml$ sitemap.php?type=specialties&page=$1 [L,QSA]
+    RewriteRule ^sitemap-specialties\.xml$ sitemap.php?type=specialties&page=1 [L,QSA]
+
+    # Doctor directory sitemaps
+    RewriteRule ^sitemap-doctor-directory-([1-9][0-9]*)\.xml$ sitemap.php?type=doctor-directory&page=$1 [L,QSA]
+    RewriteRule ^sitemap-doctor-directory\.xml$ sitemap.php?type=doctor-directory&page=1 [L,QSA]
+
+    # Hospital directory sitemaps
+    RewriteRule ^sitemap-hospital-directory-([1-9][0-9]*)\.xml$ sitemap.php?type=hospital-directory&page=$1 [L,QSA]
+    RewriteRule ^sitemap-hospital-directory\.xml$ sitemap.php?type=hospital-directory&page=1 [L,QSA]
+
+    # Legacy sitemap URL
+    RewriteRule ^sitemap-locations-([1-9][0-9]*)\.xml$ sitemap.php?type=locations&page=$1 [L,QSA]
+    RewriteRule ^sitemap-locations\.xml$ sitemap.php?type=locations&page=1 [L,QSA]
+
+    # =========================================================================
+    # 3. Prevent Direct Access To Internal Router Files
+    # =========================================================================
+
+    # route.php must only be included by index.php
+    RewriteCond %{THE_REQUEST} \s/+route\.php(?:[?\s]) [NC]
+    RewriteRule ^route\.php$ - [F,L]
+
+    # sitemap.php should only be accessed through sitemap XML URLs
+    RewriteCond %{THE_REQUEST} \s/+sitemap\.php(?:[?\s]) [NC]
+    RewriteRule ^sitemap\.php$ - [F,L]
+
+    # =========================================================================
+    # 4. Block Sensitive Paths
+    # =========================================================================
+
+    # Block configuration directory
+    RewriteRule ^config(?:/.*)?$ - [F,L]
+
+    # Block hidden files/folders, but keep Let's Encrypt working
+    RewriteRule (^|/)\.(?!well-known(?:/|$)) - [F,L]
+
+    # Block backup, SQL dump, environment and archive files
+    RewriteRule \.(?:sql|zip|rar|7z|tar|gz|bak|backup|old|log|env|ini|md)$ - [F,NC,L]
+
+    # Block common private files
+    RewriteRule ^(?:composer\.(?:json|lock)|package(?:-lock)?\.json|yarn\.lock)$ - [F,NC,L]
+
+    # =========================================================================
+    # 5. Keep Admin And User Panels Outside Frontend Router
+    # =========================================================================
+
+    RewriteRule ^admin(?:/.*)?$ - [L]
+    RewriteRule ^user(?:/.*)?$ - [L]
+
+    # =========================================================================
+    # 6. Existing Files And Directories
+    # Assets, uploads, CSS, JS, images, PHP files, admin/user folders etc.
+    # =========================================================================
+
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # =========================================================================
+    # 7. Frontend Router
+    #
+    # index.php includes route.php.
+    #
+    # Supported routes:
+    # /
+    # /bn
+    # /doctors
+    # /doctors/dhaka/cardiologist
+    # /hospitals
+    # /hospitals/dhaka/private-hospital
+    # /doctor/doctor-slug
+    # /hospital/hospital-slug
+    # /specialty/cardiology
+    # /doctor/doctor-slug/write-review
+    #
+    # Legacy doctor URL:
+    # /doctors/dhaka/mirpur/gynecologist/doctor-name
+    # /bn/doctors/dhaka/mirpur/gynecologist/doctor-name
+    #
+    # All of these are handled by route.php after index.php loads.
+    # =========================================================================
+
+    RewriteRule ^ index.php [L,QSA]
+
+</IfModule>
+
+# ============================================================================
+# Security Headers
+# ============================================================================
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
+
+# ============================================================================
+# Disable Directory Listing
+# ============================================================================
+
+Options -Indexes

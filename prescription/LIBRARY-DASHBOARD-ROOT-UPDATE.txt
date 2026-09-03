@@ -1,0 +1,10 @@
+Library dashboard location:
+/prescription/librarys.php
+
+Library management pages remain inside:
+/prescription/Library/
+
+Compatibility redirects are included for:
+/prescription/Library/
+/prescription/Library/librarys.php
+/prescription/medicine-library.php

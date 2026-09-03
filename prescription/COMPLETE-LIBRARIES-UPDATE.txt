@@ -1,0 +1,33 @@
+COMPLETE LIBRARIES UPDATE
+=========================
+
+Added independent dropdown libraries for:
+- Medicine Generic / optional Brand
+- Strength
+- Dosage
+- Frequency
+- Duration
+- Medicine Instruction
+- Tests / Investigations
+- Test Instructions
+- Chief Complaints
+- Diagnosis
+- Medical History
+- Examination Findings
+- Advice
+
+SHARED DEMOS
+------------
+Demo rows use doctor_id = 0 and are visible to all approved doctors.
+A doctor can remove a demo from their own account. This creates a record in
+prescription_library_hidden and does not affect another doctor.
+
+PERSONAL ITEMS
+--------------
+Items created by a doctor use that doctor's doctor_id. They are private and can
+be edited, activated, deactivated or permanently deleted by that doctor only.
+
+EDITOR
+------
+Every matching prescription field has an independent dropdown and still supports
+manual entry. Shared Demo and My Library labels are shown inside dropdown results.

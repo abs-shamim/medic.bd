@@ -1,0 +1,15 @@
+SEPARATE LIBRARIES UPDATE
+=========================
+
+The prescription editor now uses independent dropdown libraries for:
+- Generic/Brand Medicine Names
+- Strength
+- Dosage
+- Frequency
+- Duration
+- Instruction
+
+Each field searches only its own database table.
+Manual typing remains available in every field.
+Manage all six libraries from:
+/prescription/medicine-library.php

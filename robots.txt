@@ -1,0 +1,14 @@
+# MedicBD Robots.txt
+# Search Engine, AI Search and Crawler Access Rules
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /user/
+Disallow: /ajax/
+Disallow: /config/
+Disallow: /includes/
+Disallow: /.ssh/
+Disallow: /README.md
+
+Sitemap: https://codeq.cloud/sitemap.xml

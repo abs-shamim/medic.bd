@@ -1,0 +1,715 @@
+<?php if (!empty($doctor)): ?>
+<?php
+  /*
+  |--------------------------------------------------------------------------
+  | Doctor Card
+  |--------------------------------------------------------------------------
+  | Chamber:
+  | - Chamber data comes only from chambers table.
+  | - Chamber name comes from hospitals table using chambers.hospital_id.
+  | - primary_hospital will never be treated as chamber.
+  | - One chamber: Chamber: Name
+  | - Multiple chambers: Chamber 1: Name, Chamber 2: Name
+  |
+  | Location:
+  | - Always uses doctors.doctor_thana_id and doctors.doctor_district_id.
+  | - If query already provides doctor_thana / doctor_district, it uses those.
+  | - If not, this file fetches names from thanas and districts by ID.
+  | - First chamber location fallback removed.
+  |
+  | Fee:
+  | - Empty / 0 / 00 consultation fee will show nothing.
+  |--------------------------------------------------------------------------
+  */
+
+  if (!function_exists('medic_dc_lang')) {
+      function medic_dc_lang(): string
+      {
+          return defined('CURRENT_LANG') && CURRENT_LANG === 'bn' ? 'bn' : 'en';
+      }
+  }
+
+  if (!function_exists('medic_dc_t')) {
+      function medic_dc_t(string $key, string $fallback = ''): string
+      {
+          if (function_exists('__t')) {
+              return __t($key, $fallback !== '' ? $fallback : $key);
+          }
+
+          return $fallback !== '' ? $fallback : $key;
+      }
+  }
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Bengali Digit Display
+  |--------------------------------------------------------------------------
+  | Converts only visitor-facing text in Bengali mode.
+  | URLs, IDs, image paths and other functional values keep ASCII digits.
+  |--------------------------------------------------------------------------
+  */
+  if (!function_exists('medic_dc_display_text')) {
+      function medic_dc_display_text($value): string
+      {
+          $value = (string)($value ?? '');
+
+          if (medic_dc_lang() !== 'bn' || $value === '') {
+              return $value;
+          }
+
+          return strtr($value, [
+              '0' => '০',
+              '1' => '১',
+              '2' => '২',
+              '3' => '৩',
+              '4' => '৪',
+              '5' => '৫',
+              '6' => '৬',
+              '7' => '৭',
+              '8' => '৮',
+              '9' => '৯',
+          ]);
+      }
+  }
+
+  if (!function_exists('medic_dc_lang_value')) {
+      function medic_dc_lang_value(array $row, string $base_key, string $fallback_key = ''): string
+      {
+          $lang = medic_dc_lang();
+
+          if ($lang === 'bn') {
+              $bn_key = $base_key . '_bn';
+
+              if (isset($row[$bn_key]) && trim((string)$row[$bn_key]) !== '') {
+                  return trim((string)$row[$bn_key]);
+              }
+          }
+
+          if (isset($row[$base_key]) && trim((string)$row[$base_key]) !== '') {
+              return trim((string)$row[$base_key]);
+          }
+
+          if ($fallback_key !== '') {
+              return medic_dc_lang_value($row, $fallback_key);
+          }
+
+          return '';
+      }
+  }
+
+  if (!function_exists('medic_dc_first_lang_value')) {
+      function medic_dc_first_lang_value(array $row, array $base_keys): string
+      {
+          foreach ($base_keys as $base_key) {
+              $value = medic_dc_lang_value($row, $base_key);
+
+              if ($value !== '') {
+                  return $value;
+              }
+          }
+
+          return '';
+      }
+  }
+
+  if (!function_exists('medic_dc_url_slug')) {
+      function medic_dc_url_slug(string $text): string
+      {
+          $text = trim($text);
+
+          if ($text === '') {
+              return '';
+          }
+
+          $text = preg_replace('/[^\p{L}\p{N}\s-]+/u', '', $text);
+          $text = preg_replace('/[\s_]+/u', '-', (string)$text);
+          $text = preg_replace('/-+/u', '-', (string)$text);
+
+          if (function_exists('mb_strtolower')) {
+              $text = mb_strtolower($text, 'UTF-8');
+          } else {
+              $text = strtolower($text);
+          }
+
+          return trim((string)$text, '-');
+      }
+  }
+
+  if (!function_exists('medic_dc_front_url')) {
+      function medic_dc_front_url(string $path = '', ?string $lang = null): string
+      {
+          $path = trim($path, '/');
+          $lang = $lang ?: medic_dc_lang();
+
+          if ($lang === 'bn') {
+              return function_exists('site_url')
+                  ? site_url($path !== '' ? 'bn/' . $path : 'bn')
+                  : '/bn/' . $path;
+          }
+
+          return function_exists('site_url')
+              ? site_url($path)
+              : '/' . $path;
+      }
+  }
+
+  if (!function_exists('medic_dc_doctor_profile_url')) {
+      function medic_dc_doctor_profile_url(array $doctor): string
+      {
+          $slug = '';
+
+          if (!empty($doctor['slug'])) {
+              $slug = medic_dc_url_slug((string)$doctor['slug']);
+          }
+
+          if ($slug === '' && !empty($doctor['name'])) {
+              $slug = medic_dc_url_slug((string)$doctor['name']);
+          }
+
+          if ($slug === '' && !empty($doctor['id'])) {
+              $slug = (string)(int)$doctor['id'];
+          }
+
+          return medic_dc_front_url('doctor/' . $slug, medic_dc_lang());
+      }
+  }
+
+  if (!function_exists('medic_dc_valid_fee')) {
+      function medic_dc_valid_fee($value): float
+      {
+          $value = trim((string)($value ?? ''));
+
+          if ($value === '') {
+              return 0;
+          }
+
+          $value = str_replace([',', '৳', 'tk', 'Tk', 'BDT', 'bdt'], '', $value);
+          $value = trim($value);
+
+          if (!is_numeric($value)) {
+              return 0;
+          }
+
+          $fee = (float)$value;
+
+          return $fee > 0 ? $fee : 0;
+      }
+  }
+
+  if (!function_exists('medic_dc_first_available_fee')) {
+      function medic_dc_first_available_fee(array $doctor): float
+      {
+          $doctor_fee = medic_dc_valid_fee($doctor['consultation_fee'] ?? '');
+
+          if ($doctor_fee > 0) {
+              return $doctor_fee;
+          }
+
+          $first_chamber_fee = medic_dc_valid_fee($doctor['first_chamber_fee'] ?? '');
+
+          if ($first_chamber_fee > 0) {
+              return $first_chamber_fee;
+          }
+
+          $first_chamber_consultation_fee = medic_dc_valid_fee($doctor['first_chamber_consultation_fee'] ?? '');
+
+          if ($first_chamber_consultation_fee > 0) {
+              return $first_chamber_consultation_fee;
+          }
+
+          $fee_list_text = trim((string)(
+              $doctor['all_chamber_fees']
+              ?? $doctor['chamber_fees']
+              ?? $doctor['consultation_fees']
+              ?? $doctor['all_consultation_fees']
+              ?? ''
+          ));
+
+          if ($fee_list_text !== '') {
+              $fees = preg_split('/[,|]+/u', $fee_list_text);
+
+              foreach ($fees as $fee_item) {
+                  $fee = medic_dc_valid_fee($fee_item);
+
+                  if ($fee > 0) {
+                      return $fee;
+                  }
+              }
+          }
+
+          return 0;
+      }
+  }
+
+  if (!function_exists('medic_dc_asset_url')) {
+      function medic_dc_asset_url(string $path, string $fallback = ''): string
+      {
+          $path = trim($path);
+
+          if ($path === '') {
+              $path = $fallback;
+          }
+
+          if ($path === '') {
+              return '';
+          }
+
+          if (preg_match('/^https?:\/\//i', $path)) {
+              return $path;
+          }
+
+          $path = preg_replace('#^\.\./+#', '', $path);
+          $path = ltrim($path, '/');
+
+          if (function_exists('site_url')) {
+              return site_url($path);
+          }
+
+          $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+          $host = $_SERVER['HTTP_HOST'] ?? '';
+
+          return $host !== '' ? $scheme . '://' . $host . '/' . $path : '/' . $path;
+      }
+  }
+
+  if (!function_exists('medic_dc_years_experience_text')) {
+      function medic_dc_years_experience_text($starting_year): string
+      {
+          $starting_year = (int)trim((string)($starting_year ?? ''));
+          $current_year = (int)date('Y');
+
+          if ($starting_year < 1900 || $starting_year > $current_year) {
+              return medic_dc_t('not_specified', 'Not specified');
+          }
+
+          $years = $current_year - $starting_year;
+
+          if ($years < 0) {
+              $years = 0;
+          }
+
+          return (string)$years . '+ ' . medic_dc_t('years', 'Years');
+      }
+  }
+
+  if (!function_exists('medic_dc_site_setting')) {
+      function medic_dc_site_setting(string $key, string $default = ''): string
+      {
+          global $pdo;
+
+          $key = trim($key);
+
+          if ($key === '') {
+              return $default;
+          }
+
+          if (function_exists('get_site_setting')) {
+              $value = get_site_setting($key, $default);
+              return trim((string)$value) !== '' ? trim((string)$value) : $default;
+          }
+
+          if (!isset($pdo)) {
+              return $default;
+          }
+
+          try {
+              $stmt = $pdo->prepare("SELECT setting_value FROM site_settings WHERE setting_key = :setting_key LIMIT 1");
+              $stmt->execute([':setting_key' => $key]);
+              $value = trim((string)$stmt->fetchColumn());
+
+              return $value !== '' ? $value : $default;
+          } catch (Throwable $e) {
+              return $default;
+          }
+      }
+  }
+
+  if (!function_exists('medic_dc_location_name_by_id')) {
+      function medic_dc_location_name_by_id(string $table, int $id): array
+      {
+          global $pdo;
+
+          if (!isset($pdo) || !$pdo instanceof PDO || $id <= 0) {
+              return [
+                  'name_en' => '',
+                  'name_bn' => '',
+              ];
+          }
+
+          if (!in_array($table, ['districts', 'thanas'], true)) {
+              return [
+                  'name_en' => '',
+                  'name_bn' => '',
+              ];
+          }
+
+          static $cache = [];
+
+          $cache_key = $table . ':' . $id;
+
+          if (isset($cache[$cache_key])) {
+              return $cache[$cache_key];
+          }
+
+          try {
+              $stmt = $pdo->prepare("SELECT name_en, name_bn FROM {$table} WHERE id = :id LIMIT 1");
+              $stmt->execute([':id' => $id]);
+              $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+              if (!$row) {
+                  $cache[$cache_key] = [
+                      'name_en' => '',
+                      'name_bn' => '',
+                  ];
+
+                  return $cache[$cache_key];
+              }
+
+              $cache[$cache_key] = [
+                  'name_en' => trim((string)($row['name_en'] ?? '')),
+                  'name_bn' => trim((string)($row['name_bn'] ?? '')),
+              ];
+
+              return $cache[$cache_key];
+          } catch (Throwable $e) {
+              $cache[$cache_key] = [
+                  'name_en' => '',
+                  'name_bn' => '',
+              ];
+
+              return $cache[$cache_key];
+          }
+      }
+  }
+
+  if (!function_exists('medic_dc_location_lang_name')) {
+      function medic_dc_location_lang_name(array $names): string
+      {
+          if (medic_dc_lang() === 'bn' && trim((string)($names['name_bn'] ?? '')) !== '') {
+              return trim((string)$names['name_bn']);
+          }
+
+          return trim((string)($names['name_en'] ?? ''));
+      }
+  }
+
+  if (!function_exists('medic_dc_unique_clean_list')) {
+      function medic_dc_unique_clean_list(array $items): array
+      {
+          $clean = [];
+
+          foreach ($items as $item) {
+              $item = trim((string)$item);
+
+              if ($item === '') {
+                  continue;
+              }
+
+              $key = function_exists('mb_strtolower')
+                  ? mb_strtolower($item, 'UTF-8')
+                  : strtolower($item);
+
+              $clean[$key] = $item;
+          }
+
+          return array_values($clean);
+      }
+  }
+
+  if (!function_exists('medic_dc_chamber_list')) {
+      function medic_dc_chamber_list(array $doctor): array
+      {
+          global $pdo;
+
+          $items = [];
+          $doctor_id = (int)($doctor['id'] ?? 0);
+
+          if (!isset($pdo) || !$pdo instanceof PDO || $doctor_id <= 0) {
+              return [];
+          }
+
+          try {
+              $hospital_name_bn_select = "'' AS hospital_name_bn";
+
+              try {
+                  $check_bn = $pdo->prepare("
+                      SELECT COUNT(*)
+                      FROM INFORMATION_SCHEMA.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'hospitals'
+                        AND COLUMN_NAME = 'name_bn'
+                  ");
+                  $check_bn->execute();
+
+                  if ((int)$check_bn->fetchColumn() > 0) {
+                      $hospital_name_bn_select = "h.name_bn AS hospital_name_bn";
+                  }
+              } catch (Throwable $e) {
+                  $hospital_name_bn_select = "'' AS hospital_name_bn";
+              }
+
+              $stmt = $pdo->prepare("
+                  SELECT
+                      c.id AS chamber_id,
+                      c.sort_order,
+                      c.status,
+                      h.name AS hospital_name,
+                      {$hospital_name_bn_select}
+                  FROM chambers c
+                  LEFT JOIN hospitals h ON h.id = c.hospital_id
+                  WHERE c.doctor_id = :doctor_id
+                    AND c.status = 'active'
+                  ORDER BY c.sort_order ASC, c.id ASC
+              ");
+
+              $stmt->execute([
+                  ':doctor_id' => $doctor_id,
+              ]);
+
+              $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+              foreach ($rows as $row) {
+                  $name = '';
+
+                  if (medic_dc_lang() === 'bn' && trim((string)($row['hospital_name_bn'] ?? '')) !== '') {
+                      $name = trim((string)$row['hospital_name_bn']);
+                  } else {
+                      $name = trim((string)($row['hospital_name'] ?? ''));
+                  }
+
+                  if ($name !== '') {
+                      $items[] = $name;
+                  }
+              }
+          } catch (Throwable $e) {
+              return [];
+          }
+
+          return medic_dc_unique_clean_list($items);
+      }
+  }
+
+  $not_specified_text = medic_dc_t('not_specified', 'Not specified');
+  $doctor_text = medic_dc_t('doctor', 'Doctor');
+
+  $doctor_name = medic_dc_lang_value($doctor, 'name');
+  $doctor_designation = medic_dc_lang_value($doctor, 'designation');
+  $doctor_degree = medic_dc_lang_value($doctor, 'degree');
+  $doctor_specialty_name = medic_dc_lang_value($doctor, 'specialty_name');
+
+  if ($doctor_name === '') {
+      $doctor_name = $doctor_text;
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Doctor Chambers
+  |--------------------------------------------------------------------------
+  */
+
+  $doctor_chambers = medic_dc_chamber_list($doctor);
+
+  /*
+  |--------------------------------------------------------------------------
+  | Doctor Location
+  |--------------------------------------------------------------------------
+  */
+
+  $doctor_thana = medic_dc_first_lang_value($doctor, [
+      'doctor_thana',
+      'thana_name',
+      'thana',
+  ]);
+
+  $doctor_district = medic_dc_first_lang_value($doctor, [
+      'doctor_district',
+      'district_name',
+      'district',
+  ]);
+
+  if ($doctor_thana === '') {
+      $doctor_thana_id = (int)($doctor['doctor_thana_id'] ?? 0);
+      $doctor_thana = medic_dc_location_lang_name(
+          medic_dc_location_name_by_id('thanas', $doctor_thana_id)
+      );
+  }
+
+  if ($doctor_district === '') {
+      $doctor_district_id = (int)($doctor['doctor_district_id'] ?? 0);
+      $doctor_district = medic_dc_location_lang_name(
+          medic_dc_location_name_by_id('districts', $doctor_district_id)
+      );
+  }
+
+  $doctor_location_parts = [];
+
+  if ($doctor_thana !== '') {
+      $doctor_location_parts[] = $doctor_thana;
+  }
+
+  if ($doctor_district !== '' && $doctor_district !== $doctor_thana) {
+      $doctor_location_parts[] = $doctor_district;
+  }
+
+  $doctor_location = !empty($doctor_location_parts)
+      ? implode(', ', $doctor_location_parts)
+      : $not_specified_text;
+
+  $desktop_location = $doctor_location;
+  $mobile_location = $doctor_location;
+
+  $card_consultation_fee = medic_dc_first_available_fee($doctor);
+
+  $card_consultation_fee_text = $card_consultation_fee > 0
+      ? '৳' . number_format($card_consultation_fee, 0)
+      : '';
+
+  $profile_link = medic_dc_doctor_profile_url($doctor);
+
+  $doctor_default_image_setting = medic_dc_site_setting('default_doctor_image', 'assets/images/default-doctor.webp');
+
+  $doctor_image_url = medic_dc_asset_url(
+      (string)($doctor['image'] ?? ''),
+      $doctor_default_image_setting
+  );
+
+  $doctor_default_png_url = medic_dc_asset_url('assets/images/default-doctor.png');
+
+  $years_experience_text = medic_dc_years_experience_text($doctor['experience_years'] ?? '');
+
+  $doctor_subtitle = $doctor_designation !== ''
+      ? $doctor_designation
+      : $doctor_specialty_name;
+?>
+
+<article class="medic-doctor-list-item">
+
+  <div class="medic-doctor-list-photo">
+    <img
+      src="<?= e($doctor_image_url) ?>"
+      alt="<?= e(medic_dc_display_text($doctor_name)) ?>"
+      loading="lazy"
+      data-fallback="webp"
+      onerror="if(this.dataset.fallback==='webp'){this.dataset.fallback='png';this.src='<?= e($doctor_default_png_url) ?>';}else{this.onerror=null;this.style.display='none';}"
+    >
+  </div>
+
+  <div class="medic-doctor-list-main">
+    <div class="medic-doctor-list-title">
+      <h3>
+        <a href="<?= e($profile_link) ?>">
+          <?= e(medic_dc_display_text($doctor_name)) ?>
+        </a>
+      </h3>
+
+      <?= verified_badge((int)($doctor['is_verified'] ?? 0)) ?>
+    </div>
+
+    <?php if ($doctor_subtitle !== ''): ?>
+      <span class="medic-doctor-list-specialty">
+        <?= e(medic_dc_display_text($doctor_subtitle)) ?>
+      </span>
+    <?php endif; ?>
+
+    <div class="medic-doctor-list-info medic-desktop-info">
+      <?php if ($doctor_degree !== ''): ?>
+        <span>
+          <strong><?= e(medic_dc_display_text(medic_dc_t('degree', 'Degree'))) ?>:</strong>
+          <em><?= e(medic_dc_display_text($doctor_degree)) ?></em>
+        </span>
+      <?php endif; ?>
+
+      <?php if (!empty($doctor_chambers)): ?>
+        <?php if (count($doctor_chambers) === 1): ?>
+          <span>
+            <strong><?= e(medic_dc_display_text(medic_dc_t('chamber', 'Chamber'))) ?>:</strong>
+            <em><?= e(medic_dc_display_text($doctor_chambers[0])) ?></em>
+          </span>
+        <?php else: ?>
+          <?php foreach ($doctor_chambers as $chamber_index => $chamber_name): ?>
+            <span>
+              <strong><?= e(medic_dc_display_text(medic_dc_t('chamber', 'Chamber'))) ?> <?= e(medic_dc_display_text((string)($chamber_index + 1))) ?>:</strong>
+              <em><?= e(medic_dc_display_text($chamber_name)) ?></em>
+            </span>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      <?php endif; ?>
+
+      <span>
+        <strong><?= e(medic_dc_display_text(medic_dc_t('location', 'Location'))) ?>:</strong>
+        <em><?= e(medic_dc_display_text($desktop_location)) ?></em>
+      </span>
+
+      <span>
+        <strong><?= e(medic_dc_display_text(medic_dc_t('experience', 'Experience'))) ?>:</strong>
+        <em><?= e(medic_dc_display_text($years_experience_text)) ?></em>
+      </span>
+    </div>
+  </div>
+
+  <div class="medic-doctor-list-info medic-mobile-info">
+    <?php if ($doctor_degree !== ''): ?>
+      <span>
+        <strong><?= e(medic_dc_display_text(medic_dc_t('degree', 'Degree'))) ?>:</strong>
+        <em><?= e(medic_dc_display_text($doctor_degree)) ?></em>
+      </span>
+    <?php endif; ?>
+
+    <?php if (!empty($doctor_chambers)): ?>
+      <?php if (count($doctor_chambers) === 1): ?>
+        <span>
+          <strong><?= e(medic_dc_display_text(medic_dc_t('chamber', 'Chamber'))) ?>:</strong>
+          <em><?= e(medic_dc_display_text($doctor_chambers[0])) ?></em>
+        </span>
+      <?php else: ?>
+        <?php foreach ($doctor_chambers as $chamber_index => $chamber_name): ?>
+          <span>
+            <strong><?= e(medic_dc_display_text(medic_dc_t('chamber', 'Chamber'))) ?> <?= e(medic_dc_display_text((string)($chamber_index + 1))) ?>:</strong>
+            <em><?= e(medic_dc_display_text($chamber_name)) ?></em>
+          </span>
+        <?php endforeach; ?>
+      <?php endif; ?>
+    <?php endif; ?>
+
+    <span>
+      <strong><?= e(medic_dc_display_text(medic_dc_t('location', 'Location'))) ?>:</strong>
+      <em><?= e(medic_dc_display_text($mobile_location)) ?></em>
+    </span>
+
+    <span>
+      <strong><?= e(medic_dc_display_text(medic_dc_t('experience', 'Experience'))) ?>:</strong>
+      <em><?= e(medic_dc_display_text($years_experience_text)) ?></em>
+    </span>
+  </div>
+
+  <div class="medic-doctor-list-side">
+    <div>
+      <?php if ($card_consultation_fee_text !== ''): ?>
+        <div class="medic-doctor-list-fee">
+          <?= e(medic_dc_display_text($card_consultation_fee_text)) ?>
+        </div>
+      <?php endif; ?>
+
+      <div class="medic-doctor-list-rating">
+        <?= e(medic_dc_display_text((string)($doctor['rating'] ?? '0'))) ?>
+        <?= e(medic_dc_display_text(medic_dc_t('rating', 'rating'))) ?>
+        ·
+        <?= e(medic_dc_display_text((string)($doctor['reviews_count'] ?? '0'))) ?>
+        <?= e(medic_dc_display_text(medic_dc_t('reviews', 'reviews'))) ?>
+      </div>
+    </div>
+
+    <div class="medic-doctor-list-actions">
+      <a href="<?= e($profile_link) ?>" class="medic-list-btn">
+        <?= e(medic_dc_display_text(medic_dc_t('profile', 'Profile'))) ?>
+      </a>
+
+      <a href="<?= e($profile_link) ?>" class="medic-list-btn medic-list-btn-primary">
+        <?= e(medic_dc_display_text(medic_dc_t('appointment', 'Appointment'))) ?>
+      </a>
+    </div>
+  </div>
+
+</article>
+<?php endif; ?>

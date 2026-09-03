@@ -1,0 +1,8 @@
+Standalone Library Pages Update
+
+- All 11 list pages contain their own PHP processing and inline CSS.
+- All 11 form pages contain their own PHP processing and inline CSS.
+- No Library page loads includes/library-list-page.php or includes/library-form-page.php.
+- The old library-admin-shell.php renderer is no longer required.
+- Common authentication, database functions, global header and footer remain shared.
+- Clicking a Library Menu item opens that library's *_form.php page.

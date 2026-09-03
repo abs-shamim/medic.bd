@@ -1,0 +1,16 @@
+PRESCRIPTION NUMBER FORMAT UPDATE
+=================================
+
+New format: RXYYMMDDNN
+Example: RX26071101
+
+RX       = prescription prefix
+260711   = 11 July 2026 in YYMMDD format
+01       = first prescription for that date
+02       = second prescription for that date
+
+The sequence is global across all doctors because prescription_no is globally unique.
+The visit date is used for the YYMMDD section.
+The daily counter resets for each date and grows beyond 99 when necessary.
+A transaction-locked sequence table prevents duplicate numbers during concurrent saves.
+Existing old prescription numbers are not changed.

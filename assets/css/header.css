@@ -1,0 +1,295 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", "Noto Sans Bengali", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--medic-header-dark);
+  background: var(--medic-header-soft);
+}
+
+.container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.medic-topbar {
+  background: var(--medic-header-soft);
+  border-bottom: 1px solid var(--medic-header-border);
+  font-size: 13px;
+  color: var(--medic-header-muted);
+}
+
+.medic-topbar-inner {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.medic-topbar-left,
+.medic-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.medic-topbar a {
+  color: var(--medic-header-blue);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.medic-topbar a:hover {
+  text-decoration: underline;
+}
+
+.medic-header {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid var(--medic-header-border);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--medic-header-shadow);
+}
+
+.medic-header input[type="checkbox"] {
+  display: none;
+}
+
+.medic-header-inner {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.medic-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--medic-header-dark);
+  text-decoration: none;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.medic-logo-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--medic-header-green);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: inset 0 -1px 0 rgba(27, 31, 36, 0.15);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.medic-logo-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #ffffff;
+}
+
+.medic-menu {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  flex: 1;
+}
+
+.medic-menu a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 6px;
+  color: var(--medic-header-dark);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: 0.18s ease;
+  white-space: nowrap;
+}
+
+.medic-menu a:hover {
+  background: var(--medic-header-soft);
+  color: var(--medic-header-blue);
+}
+
+.medic-menu a.active,
+.medic-menu .active {
+  background: #ddf4ff;
+  color: var(--medic-header-blue);
+}
+
+.medic-menu .medic-add-link {
+  margin-left: 8px;
+  background: var(--medic-header-green);
+  color: #ffffff;
+  border: 1px solid rgba(27, 31, 36, 0.15);
+  font-weight: 700;
+}
+
+.medic-menu .medic-add-link:hover {
+  background: var(--medic-header-green-dark);
+  color: #ffffff;
+}
+
+.medic-lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  padding: 3px;
+  background: #ffffff;
+  border: 1px solid var(--medic-header-border);
+  border-radius: 999px;
+}
+
+.medic-lang-switch a {
+  min-height: 28px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--medic-header-muted);
+}
+
+.medic-lang-switch a:hover {
+  background: var(--medic-header-soft);
+  color: var(--medic-header-blue);
+  text-decoration: none;
+}
+
+.medic-lang-switch a.active {
+  background: var(--medic-header-blue);
+  color: #ffffff;
+}
+
+.medic-mobile-btn {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--medic-header-border);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--medic-header-dark);
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.medic-mobile-menu {
+  display: none;
+  padding: 10px 0 14px;
+  border-top: 1px solid var(--medic-header-border);
+}
+
+.medic-mobile-menu a {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--medic-header-dark);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.medic-mobile-menu a:hover {
+  background: var(--medic-header-soft);
+  color: var(--medic-header-blue);
+}
+
+.medic-mobile-menu a.active,
+.medic-mobile-menu .active {
+  background: #ddf4ff;
+  color: var(--medic-header-blue);
+}
+
+.medic-mobile-lang-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 8px 0 4px;
+}
+
+.medic-mobile-lang-switch a {
+  justify-content: center;
+  min-height: 40px;
+  border: 1px solid var(--medic-header-border);
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.medic-mobile-lang-switch a.active {
+  background: var(--medic-header-blue);
+  color: #ffffff;
+  border-color: var(--medic-header-blue);
+}
+
+@media (max-width: 980px) {
+  .medic-topbar {
+    display: none;
+  }
+
+  .medic-header-inner {
+    min-height: 60px;
+  }
+
+  .medic-menu {
+    display: none;
+  }
+
+  .medic-mobile-btn {
+    display: inline-flex;
+  }
+
+  #menu-toggle:checked ~ .medic-header-inner .medic-mobile-btn {
+    background: var(--medic-header-soft);
+  }
+
+  #menu-toggle:checked ~ .medic-mobile-menu {
+    display: grid;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .medic-logo {
+    font-size: 18px;
+  }
+
+  .medic-logo-icon {
+    width: 32px;
+    height: 32px;
+  }
+}

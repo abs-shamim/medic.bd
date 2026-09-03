@@ -1,0 +1,305 @@
+/**
+ * Static Page Rich Editor
+ * Scoped styles for the self-hosted, no-dependency editor.
+ */
+
+.static-page-editor-source {
+  display: none !important;
+}
+
+.static-page-rich-editor {
+  width: 100%;
+  min-width: 0;
+}
+
+.spe-shell {
+  overflow: hidden;
+  border: 1px solid #cdd8e7;
+  border-radius: 11px;
+  background: #ffffff;
+  color: #10243e;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .03);
+}
+
+.spe-topbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 7px 10px;
+  border-bottom: 1px solid #e5ebf3;
+  background: #f7faff;
+}
+
+.spe-mode-group,
+.spe-toolbar-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.spe-word-count {
+  margin-left: auto;
+  color: #6b7a90;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.static-page-rich-editor button.spe-button,
+.static-page-rich-editor select.spe-select,
+.static-page-rich-editor input.spe-color-input {
+  box-sizing: border-box;
+  min-height: 34px;
+  border: 1px solid #d0dbe9;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #16273a;
+  box-shadow: none;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.static-page-rich-editor button.spe-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 34px;
+  padding: 0 9px !important;
+  cursor: pointer;
+  text-decoration: none;
+  text-shadow: none;
+  transition: background-color .14s ease, color .14s ease, border-color .14s ease;
+}
+
+.static-page-rich-editor button.spe-button.spe-text-button {
+  min-width: auto;
+  gap: 6px;
+}
+
+.static-page-rich-editor button.spe-button:hover,
+.static-page-rich-editor button.spe-button:focus-visible {
+  border-color: #9fb9dc;
+  background: #edf5ff;
+  color: #1458bb;
+  outline: none;
+}
+
+.static-page-rich-editor button.spe-button.is-active,
+.static-page-rich-editor button.spe-button.is-active:hover,
+.static-page-rich-editor button.spe-button.is-active:focus-visible {
+  border-color: #16824b;
+  background: #16824b;
+  color: #ffffff;
+}
+
+.static-page-rich-editor button.spe-button:disabled {
+  cursor: not-allowed;
+  opacity: .48;
+}
+
+.static-page-rich-editor select.spe-select {
+  max-width: 150px;
+  padding: 0 26px 0 9px;
+  cursor: pointer;
+}
+
+.static-page-rich-editor .spe-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #e5ebf3;
+  background: #ffffff;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.static-page-rich-editor .spe-toolbar-group {
+  padding-right: 8px;
+  border-right: 1px solid #e5ebf3;
+  flex: 0 0 auto;
+}
+
+.static-page-rich-editor .spe-toolbar-group:last-child {
+  padding-right: 0;
+  border-right: 0;
+}
+
+.static-page-rich-editor .spe-color-input {
+  width: 34px;
+  padding: 3px;
+  cursor: pointer;
+}
+
+.static-page-rich-editor .spe-stage {
+  position: relative;
+  min-height: 340px;
+}
+
+.static-page-rich-editor .spe-canvas,
+.static-page-rich-editor .spe-source-view,
+.static-page-rich-editor .spe-preview {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 340px;
+  padding: 22px 24px;
+  color: #172b45;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.static-page-rich-editor .spe-canvas {
+  outline: none;
+  background: #ffffff;
+}
+
+.static-page-rich-editor .spe-canvas:empty::before {
+  color: #94a3b8;
+  content: attr(data-placeholder);
+  pointer-events: none;
+}
+
+.static-page-rich-editor .spe-canvas h1,
+.static-page-rich-editor .spe-canvas h2,
+.static-page-rich-editor .spe-canvas h3,
+.static-page-rich-editor .spe-canvas h4,
+.static-page-rich-editor .spe-preview h1,
+.static-page-rich-editor .spe-preview h2,
+.static-page-rich-editor .spe-preview h3,
+.static-page-rich-editor .spe-preview h4 {
+  color: #10243e;
+  line-height: 1.3;
+}
+
+.static-page-rich-editor .spe-canvas h1,
+.static-page-rich-editor .spe-preview h1 { font-size: 28px; }
+.static-page-rich-editor .spe-canvas h2,
+.static-page-rich-editor .spe-preview h2 { font-size: 24px; }
+.static-page-rich-editor .spe-canvas h3,
+.static-page-rich-editor .spe-preview h3 { font-size: 20px; }
+.static-page-rich-editor .spe-canvas h4,
+.static-page-rich-editor .spe-preview h4 { font-size: 17px; }
+
+.static-page-rich-editor .spe-canvas blockquote,
+.static-page-rich-editor .spe-preview blockquote {
+  margin: 1em 0;
+  padding: 10px 16px;
+  border-left: 4px solid #2d7de3;
+  background: #f4f8ff;
+  color: #405875;
+}
+
+.static-page-rich-editor .spe-canvas pre,
+.static-page-rich-editor .spe-preview pre {
+  overflow: auto;
+  padding: 14px;
+  border-radius: 8px;
+  background: #0f243d;
+  color: #eef6ff;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.static-page-rich-editor .spe-canvas code:not(pre code),
+.static-page-rich-editor .spe-preview code:not(pre code) {
+  padding: 2px 5px;
+  border-radius: 5px;
+  background: #edf2f8;
+  color: #193a64;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: .9em;
+}
+
+.static-page-rich-editor .spe-canvas table,
+.static-page-rich-editor .spe-preview table {
+  width: 100%;
+  margin: 1em 0;
+  border-collapse: collapse;
+}
+
+.static-page-rich-editor .spe-canvas th,
+.static-page-rich-editor .spe-canvas td,
+.static-page-rich-editor .spe-preview th,
+.static-page-rich-editor .spe-preview td {
+  min-width: 70px;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  vertical-align: top;
+}
+
+.static-page-rich-editor .spe-canvas th,
+.static-page-rich-editor .spe-preview th {
+  background: #f1f5f9;
+  font-weight: 800;
+}
+
+.static-page-rich-editor .spe-canvas img,
+.static-page-rich-editor .spe-preview img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 12px 0;
+  border-radius: 8px;
+}
+
+.static-page-rich-editor .spe-source-view {
+  display: none;
+  resize: vertical;
+  border: 0;
+  outline: 0;
+  background: #0f243d;
+  color: #eaf4ff;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.static-page-rich-editor .spe-preview {
+  display: none;
+  background: #fbfdff;
+}
+
+.static-page-rich-editor .spe-shell.is-source .spe-canvas,
+.static-page-rich-editor .spe-shell.is-source .spe-preview {
+  display: none;
+}
+
+.static-page-rich-editor .spe-shell.is-source .spe-source-view {
+  display: block;
+}
+
+.static-page-rich-editor .spe-shell.is-preview .spe-canvas,
+.static-page-rich-editor .spe-shell.is-preview .spe-source-view {
+  display: none;
+}
+
+.static-page-rich-editor .spe-shell.is-preview .spe-preview {
+  display: block;
+}
+
+.static-page-rich-editor .spe-shell.is-source .spe-toolbar,
+.static-page-rich-editor .spe-shell.is-preview .spe-toolbar {
+  opacity: .55;
+  pointer-events: none;
+}
+
+@media (max-width: 700px) {
+  .spe-topbar {
+    flex-wrap: wrap;
+  }
+
+  .spe-word-count {
+    flex: 0 0 100%;
+    margin-left: 0;
+  }
+
+  .static-page-rich-editor .spe-canvas,
+  .static-page-rich-editor .spe-source-view,
+  .static-page-rich-editor .spe-preview {
+    min-height: 280px;
+    padding: 17px 15px;
+  }
+}

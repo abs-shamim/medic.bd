@@ -1,0 +1,22 @@
+Medicine Form Library Update
+============================
+
+Added a new reusable Medicine Forms library before Generic Name.
+
+Examples:
+Tab., Cap., Syr., Susp., Inj., Cream, Oint., Eye Drop, Inhaler, Supp., etc.
+
+Main changes:
+- New library type: medicine_form
+- New pages: Library/Medicine_type.php and Library/Medicine_type_form.php
+- New table: prescription_medicine_form_library
+- New prescription_medicines column: medicine_form
+- Medicine Form field appears before Generic Name in the prescription editor
+- New medicine rows include the Medicine Form field
+- View and print pages display the form before the generic name
+- Shared demo forms are automatically seeded
+
+For an existing database, import:
+medicine-form-library-upgrade-20260712.sql
+
+The PHP schema updater also attempts to create the table and column automatically.

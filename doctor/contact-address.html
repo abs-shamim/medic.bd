@@ -1,0 +1,340 @@
+<?php
+/*
+|--------------------------------------------------------------------------
+| Doctor Contact & Address Section
+|--------------------------------------------------------------------------
+| Self-contained contact-address file.
+| Old contact display logic is kept unchanged.
+|--------------------------------------------------------------------------
+*/
+
+require_once __DIR__ . '/../includes/functions.php';
+
+$slug = $_GET['slug'] ?? '';
+
+if (!isset($doctor) || !is_array($doctor)) {
+    $doctor = function_exists('get_doctor_by_slug') ? get_doctor_by_slug($slug) : null;
+}
+
+if (!$doctor || !is_array($doctor)) {
+    return;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Basic Language Fallbacks
+|--------------------------------------------------------------------------
+*/
+
+if (!defined('CURRENT_LANG')) {
+    $current_request_path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+    $current_request_path = trim((string)$current_request_path, '/');
+
+    if (defined('APP_URL')) {
+        $app_path = trim((string)(parse_url(APP_URL, PHP_URL_PATH) ?? ''), '/');
+
+        if ($app_path !== '' && str_starts_with($current_request_path, $app_path)) {
+            $current_request_path = trim(substr($current_request_path, strlen($app_path)), '/');
+        }
+    }
+
+    define('CURRENT_LANG', ($current_request_path === 'bn' || str_starts_with($current_request_path, 'bn/')) ? 'bn' : 'en');
+}
+
+if (!function_exists('__t')) {
+    function __t(string $key, string $fallback = ''): string
+    {
+        $lang = defined('CURRENT_LANG') ? CURRENT_LANG : 'en';
+        $base_dir = dirname(__DIR__);
+        $default_file = $base_dir . '/languages/en.php';
+        $lang_file = $base_dir . '/languages/' . $lang . '.php';
+
+        static $translations = null;
+
+        if ($translations === null) {
+            $translations = [];
+
+            if (file_exists($default_file)) {
+                $default_translations = require $default_file;
+
+                if (is_array($default_translations)) {
+                    $translations = $default_translations;
+                }
+            }
+
+            if ($lang !== 'en' && file_exists($lang_file)) {
+                $current_translations = require $lang_file;
+
+                if (is_array($current_translations)) {
+                    $translations = array_merge($translations, $current_translations);
+                }
+            }
+        }
+
+        $value = $translations[$key] ?? '';
+
+        if (trim((string)$value) !== '') {
+            return (string)$value;
+        }
+
+        return $fallback !== '' ? $fallback : $key;
+    }
+}
+
+if (!function_exists('lang_text')) {
+    function lang_text(string $english = '', string $bangla = ''): string
+    {
+        if (defined('CURRENT_LANG') && CURRENT_LANG === 'bn' && trim($bangla) !== '') {
+            return $bangla;
+        }
+
+        return $english;
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Contact Helpers
+|--------------------------------------------------------------------------
+*/
+
+if (!function_exists('doctor_contact_field')) {
+    function doctor_contact_field(array $doctor, string $key): string
+    {
+        $english = trim((string)($doctor[$key] ?? ''));
+        $bangla = trim((string)($doctor[$key . '_bn'] ?? ''));
+
+        return trim(lang_text($english, $bangla));
+    }
+}
+
+if (!function_exists('doctor_contact_has_any')) {
+    function doctor_contact_has_any(array $doctor, array $keys): bool
+    {
+        foreach ($keys as $key) {
+            if (doctor_contact_field($doctor, $key) !== '') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
+if (!function_exists('doctor_contact_phone_link')) {
+    function doctor_contact_phone_link(string $phone): string
+    {
+        $phone = trim($phone);
+
+        if ($phone === '') {
+            return '';
+        }
+
+        return preg_replace('/[^\d+]/', '', $phone);
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Contact Data
+|--------------------------------------------------------------------------
+*/
+
+$doctor_contact_keys = [
+    'phone',
+    'whatsapp',
+    'email',
+    'address',
+    'google_map_url',
+    'area_locality',
+    'road_street',
+    'house_building',
+    'post_code',
+    'doctor_division',
+    'doctor_district',
+    'doctor_thana',
+];
+
+if (!doctor_contact_has_any($doctor, $doctor_contact_keys)) {
+    return;
+}
+
+$contact_parts = [];
+
+if (doctor_contact_field($doctor, 'phone') !== '') {
+    $contact_parts[] = __t('phone', 'Phone') . ': ' . doctor_contact_field($doctor, 'phone');
+}
+
+if (doctor_contact_field($doctor, 'whatsapp') !== '') {
+    $contact_parts[] = __t('whatsapp', 'WhatsApp') . ': ' . doctor_contact_field($doctor, 'whatsapp');
+}
+
+if (doctor_contact_field($doctor, 'email') !== '') {
+    $contact_parts[] = __t('email', 'Email') . ': ' . doctor_contact_field($doctor, 'email');
+}
+
+$area_text = trim(implode(', ', array_filter([
+    doctor_contact_field($doctor, 'doctor_thana'),
+    doctor_contact_field($doctor, 'doctor_district'),
+    doctor_contact_field($doctor, 'doctor_division'),
+])));
+
+$full_address_parts = array_filter([
+    doctor_contact_field($doctor, 'house_building'),
+    doctor_contact_field($doctor, 'road_street'),
+    doctor_contact_field($doctor, 'area_locality'),
+    doctor_contact_field($doctor, 'address'),
+    doctor_contact_field($doctor, 'post_code'),
+]);
+
+$full_address_text = trim(implode(', ', $full_address_parts));
+$google_map_url = doctor_contact_field($doctor, 'google_map_url');
+
+?>
+
+<style>
+.medic-card {
+    background: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
+}
+
+.medic-article-card {
+    overflow: hidden;
+}
+
+.medic-article-head {
+    margin-bottom: 18px;
+}
+
+.medic-article-kicker {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: #ddf4ff;
+    color: var(--doctor-primary, #0969da);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border: 1px solid rgba(9, 105, 218, 0.20);
+}
+
+.medic-article-head h2 {
+    margin: 10px 0 0;
+    color: #24292f;
+    font-size: 24px;
+    line-height: 1.25;
+    font-weight: 800;
+}
+
+.medic-article-block {
+    border-top: 1px solid #d0d7de;
+    padding-top: 16px;
+    margin-top: 16px;
+}
+
+.medic-article-block:first-of-type {
+    border-top: 0;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+.medic-article-block h3 {
+    margin: 0 0 8px;
+    color: #24292f;
+    font-size: 18px;
+    line-height: 1.35;
+    font-weight: 800;
+}
+
+.medic-article-block p {
+    margin: 0 0 8px;
+    color: #57606a;
+    font-size: 15px;
+    line-height: 1.8;
+}
+
+.medic-article-block p:last-child {
+    margin-bottom: 0;
+}
+
+.medic-chamber-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.medic-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 18px;
+    border-radius: 6px;
+    border: 1px solid rgba(27, 31, 36, 0.15);
+    background: var(--doctor-accent, #2da44e);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.medic-btn:hover {
+    color: #ffffff;
+    text-decoration: none;
+    filter: brightness(0.98);
+}
+
+.medic-btn-outline {
+    background: #ffffff;
+    color: var(--doctor-primary, #0969da);
+    border-color: rgba(9, 105, 218, 0.35);
+}
+
+.medic-btn-outline:hover {
+    color: var(--doctor-primary, #0969da);
+}
+</style>
+
+<section class="medic-card medic-article-card">
+    <header class="medic-article-head">
+        <span class="medic-article-kicker"><?= e(__t('patient_information', 'Patient Information')) ?></span>
+        <h2><?= e(__t('contact_address', 'Contact & Address')) ?></h2>
+    </header>
+
+    <?php if (!empty($contact_parts)): ?>
+        <article class="medic-article-block">
+            <h3><?= e(__t('contact_details', 'Contact Details')) ?></h3>
+            <p><?= e(implode('. ', $contact_parts)) ?>.</p>
+        </article>
+    <?php endif; ?>
+
+    <?php if ($area_text !== '' || $full_address_text !== ''): ?>
+        <article class="medic-article-block">
+            <h3><?= e(__t('address', 'Address')) ?></h3>
+
+            <?php if ($area_text !== ''): ?>
+                <p><?= e($area_text) ?></p>
+            <?php endif; ?>
+
+            <?php if ($full_address_text !== ''): ?>
+                <p><?= e($full_address_text) ?></p>
+            <?php endif; ?>
+        </article>
+    <?php endif; ?>
+
+    <?php if ($google_map_url !== ''): ?>
+        <div class="medic-chamber-actions">
+            <a href="<?= e($google_map_url) ?>" class="medic-btn medic-btn-outline" target="_blank" rel="noopener">
+                <?= e(__t('view_google_map', 'View Google Map')) ?>
+            </a>
+        </div>
+    <?php endif; ?>
+</section>

@@ -1,0 +1,19 @@
+PRESCRIPTION DASHBOARD + PATIENT HISTORY UPDATE
+===============================================
+
+Updated features:
+- Admin-dashboard style left sidebar and top header.
+- Responsive mobile navigation drawer.
+- Patient profile is saved once and reused later.
+- Name or mobile lookup from the prescription form.
+- Exact matching patient automatically fills demographics, latest vitals and medical history.
+- Mobile numbers are normalized to reduce duplicate patients.
+- Every prescription remains linked to the patient's history page.
+- Patient page now shows saved profile, latest vitals, medical history and all prescriptions.
+- Existing installations receive the required patient columns automatically.
+- Patient pages use no-store browser cache headers for better privacy.
+
+Important matching rule:
+- Mobile number has priority.
+- Without a mobile number, an exact name is reused only when exactly one patient has that name.
+- When multiple patients share the same name, the doctor must select the correct search result.
