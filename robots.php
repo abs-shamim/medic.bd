@@ -19,6 +19,16 @@ header('X-Content-Type-Options: nosniff');
 header('Cache-Control: public, max-age=300, s-maxage=300');
 header('Vary: Accept-Encoding');
 
+/*
+ * Loaded here (not just inside medic_robots_get_settings()) so APP_URL is
+ * defined before medic_robots_site_url() runs below. Without this, the
+ * site URL fallback used HTTP_HOST alone and silently dropped a subfolder
+ * install's path (e.g. /medicbd), producing a broken sitemap URL.
+ */
+if (is_file(__DIR__ . '/config/config.php')) {
+    require_once __DIR__ . '/config/config.php';
+}
+
 function medic_robots_clean_paths(string $value): array
 {
     $paths = [];

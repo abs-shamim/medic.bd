@@ -691,11 +691,13 @@ UNION ALL
         }
 
         /*
-         * Division pages require a suffix because the live router uses it
-         * to distinguish a division from a district with the same slug.
+         * divisions.slug already stores the "-division" suffix (e.g.
+         * "chattogram-division") so the live router can tell a division
+         * apart from a district with the same base name. Appending another
+         * suffix here would double it up.
          */
         if ($division_slug !== '') {
-            sm_add_record($records, 'doctors/' . $division_slug . '-division', null, '0.74');
+            sm_add_record($records, 'doctors/' . $division_slug, null, '0.74');
         }
 
         sm_add_record($records, 'doctors/' . $district_slug, null, '0.78');
@@ -835,8 +837,12 @@ function sm_hospital_directory_records(): array
             continue;
         }
 
+        /*
+         * divisions.slug already stores the "-division" suffix, so appending
+         * another one here would double it up (see the doctors loop above).
+         */
         if ($division_slug !== '') {
-            sm_add_record($records, 'hospitals/' . $division_slug . '-division', null, '0.74');
+            sm_add_record($records, 'hospitals/' . $division_slug, null, '0.74');
         }
 
         sm_add_record($records, 'hospitals/' . $district_slug, null, '0.78');
