@@ -15,6 +15,14 @@ $page_title = $page_title ?? 'User Panel';
 
 $current_path = $_SERVER['REQUEST_URI'] ?? '';
 
+// BASE_URL includes the site's subfolder (e.g. /medicbd), so "Home" is only
+// active when the request path matches that base path exactly -- a plain
+// strpos($current_path, '') check (as user_nav_active() does) would always
+// match and mark Home active on every page.
+$current_request_path = rtrim((string)parse_url($current_path, PHP_URL_PATH), '/');
+$site_base_path = rtrim((string)parse_url(BASE_URL, PHP_URL_PATH), '/');
+$is_home_active = $current_request_path === $site_base_path;
+
 /*
 |--------------------------------------------------------------------------
 | User Header Site Settings Helpers
@@ -440,23 +448,29 @@ if ($is_doctor_user) {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            display: block;
             background: #ffffff;
         }
 
-        .logo-light {
+        /*
+         * These need to be at least as specific as ".user-logo-icon img"
+         * above (class + element) -- a plain ".logo-light"/".logo-dark"
+         * class selector loses to it, so both the light and dark logo
+         * images rendered at once instead of only the one matching the
+         * active theme.
+         */
+        .user-logo-icon .logo-light {
             display: block;
         }
 
-        .logo-dark {
+        .user-logo-icon .logo-dark {
             display: none;
         }
 
-        html[data-theme="dark"] .logo-light {
+        html[data-theme="dark"] .user-logo-icon .logo-light {
             display: none;
         }
 
-        html[data-theme="dark"] .logo-dark {
+        html[data-theme="dark"] .user-logo-icon .logo-dark {
             display: block;
         }
 
@@ -942,6 +956,30 @@ if ($is_doctor_user) {
                     </div>
 
                 <?php else: ?>
+                    <a href="<?php echo BASE_URL; ?>/" class="<?php echo $is_home_active ? 'active' : ''; ?>">
+                        Home
+                    </a>
+
+                    <a href="<?php echo BASE_URL; ?>/doctors" class="<?php echo user_nav_active('/doctors', $current_path); ?>">
+                        Doctors
+                    </a>
+
+                    <a href="<?php echo BASE_URL; ?>/hospitals" class="<?php echo user_nav_active('/hospitals', $current_path); ?>">
+                        Hospitals
+                    </a>
+
+                    <a href="<?php echo BASE_URL; ?>/specialties" class="<?php echo user_nav_active('/specialties', $current_path); ?>">
+                        Specialties
+                    </a>
+
+                    <a href="<?php echo BASE_URL; ?>/blog" class="<?php echo user_nav_active('/blog', $current_path); ?>">
+                        Blog
+                    </a>
+
+                    <a href="<?php echo BASE_URL; ?>/contact" class="<?php echo user_nav_active('/contact', $current_path); ?>">
+                        Contact
+                    </a>
+
                     <a href="<?php echo BASE_URL; ?>/user/login.php" class="<?php echo user_nav_active('/user/login.php', $current_path); ?>">
                         Login
                     </a>
@@ -1008,6 +1046,30 @@ if ($is_doctor_user) {
                     Logout
                 </a>
             <?php else: ?>
+                <a href="<?php echo BASE_URL; ?>/" class="<?php echo $is_home_active ? 'active' : ''; ?>">
+                    Home
+                </a>
+
+                <a href="<?php echo BASE_URL; ?>/doctors" class="<?php echo user_nav_active('/doctors', $current_path); ?>">
+                    Doctors
+                </a>
+
+                <a href="<?php echo BASE_URL; ?>/hospitals" class="<?php echo user_nav_active('/hospitals', $current_path); ?>">
+                    Hospitals
+                </a>
+
+                <a href="<?php echo BASE_URL; ?>/specialties" class="<?php echo user_nav_active('/specialties', $current_path); ?>">
+                    Specialties
+                </a>
+
+                <a href="<?php echo BASE_URL; ?>/blog" class="<?php echo user_nav_active('/blog', $current_path); ?>">
+                    Blog
+                </a>
+
+                <a href="<?php echo BASE_URL; ?>/contact" class="<?php echo user_nav_active('/contact', $current_path); ?>">
+                    Contact
+                </a>
+
                 <a href="<?php echo BASE_URL; ?>/user/login.php" class="<?php echo user_nav_active('/user/login.php', $current_path); ?>">
                     Login
                 </a>
