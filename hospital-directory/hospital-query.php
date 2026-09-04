@@ -171,6 +171,10 @@ function hp_build_hospital_query_parts(array $filters): array
         $order[] = 'h.is_verified DESC';
     }
 
+    if (hp_column_exists('hospitals', 'views_count')) {
+        $order[] = 'COALESCE(h.views_count, 0) DESC';
+    }
+
     if (hp_column_exists('hospitals', 'rating')) {
         $order[] = 'h.rating DESC';
     }

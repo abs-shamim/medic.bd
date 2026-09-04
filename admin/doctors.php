@@ -3,6 +3,8 @@ require_once __DIR__ . '/../includes/functions.php';
 
 require_admin();
 
+ensure_profile_views_column('doctors');
+
 function admin_doctors_table_exists(string $table): bool
 {
     global $pdo;
@@ -911,6 +913,53 @@ require_once __DIR__ . '/includes/header.php';
 ?>
 
 <style>
+.admin-icon-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+/*
+ * Scoped under .admin-icon-actions so these beat the admin panel's global
+ * ".admin-main button" rule (class+element specificity) on every property,
+ * including background -- a bare ".admin-icon-btn.danger" class selector
+ * still loses the background fight to that more specific global rule even
+ * though it wins on color, leaving the Delete button green instead of red.
+ */
+.admin-icon-actions .admin-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    min-height: 0;
+    padding: 0;
+    border-radius: 6px;
+    border: 1px solid #d0d7de;
+    background: #ffffff;
+    color: #57606a;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.admin-icon-actions .admin-icon-btn:hover {
+    background: #f6f8fa;
+    color: #24292f;
+    text-decoration: none;
+}
+
+.admin-icon-actions .admin-icon-btn.danger {
+    background: #ffffff;
+    color: #cf222e;
+    border-color: rgba(207, 34, 46, 0.35);
+}
+
+.admin-icon-actions .admin-icon-btn.danger:hover {
+    background: #ffebe9;
+    color: #a40e26;
+}
+
 .doctor-top-actions {
     margin-bottom: 16px;
     display: flex;
@@ -1277,6 +1326,7 @@ require_once __DIR__ . '/includes/header.php';
       <th>Thana</th>
       <th>Verified</th>
       <th>Featured</th>
+      <th>Views</th>
       <th class="completion-col">Completion</th>
       <th>Actions</th>
     </tr>
@@ -1311,6 +1361,7 @@ require_once __DIR__ . '/includes/header.php';
           <td><?= e($doctor['thana_name'] ?? $doctor['doctor_thana'] ?? '') ?></td>
           <td><?= admin_doctors_verified_icon($doctor) ?></td>
           <td><?= admin_doctors_featured_badge($doctor) ?></td>
+          <td><?= number_format((int)($doctor['views_count'] ?? 0)) ?></td>
           <td class="completion-col">
             <div class="completion-wrap">
               <div class="completion-top">
@@ -1328,22 +1379,22 @@ require_once __DIR__ . '/includes/header.php';
             </div>
           </td>
           <td>
-            <div class="admin-actions">
-              <a class="btn btn-outline small-btn" href="doctor-form.php?id=<?= e((string) ($doctor['id'] ?? '')) ?>">Edit</a>
+            <div class="admin-icon-actions">
+              <a class="admin-icon-btn" href="doctor-form.php?id=<?= e((string) ($doctor['id'] ?? '')) ?>" title="Edit"><i class="fa fa-pencil"></i></a>
 
               <?php if (!empty($doctor['slug']) && function_exists('site_url')): ?>
-                <a class="btn btn-outline small-btn" href="<?= e(site_url('doctor/' . $doctor['slug'])) ?>" target="_blank">View</a>
+                <a class="admin-icon-btn" href="<?= e(site_url('doctor/' . $doctor['slug'])) ?>" target="_blank" title="View"><i class="fa fa-eye"></i></a>
               <?php elseif (!empty($doctor['slug'])): ?>
-                <a class="btn btn-outline small-btn" href="../doctor/<?= e($doctor['slug']) ?>" target="_blank">View</a>
+                <a class="admin-icon-btn" href="../doctor/<?= e($doctor['slug']) ?>" target="_blank" title="View"><i class="fa fa-eye"></i></a>
               <?php else: ?>
-                <a class="btn btn-outline small-btn" href="doctor-form.php?id=<?= e((string) ($doctor['id'] ?? '')) ?>">View</a>
+                <a class="admin-icon-btn" href="doctor-form.php?id=<?= e((string) ($doctor['id'] ?? '')) ?>" title="View"><i class="fa fa-eye"></i></a>
               <?php endif; ?>
 
               <form method="POST" action="doctors.php" style="display:inline;" onsubmit="return confirm('Delete this doctor?');">
                 <input type="hidden" name="csrf_token" value="<?= e($_SESSION['doctor_delete_csrf']) ?>">
                 <input type="hidden" name="doctor_id" value="<?= e((string) ($doctor['id'] ?? '')) ?>">
                 <input type="hidden" name="return_url" value="<?= e($current_return_url) ?>">
-                <button type="submit" name="delete_doctor" class="btn btn-danger small-btn">Delete</button>
+                <button type="submit" name="delete_doctor" class="admin-icon-btn danger" title="Delete"><i class="fa fa-trash-o"></i></button>
               </form>
             </div>
           </td>
@@ -1351,7 +1402,7 @@ require_once __DIR__ . '/includes/header.php';
       <?php endforeach; ?>
     <?php else: ?>
       <tr>
-        <td colspan="11" style="text-align:center;padding:20px;color:#64748b;">
+        <td colspan="12" style="text-align:center;padding:20px;color:#64748b;">
           No doctors found for your filter.
         </td>
       </tr>

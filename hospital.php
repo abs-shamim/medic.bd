@@ -117,6 +117,8 @@ if (!$hospital) {
 
 $hospital_id = (int)$hospital['id'];
 
+track_profile_view('hospitals', $hospital_id);
+
 /*
 |--------------------------------------------------------------------------
 | Safe Table And Column Checkers

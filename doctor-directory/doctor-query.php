@@ -937,11 +937,15 @@ function dp_build_doctor_search_query(array $filters, int $limit = 10, int $offs
     /*
      * Sorting rule:
      * - Step 4 specialty doctor-list pages: context featured active doctors first, sorted by context position.
-     * - Other pages: normal sorting by rating and reviews.
+     * - Other pages: profile popularity (views), then rating and reviews.
      */
     if ($context_featured_enabled) {
         $order[] = 'context_is_featured DESC';
         $order[] = 'context_featured_position ASC';
+    }
+
+    if (dp_column_exists('doctors', 'views_count')) {
+        $order[] = 'COALESCE(d.views_count, 0) DESC';
     }
 
     if (dp_column_exists('doctors', 'rating')) {

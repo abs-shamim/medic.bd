@@ -39,6 +39,8 @@ if (!$doctor || !is_array($doctor)) {
     exit;
 }
 
+track_profile_view('doctors', (int)($doctor['id'] ?? 0));
+
 /*
 |--------------------------------------------------------------------------
 | Language

@@ -3,6 +3,8 @@ require_once __DIR__ . '/../includes/functions.php';
 
 require_admin();
 
+ensure_profile_views_column('hospitals');
+
 /**
  * Validate SQL identifier before using it in dynamic SQL.
  */
@@ -964,6 +966,55 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
 require_once __DIR__ . '/includes/header.php';
 ?>
 
+<style>
+.admin-icon-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+/*
+ * Scoped under .admin-icon-actions so these beat the admin panel's global
+ * ".admin-main button" rule (class+element specificity) on every property,
+ * including background -- a bare ".admin-icon-btn.danger" class selector
+ * still loses the background fight to that more specific global rule even
+ * though it wins on color, leaving the Delete button green instead of red.
+ */
+.admin-icon-actions .admin-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    min-height: 0;
+    padding: 0;
+    border-radius: 6px;
+    border: 1px solid #d0d7de;
+    background: #ffffff;
+    color: #57606a;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.admin-icon-actions .admin-icon-btn:hover {
+    background: #f6f8fa;
+    color: #24292f;
+    text-decoration: none;
+}
+
+.admin-icon-actions .admin-icon-btn.danger {
+    background: #ffffff;
+    color: #cf222e;
+    border-color: rgba(207, 34, 46, 0.35);
+}
+
+.admin-icon-actions .admin-icon-btn.danger:hover {
+    background: #ffebe9;
+    color: #a40e26;
+}
+</style>
+
 <h1 style="margin-bottom:18px;color:#0f172a;">Hospitals</h1>
 
 <?php if ($flash_success !== ''): ?>
@@ -1137,6 +1188,7 @@ require_once __DIR__ . '/includes/header.php';
             <th>Doctors</th>
             <th>Verified</th>
             <th>Featured</th>
+            <th>Views</th>
             <th>Completion</th>
             <th>Actions</th>
         </tr>
@@ -1189,6 +1241,7 @@ require_once __DIR__ . '/includes/header.php';
                     <td><?= e((string) ($hospital['doctors_count'] ?? 0)) ?></td>
                     <td><?= !empty($hospital['is_verified']) ? 'Yes' : 'No' ?></td>
                     <td><?= !empty($hospital['is_featured']) ? 'Yes' : 'No' ?></td>
+                    <td><?= number_format((int)($hospital['views_count'] ?? 0)) ?></td>
 
                     <td style="min-width:145px;">
                         <div style="display:grid;gap:6px;">
@@ -1215,41 +1268,45 @@ require_once __DIR__ . '/includes/header.php';
                     </td>
 
                     <td>
-                        <div class="admin-actions">
+                        <div class="admin-icon-actions">
 
                             <a
-                                class="btn btn-outline small-btn"
+                                class="admin-icon-btn"
                                 href="hospital-form.php?id=<?= e((string) ($hospital['id'] ?? '')) ?>"
+                                title="Edit"
                             >
-                                Edit
+                                <i class="fa fa-pencil"></i>
                             </a>
 
                             <?php if (!empty($hospital['slug']) && function_exists('site_url')): ?>
                                 <a
-                                    class="btn btn-outline small-btn"
+                                    class="admin-icon-btn"
                                     href="<?= e(site_url('hospital/' . $hospital['slug'])) ?>"
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    title="View"
                                 >
-                                    View
+                                    <i class="fa fa-eye"></i>
                                 </a>
 
                             <?php elseif (!empty($hospital['slug'])): ?>
                                 <a
-                                    class="btn btn-outline small-btn"
+                                    class="admin-icon-btn"
                                     href="../hospital/<?= e($hospital['slug']) ?>"
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    title="View"
                                 >
-                                    View
+                                    <i class="fa fa-eye"></i>
                                 </a>
 
                             <?php else: ?>
                                 <a
-                                    class="btn btn-outline small-btn"
+                                    class="admin-icon-btn"
                                     href="hospital-form.php?id=<?= e((string) ($hospital['id'] ?? '')) ?>"
+                                    title="View"
                                 >
-                                    View
+                                    <i class="fa fa-eye"></i>
                                 </a>
                             <?php endif; ?>
 
@@ -1280,9 +1337,10 @@ require_once __DIR__ . '/includes/header.php';
                                 <button
                                     type="submit"
                                     name="delete_hospital"
-                                    class="btn btn-danger small-btn"
+                                    class="admin-icon-btn danger"
+                                    title="Delete"
                                 >
-                                    Delete
+                                    <i class="fa fa-trash-o"></i>
                                 </button>
                             </form>
 
@@ -1294,7 +1352,7 @@ require_once __DIR__ . '/includes/header.php';
 
         <?php else: ?>
             <tr>
-                <td colspan="10" style="text-align:center;padding:20px;color:#64748b;">
+                <td colspan="11" style="text-align:center;padding:20px;color:#64748b;">
                     No hospitals found for your filter.
                 </td>
             </tr>

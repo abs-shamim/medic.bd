@@ -532,6 +532,70 @@ function column_exists(string $table, string $column): bool
     return $cache[$cache_key];
 }
 
+/*
+|--------------------------------------------------------------------------
+| Profile View Tracking
+|--------------------------------------------------------------------------
+| Counts visits to a doctor or hospital profile page for ranking purposes
+| only (higher views_count sorts higher in the directory listing). Never
+| shown on the public frontend -- only surfaced in the admin panel.
+|
+| One increment per visitor session per profile, so refreshing the page
+| repeatedly cannot artificially inflate a profile's rank.
+|--------------------------------------------------------------------------
+*/
+function ensure_profile_views_column(string $table): void
+{
+    global $pdo;
+
+    if (!in_array($table, ['doctors', 'hospitals'], true)) {
+        return;
+    }
+
+    try {
+        if (!column_exists($table, 'views_count')) {
+            $pdo->exec("ALTER TABLE `{$table}` ADD COLUMN `views_count` INT UNSIGNED NOT NULL DEFAULT 0");
+        }
+    } catch (Throwable $e) {
+        // If the hosting database user has no ALTER permission, view
+        // tracking is silently skipped rather than breaking the page.
+    }
+}
+
+function track_profile_view(string $table, int $id): void
+{
+    global $pdo;
+
+    if ($id <= 0 || !in_array($table, ['doctors', 'hospitals'], true)) {
+        return;
+    }
+
+    ensure_profile_views_column($table);
+
+    if (!column_exists($table, 'views_count')) {
+        return;
+    }
+
+    $session_key = 'viewed_' . $table;
+
+    if (!isset($_SESSION[$session_key]) || !is_array($_SESSION[$session_key])) {
+        $_SESSION[$session_key] = [];
+    }
+
+    if (!empty($_SESSION[$session_key][$id])) {
+        return;
+    }
+
+    try {
+        $stmt = $pdo->prepare("UPDATE `{$table}` SET views_count = views_count + 1 WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+
+        $_SESSION[$session_key][$id] = true;
+    } catch (Throwable $e) {
+        // Never let view tracking break the profile page.
+    }
+}
+
 function get_address_id_by_name(string $table, string $name): int
 {
     global $pdo;
