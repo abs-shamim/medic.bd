@@ -1,42 +1,95 @@
-MedicBD
-MedicBD is a raw PHP and MySQL doctor, hospital, specialty, and healthcare directory website for Bangladesh.
-The project supports clean English and Bangla URLs, doctor and hospital profiles, specialty pages, XML sitemaps, an admin panel, user dashboard areas, and dynamic `robots.txt` management from Site Settings.
+# MedicBD
+
+**MedicBD** is a raw PHP + MySQL doctor, hospital, specialty, and healthcare directory platform built for Bangladesh. It supports clean English and Bangla URLs, doctor and hospital profiles, specialty pages, a full admin panel, a user dashboard for doctors/hospital owners, a structured contact/request system, XML sitemaps, and dynamic `robots.txt` management — all from Site Settings.
+
 ---
-Main Features
-Doctor directory with profile pages
-Hospital directory with profile pages
-Specialty pages and specialty-based browsing
-English and Bangla public URL support
-SEO-friendly clean URLs
-XML sitemap index and paginated sitemap files
-Dynamic `robots.txt`
-Admin panel site settings
-User dashboard area
-Image uploads and WebP conversion
-Meta settings, Open Graph image support, verification codes, and schema settings
-Configurable crawler and AI bot controls
+
+## Table of Contents
+
+- [Key Features](#key-features)
+- [Requirements](#requirements)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Default Admin Access](#default-admin-access)
+- [Public URL Examples](#public-url-examples)
+- [XML Sitemap](#xml-sitemap)
+- [Dynamic Robots.txt](#dynamic-robotstxt)
+- [Crawler & AI Bot Controls](#crawler--ai-bot-controls)
+- [Cloudflare Managed Robots.txt](#cloudflare-managed-robotstxt)
+- [Admin Settings](#admin-settings)
+- [File Permissions](#file-permissions)
+- [Troubleshooting](#troubleshooting)
+- [Production Checklist](#production-checklist)
+- [License](#license)
+
 ---
-Requirements
-PHP 8.0 or newer
-MySQL 5.7+ or MariaDB 10.4+
-Apache with `mod_rewrite` enabled
-PHP PDO MySQL extension
-GD extension recommended for image conversion
-Optional: Imagick extension for image conversion fallback
+
+## Key Features
+
+- **Doctor & hospital directories** — browsable by division, district, area, and specialty, with full profile pages
+- **Specialty pages** with specialty-based doctor browsing
+- **Structured contact & request system** — visitors submit typed requests (Add/Update Doctor Profile, Add/Update Hospital Profile, Claim Doctor/Hospital Profile, Report Incorrect Information, Technical Support, Other) that route into an admin review queue; nothing changes a live doctor/hospital record until an admin approves it
+- **Admin panel** — manage doctors, hospitals, specialties, locations, blog, static pages, moderators, contact requests, and site-wide settings
+- **User dashboard** — for registered doctors and hospital owners to claim profiles, request updates, manage chambers, and (where enabled) issue prescriptions
+- **English and Bangla** public URL support
+- **SEO-friendly clean URLs**, XML sitemap index with paginated sitemap files, and a fully dynamic `robots.txt`
+- **Image uploads with automatic WebP conversion** to keep stored files small
+- **Meta/SEO settings** — Open Graph images, verification codes, schema.org settings
+- **Configurable crawler and AI bot controls** from the admin panel
+
 ---
-Installation
-Upload all project files to your web root, for example:
+
+## Requirements
+
+| Requirement | Version |
+|---|---|
+| PHP | 8.0+ |
+| MySQL / MariaDB | 5.7+ / 10.4+ |
+| Apache | with `mod_rewrite` enabled |
+| PHP extension | PDO MySQL |
+| PHP extension | GD (recommended, for image/WebP conversion) |
+| PHP extension | Imagick (optional fallback) |
+
+---
+
+## Project Structure
+
 ```text
-   public_html/
-   ```
-Import the project database into MySQL.
-Open the database configuration file:
-```text
-   config/config.php
-   ```
-Set your database credentials and application URL.
-Example:
-```php
+index.php                 Front controller — loads route.php, falls through to the homepage
+route.php                 Main frontend router: clean URLs, language detection, SEO, sitemap dispatch
+contact.php                Public contact/request form (9 dynamic request types)
+doctor.php / doctors.php   Doctor profile page / doctor directory listing
+hospital.php / hospitals.php  Hospital profile page / hospital directory listing
+specialty.php / specialties.php  Specialty profile page / specialty listing
+sitemap.php                XML sitemap generator
+robots.php                 Dynamic robots.txt generator
+blog.php / blog-post.php   Blog listing and post pages (optional module)
+
+admin/                     Admin panel (doctors, hospitals, specialties, locations,
+                            blog, static pages, moderators, contact requests, settings)
+user/                      User-facing dashboard (login, register, claim profile,
+                            profile update, chambers)
+doctor-directory/          Doctor directory query/filter logic
+hospital-directory/        Hospital directory query/filter logic
+includes/                  Shared helpers: functions.php, header.php, footer.php,
+                            contact form schema, address lookups
+config/                    Database and application configuration
+assets/                    CSS, JS, images, and uploaded files
+languages/                 en.php / bn.php translation strings
+prescription/              Prescription module for verified doctor accounts
+cron/                      Scheduled maintenance scripts
+ajax/                      AJAX endpoints (e.g. division → district lookups)
+```
+
+---
+
+## Installation
+
+1. Upload all project files to your web root, e.g. `public_html/`.
+2. Import the project database into MySQL.
+3. Open `config/config.php` and set your database credentials and application URL:
+
+   ```php
    define('DB_HOST', 'localhost');
    define('DB_NAME', 'your_database_name');
    define('DB_USER', 'your_database_user');
@@ -45,83 +98,108 @@ Example:
 
    define('APP_URL', 'https://medic.bd');
    ```
-Make sure these folders are writable by PHP when uploads are enabled:
-```text
+
+4. Make sure these folders are writable by PHP (required for uploads):
+
+   ```text
+   assets/uploads/
    assets/images/
-   uploads/
    ```
-Upload the included `.htaccess` file to the project root.
-Open the website and confirm that clean URLs work.
+
+5. Upload the included `.htaccess` file to the project root.
+6. Open the website and confirm clean URLs work correctly.
+
 ---
-Important Root Files
+
+## Default Admin Access
+
+The super-admin login is controlled by environment variables, read in `config/config.php`:
+
 ```text
-index.php              Public frontend router
-route.php              Legacy premium doctor profile router
-sitemap.php            XML sitemap generator
-robots.php             Dynamic robots.txt generator
-.htaccess              Apache rewrite rules
-config/config.php      Database and application configuration
+ADMIN_EMAIL
+ADMIN_PASSWORD
 ```
+
+Set these on your server (or in your local environment) before first login. A super-admin account bypasses all permission checks and can manage other admin/moderator accounts from **Users** in the admin panel.
+
 ---
-Public URL Examples
+
+## Public URL Examples
+
 ```text
 /
- /bn
- /doctors
- /hospitals
- /specialties
- /specialty/{slug}
- /bn/specialty/{slug}
- /doctor/{slug}
- /hospital/{slug}
+/bn
+/doctors
+/hospitals
+/specialties
+/specialty/{slug}
+/bn/specialty/{slug}
+/doctor/{slug}
+/hospital/{slug}
+/contact
 ```
-Legacy premium doctor profile URLs are routed through `route.php`.
-Example:
+
+Legacy nested doctor-directory URLs are also supported through `route.php`:
+
 ```text
-/doctors/dhaka/mirpur/gynecologist/doctor-name
-/bn/doctors/dhaka/mirpur/gynecologist/doctor-name
+/doctors/{division}/{district}/{specialty}
+/bn/doctors/{division}/{district}/{specialty}
 ```
+
 ---
-XML Sitemap
-The main sitemap URL is:
+
+## XML Sitemap
+
+Main sitemap URL:
+
 ```text
 https://medic.bd/sitemap.xml
 ```
-The sitemap index can include paginated sitemap routes for:
-Main public pages
-Doctor profiles
-Hospital profiles
-Specialty articles
-Doctor directory pages
-Hospital directory pages
-Location-based directory pages
+
+The sitemap index includes paginated sitemap sections for:
+
+- Main public pages
+- Doctor profiles
+- Hospital profiles
+- Specialty articles
+- Doctor directory pages (division / district / area)
+- Hospital directory pages
+- Location-based directory pages
+
 Do not block `/sitemap.xml` in `robots.txt`.
+
 ---
-Dynamic Robots.txt
-The public URL is:
+
+## Dynamic Robots.txt
+
+Public URL:
+
 ```text
 https://medic.bd/robots.txt
 ```
-The actual generator file is:
+
+Actual generator file:
+
 ```text
 /robots.php
 ```
-The `.htaccess` file must contain this rule before existing-file checks:
+
+`.htaccess` must rewrite the public URL to the generator **before** existing-file checks:
+
 ```apache
 RewriteRule ^robots\.txt$ robots.php [L,QSA]
 ```
-The generator reads values from:
-```text
-Admin Panel > Site Settings > Robots.txt Control
-```
-From that settings area, you can control:
-Public crawling access
-Paths blocked from crawl
-Allowed exception paths
-Sitemap URL
-Content Signal setting
-Individual crawler blocks
-Typical protected paths are:
+
+The generator reads its rules from **Admin Panel → Site Settings → Robots.txt Control**, where you can configure:
+
+- Public crawling access
+- Blocked paths and allowed exception paths
+- Sitemap URL
+- Content Signal setting
+- Individual crawler blocks
+
+Typical protected paths:
+
 ```text
 /admin/
 /user/
@@ -129,17 +207,15 @@ Typical protected paths are:
 /config/
 /includes/
 ```
-Important Security Note
-`robots.txt` only requests that compliant crawlers avoid URLs. It does not protect private files or folders.
-Protect sensitive folders using:
-Login and session checks
-Server-side access rules
-Correct file permissions
-Database credentials outside public exposure
-Cloudflare or hosting firewall rules when needed
+
+> **Security note:** `robots.txt` only *requests* that compliant crawlers avoid certain URLs — it does not protect private files or folders. Protect sensitive areas with login/session checks, server-side access rules, correct file permissions, database credentials kept outside public exposure, and firewall rules (e.g. Cloudflare) where needed.
+
 ---
-Crawler and AI Bot Settings
-The dynamic robots system can block selected crawlers, including:
+
+## Crawler & AI Bot Controls
+
+The dynamic robots system can block selected crawlers individually, including:
+
 ```text
 Amazonbot
 Applebot-Extended
@@ -151,96 +227,103 @@ Google-Extended
 GPTBot
 meta-externalagent
 ```
-Normal Google Search indexing uses `Googlebot`, not `Google-Extended`.
-Blocking `Google-Extended` does not normally block Google Search indexing.
+
+Normal Google Search indexing uses `Googlebot`, **not** `Google-Extended` — blocking `Google-Extended` does not block Google Search indexing.
+
 ---
-Cloudflare Managed Robots.txt
-If Cloudflare Managed robots.txt or AI Crawl Control is enabled, Cloudflare may prepend its own crawler rules to the response at:
-```text
-https://medic.bd/robots.txt
-```
-This can create duplicate bot rules if the same crawlers are also blocked from the MedicBD admin panel.
-Choose one approach:
-Keep Cloudflare Managed robots.txt enabled and turn off duplicate bot checkboxes in the MedicBD admin panel.
-Disable Cloudflare Managed robots.txt and manage crawler rules only from MedicBD Site Settings.
+
+## Cloudflare Managed Robots.txt
+
+If Cloudflare's Managed `robots.txt` or AI Crawl Control is enabled, Cloudflare may prepend its own crawler rules to the response at `https://medic.bd/robots.txt`. This can create duplicate bot rules if the same crawlers are also blocked from the MedicBD admin panel. Pick one approach:
+
+- Keep Cloudflare Managed robots.txt enabled and turn off the duplicate bot checkboxes in MedicBD Site Settings, **or**
+- Disable Cloudflare Managed robots.txt and manage all crawler rules from MedicBD Site Settings only.
+
 ---
-Admin Settings
-The Site Settings page uses the `site_settings` database table.
-It includes sections for:
-Website identity
-Contact information
-Social links
-SEO settings
-Robots.txt control
-Homepage settings
-Directory settings
-Appointment settings
-User settings
-SMTP configuration
-SMS and WhatsApp settings
-Analytics and tracking
-Design settings
-Header and footer
-Legal pages
-Security and system settings
+
+## Admin Settings
+
+The Site Settings page (backed by the `site_settings` table) covers:
+
+- Website identity, contact information, social links
+- SEO settings and robots.txt control
+- Homepage, directory, and appointment settings
+- User settings
+- SMTP, SMS, and WhatsApp configuration
+- Analytics and tracking
+- Design settings, header and footer
+- Legal pages
+- Security and system settings
+
 ---
-File Permissions
-Recommended permissions:
+
+## File Permissions
+
+Recommended:
+
 ```text
 Folders: 755
 Files:   644
 ```
-For upload directories, your hosting environment may require writable permissions:
+
+Upload directories may need to be more permissive depending on your host:
+
 ```text
-assets/images/   755 or 775
-uploads/         755 or 775
+assets/uploads/   755 or 775
+assets/images/    755 or 775
 ```
-Avoid using `777` unless your hosting provider specifically requires it for a short troubleshooting period.
+
+Avoid `777` unless your hosting provider specifically requires it for short-term troubleshooting.
+
 ---
-Troubleshooting
-Clean URLs show 404
-Check:
-`.htaccess` is in the correct domain root
-Apache `mod_rewrite` is enabled
-Your hosting allows `.htaccess` overrides
-The domain document root points to the folder containing `index.php`
-`/robots.txt` shows an old version
-Check:
-`robots.php` is in the root folder
-The rewrite rule appears before existing file checks
-An old physical `robots.txt` file is renamed or removed if necessary
-Cloudflare cache has been purged
-Cloudflare Managed robots.txt is not adding an older cached response
-`/robots.php` opens directly
-The `.htaccess` rule can block direct access:
+
+## Troubleshooting
+
+**Clean URLs show 404**
+- `.htaccess` is in the correct domain root
+- Apache `mod_rewrite` is enabled
+- Your hosting allows `.htaccess` overrides
+- The domain document root points to the folder containing `index.php`
+
+**`/robots.txt` shows an old version**
+- `robots.php` is in the root folder
+- The rewrite rule appears before existing-file checks
+- Any old physical `robots.txt` file has been renamed or removed
+- Cloudflare cache has been purged, and Cloudflare Managed robots.txt isn't serving a cached response
+
+**`/robots.php` opens directly instead of only via `/robots.txt`**
+
+Block direct access in `.htaccess`:
+
 ```apache
 RewriteCond %{THE_REQUEST} \s/+robots\.php(?:[?\s]) [NC]
 RewriteRule ^robots\.php$ - [F,L]
 ```
-The public crawler URL should remain:
-```text
-https://medic.bd/robots.txt
-```
-Images do not upload
-Check:
-PHP upload limit
-`assets/images/` write permission
-GD or Imagick availability
-Maximum file size in Site Settings configuration
+
+The public crawler URL should always remain `https://medic.bd/robots.txt`.
+
+**Images do not upload**
+- PHP upload size limit
+- `assets/uploads/` write permission
+- GD or Imagick availability
+- Maximum file size configured in Site Settings
+
 ---
-Production Checklist
-Before launching, confirm:
-HTTPS is active
-`APP_URL` uses the correct production domain
-Database debug output is disabled
-`/config/` is protected from public access
-Admin login uses strong passwords
-XML sitemap works
-`robots.txt` uses the correct sitemap URL
-Cloudflare cache settings are reviewed
-Google Search Console property is verified
-Backups are stored outside the public web directory
+
+## Production Checklist
+
+- [ ] HTTPS is active
+- [ ] `APP_URL` uses the correct production domain
+- [ ] Database debug output is disabled
+- [ ] `/config/` is protected from public access
+- [ ] Admin login uses strong, unique passwords
+- [ ] XML sitemap works and is submitted to Search Console / Bing Webmaster Tools
+- [ ] `robots.txt` uses the correct sitemap URL
+- [ ] Cloudflare cache settings are reviewed
+- [ ] Backups are stored outside the public web directory
+
 ---
-License
-This project is private software for MedicBD.
-Do not distribute, resell, or publish the source code without permission.
+
+## License
+
+This project is private software for MedicBD. Do not distribute, resell, or publish the source code without permission.
