@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/contact-form-schema.php';
 
 require_admin();
 
@@ -36,23 +37,46 @@ function ensure_contacts_table(): void
         if (!column_exists('contacts', 'category')) {
             $pdo->exec("ALTER TABLE `contacts` ADD COLUMN `category` VARCHAR(20) NOT NULL DEFAULT 'primary' AFTER `starred`");
         }
+
+        if (!column_exists('contacts', 'request_type')) {
+            $pdo->exec("ALTER TABLE `contacts` ADD COLUMN `request_type` VARCHAR(60) NOT NULL DEFAULT '' AFTER `subject`");
+        }
     } catch (Throwable $e) {
         // If the hosting database user has no CREATE/ALTER permission,
         // the page still loads below and simply shows no messages.
     }
 }
 
+/*
+ * Inbox tabs mirror the public contact form's Subject dropdown exactly
+ * (see includes/contact-form-schema.php), since every new submission is
+ * auto-tagged with its request_type at save time -- no manual "move to
+ * category" triage is needed the way the old free-text subject required.
+ * "Primary" stays as the All view for messages sent before this dropdown
+ * existed (request_type is blank on those).
+ */
 if (!function_exists('cm_category_list')) {
     function cm_category_list(): array
     {
-        return [
-            'primary' => ['label' => 'Primary', 'icon' => 'fa-inbox'],
-            'promotions' => ['label' => 'Promotions', 'icon' => 'fa-tags'],
-            'doctors' => ['label' => 'Doctors', 'icon' => 'fa-user-md'],
-            'hospitals' => ['label' => 'Hospitals', 'icon' => 'fa-hospital-o'],
-            'updates' => ['label' => 'Updates', 'icon' => 'fa-info-circle'],
-            'reviews' => ['label' => 'Reviews', 'icon' => 'fa-star-o'],
+        $icons = [
+            'add_doctor'        => 'fa-user-plus',
+            'update_doctor'     => 'fa-user-md',
+            'add_hospital'      => 'fa-hospital-o',
+            'update_hospital'   => 'fa-edit',
+            'claim_doctor'      => 'fa-id-badge',
+            'claim_hospital'    => 'fa-building',
+            'report_incorrect'  => 'fa-exclamation-triangle',
+            'technical_support' => 'fa-wrench',
+            'other'             => 'fa-question-circle',
         ];
+
+        $list = ['primary' => ['label' => 'Primary', 'icon' => 'fa-inbox']];
+
+        foreach (cf_subject_labels() as $type_key => $type_label) {
+            $list[$type_key] = ['label' => $type_label, 'icon' => $icons[$type_key] ?? 'fa-envelope-o'];
+        }
+
+        return $list;
     }
 }
 
@@ -115,11 +139,13 @@ if (table_exists('contacts') && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($
         flash('success', count($ids) . ' message(s) deleted.');
     } elseif (strpos($bulk_action, 'move_') === 0) {
         $target_category = substr($bulk_action, strlen('move_'));
+        $category_list = cm_category_list();
 
-        if (array_key_exists($target_category, cm_category_list())) {
-            $stmt = $pdo->prepare("UPDATE contacts SET category=? WHERE id IN ({$placeholders})");
-            $stmt->execute(array_merge([$target_category], $ids));
-            flash('success', count($ids) . ' message(s) moved to ' . cm_category_list()[$target_category]['label'] . '.');
+        if (array_key_exists($target_category, $category_list)) {
+            $new_request_type = $target_category === 'primary' ? '' : $target_category;
+            $stmt = $pdo->prepare("UPDATE contacts SET request_type=? WHERE id IN ({$placeholders})");
+            $stmt->execute(array_merge([$new_request_type], $ids));
+            flash('success', count($ids) . ' message(s) moved to ' . $category_list[$target_category]['label'] . '.');
         } else {
             flash('error', 'Invalid bulk action.');
         }
@@ -255,12 +281,12 @@ $params = [];
 
 /*
  * The "Primary" tab acts as an "All" view showing every message regardless
- * of category, matching how most of this app's messages will stay
- * uncategorized. The other tabs (Promotions, Doctors, ...) filter strictly
- * to their own category.
+ * of request_type -- this is where older messages sent before the Subject
+ * dropdown existed still show up, since their request_type is blank. The
+ * other tabs filter strictly to their own request type.
  */
 if ($category_filter !== 'primary') {
-    $where[] = "category = :category";
+    $where[] = "request_type = :category";
     $params[':category'] = $category_filter;
 }
 
@@ -275,6 +301,8 @@ if ($search !== '') {
 if (in_array($status_filter, ['unread', 'read'], true)) {
     $where[] = "status = :status";
     $params[':status'] = $status_filter;
+} elseif ($status_filter === 'starred') {
+    $where[] = "starred = 1";
 }
 
 if ($date_from !== '') {
@@ -313,13 +341,16 @@ $messages = $stmt->fetchAll();
 $total_all = (int)$pdo->query("SELECT COUNT(*) FROM contacts")->fetchColumn();
 $total_unread = (int)$pdo->query("SELECT COUNT(*) FROM contacts WHERE status = 'unread'")->fetchColumn();
 $total_today = (int)$pdo->query("SELECT COUNT(*) FROM contacts WHERE DATE(created_at) = CURDATE()")->fetchColumn();
+$total_starred = (int)$pdo->query("SELECT COUNT(*) FROM contacts WHERE starred = 1")->fetchColumn();
 
 $category_unread_counts = array_fill_keys(array_keys(cm_category_list()), 0);
-$category_counts_stmt = $pdo->query("SELECT category, COUNT(*) AS total, SUM(status = 'unread') AS unread FROM contacts GROUP BY category");
+$category_total_counts = array_fill_keys(array_keys(cm_category_list()), 0);
+$category_counts_stmt = $pdo->query("SELECT request_type AS category, COUNT(*) AS total, SUM(status = 'unread') AS unread FROM contacts GROUP BY request_type");
 
 foreach ($category_counts_stmt->fetchAll() as $row) {
     if (array_key_exists($row['category'], $category_unread_counts)) {
         $category_unread_counts[$row['category']] = (int)$row['unread'];
+        $category_total_counts[$row['category']] = (int)$row['total'];
     }
 }
 
@@ -992,10 +1023,10 @@ foreach ([$search, $status_filter, $date_from, $date_to] as $filter_value) {
             <i class="fa <?= e($cat_info['icon']) ?>"></i>
             <?= e($cat_info['label']) ?>
             <?php
-                $tab_unread_count = $cat_key === 'primary' ? $total_unread : $category_unread_counts[$cat_key];
+                $tab_total_count = $cat_key === 'primary' ? $total_all : $category_total_counts[$cat_key];
             ?>
-            <?php if ($tab_unread_count > 0): ?>
-                <span class="count"><?= number_format($tab_unread_count) ?></span>
+            <?php if ($tab_total_count > 0): ?>
+                <span class="count"><?= number_format($tab_total_count) ?></span>
             <?php endif; ?>
         </a>
     <?php endforeach; ?>
@@ -1026,6 +1057,7 @@ foreach ([$search, $status_filter, $date_from, $date_to] as $filter_value) {
     <select id="cm-status-select" onchange="window.location.href = this.value">
       <option value="contact-messages.php?<?= e(admin_contact_messages_current_query(['status' => null, 'page' => null])) ?>" <?= $status_filter === '' ? 'selected' : '' ?>>All Messages</option>
       <option value="contact-messages.php?<?= e(admin_contact_messages_current_query(['status' => 'unread', 'page' => null])) ?>" <?= $status_filter === 'unread' ? 'selected' : '' ?>>Unread (<?= number_format($total_unread) ?>)</option>
+      <option value="contact-messages.php?<?= e(admin_contact_messages_current_query(['status' => 'starred', 'page' => null])) ?>" <?= $status_filter === 'starred' ? 'selected' : '' ?>>Starred (<?= number_format($total_starred) ?>)</option>
       <option value="contact-messages.php?<?= e(admin_contact_messages_current_query(['status' => 'read', 'page' => null])) ?>" <?= $status_filter === 'read' ? 'selected' : '' ?>>Read</option>
     </select>
 
@@ -1076,19 +1108,29 @@ foreach ([$search, $status_filter, $date_from, $date_to] as $filter_value) {
             <i class="fa <?= $is_starred ? 'fa-star' : 'fa-star-o' ?>"></i>
           </a>
 
-          <a href="contact-message-view.php?email=<?= e(rawurlencode($item['email'])) ?>" class="cm-avatar" style="background:<?= e(cm_avatar_color($item['email'])) ?>;">
+          <a href="contact-message-view.php?email=<?= e(rawurlencode($item['email'])) ?>&open=<?= e((string)$item['id']) ?>" class="cm-avatar" style="background:<?= e(cm_avatar_color($item['email'])) ?>;">
             <?= e($initial) ?>
           </a>
 
-          <a href="contact-message-view.php?email=<?= e(rawurlencode($item['email'])) ?>" class="cm-row-main" style="text-decoration:none;color:inherit;">
+          <a href="contact-message-view.php?email=<?= e(rawurlencode($item['email'])) ?>&open=<?= e((string)$item['id']) ?>" class="cm-row-main" style="text-decoration:none;color:inherit;">
             <div class="cm-row-top">
               <span class="cm-row-name"><?= e($name) ?></span>
               <span class="cm-row-email"><?= e($item['email']) ?></span>
             </div>
 
+            <?php
+                $item_request_label = trim((string)($item['request_type'] ?? '')) !== ''
+                    ? (cm_category_list()[$item['request_type']]['label'] ?? ucfirst((string)$item['request_type']))
+                    : '';
+                // The request type's label already matches the subject text for
+                // every submission made through the dropdown, so the label chip
+                // only needs to show when it adds information the subject doesn't
+                // already state (e.g. after an admin manually reclassifies it).
+                $show_request_label = $category_filter === 'primary' && $item_request_label !== '' && $item_request_label !== $item['subject'];
+            ?>
             <div class="cm-row-subject-line">
-              <?php if ($category_filter === 'primary' && ($item['category'] ?? 'primary') !== 'primary'): ?>
-                <span class="cm-row-label"><?= e(cm_category_list()[$item['category']]['label'] ?? ucfirst((string)$item['category'])) ?></span>
+              <?php if ($show_request_label): ?>
+                <span class="cm-row-label"><?= e($item_request_label) ?></span>
               <?php endif; ?>
 
               <span><?= e($item['subject'] !== '' ? $item['subject'] : '(no subject)') ?></span>
@@ -1109,7 +1151,7 @@ foreach ([$search, $status_filter, $date_from, $date_to] as $filter_value) {
             <span class="cm-row-date"><?= e(date('M d', strtotime((string)($item['created_at'] ?? 'now')))) ?></span>
 
             <div class="cm-row-actions">
-              <a class="cm-icon-btn" href="contact-message-view.php?email=<?= e(rawurlencode($item['email'])) ?>" title="View"><i class="fa fa-eye"></i></a>
+              <a class="cm-icon-btn" href="contact-message-view.php?email=<?= e(rawurlencode($item['email'])) ?>&open=<?= e((string)$item['id']) ?>" title="View"><i class="fa fa-eye"></i></a>
 
               <?php if (!$is_unread): ?>
                 <a class="cm-icon-btn" href="contact-messages.php?unread=<?= e((string)$item['id']) ?>" title="Mark Unread"><i class="fa fa-envelope"></i></a>

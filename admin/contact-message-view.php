@@ -1,7 +1,51 @@
 <?php
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/contact-form-schema.php';
 
 require_admin();
+
+function cmv_review_statuses(): array
+{
+    return [
+        'new'       => 'New',
+        'under_review' => 'Under Review',
+        'need_info' => 'Need More Information',
+        'approved'  => 'Approved',
+        'rejected'  => 'Rejected',
+        'resolved'  => 'Resolved',
+    ];
+}
+
+function cmv_review_status_color(string $status): string
+{
+    $colors = [
+        'new'          => 'blue',
+        'under_review' => 'gray',
+        'need_info'    => 'gray',
+        'approved'     => 'green',
+        'rejected'     => 'gray',
+        'resolved'     => 'green',
+    ];
+
+    return $colors[$status] ?? 'gray';
+}
+
+/*
+ * Turns a stored form_data field key (e.g. "doctor_name") into the exact
+ * label the visitor saw on the public form, by looking it up in the same
+ * schema contact.php renders from. Falls back to a humanized version of the
+ * key for anything the schema doesn't recognize (e.g. an older submission).
+ */
+function cmv_field_label(string $request_type, string $field_key): string
+{
+    $sections = cf_subject_sections();
+
+    if (isset($sections[$request_type]['fields'][$field_key]['label'])) {
+        return (string)$sections[$request_type]['fields'][$field_key]['label'];
+    }
+
+    return ucfirst(str_replace('_', ' ', $field_key));
+}
 
 if (function_exists('require_admin_permission')) {
     require_admin_permission('contacts.manage');
@@ -55,6 +99,17 @@ if ($email === '' && isset($_GET['id']) && table_exists('contacts')) {
 
 $thread_url = 'contact-message-view.php?email=' . rawurlencode($email);
 
+/*
+ * Preserve whatever message was explicitly open (if any) across these
+ * action redirects. Without this, clicking star/read/unread/delete on any
+ * message would land back on a bare thread URL, and -- combined with the
+ * "don't default-expand anything" rule below -- silently close whatever
+ * the admin already had open, or worse, pop open a message they never
+ * asked to see. A stale id (e.g. the message just deleted) is harmless:
+ * it simply won't match a real message later and nothing opens.
+ */
+$preserve_open = isset($_GET['open']) ? '&open=' . (int)$_GET['open'] : '';
+
 if ($email !== '' && table_exists('contacts')) {
     if (isset($_GET['delete'])) {
         $target_id = (int)$_GET['delete'];
@@ -69,7 +124,7 @@ if ($email !== '' && table_exists('contacts')) {
         $remaining = $pdo->prepare("SELECT COUNT(*) FROM contacts WHERE LOWER(email) = LOWER(:email)");
         $remaining->execute([':email' => $email]);
 
-        redirect((int)$remaining->fetchColumn() > 0 ? $thread_url : 'contact-messages.php');
+        redirect((int)$remaining->fetchColumn() > 0 ? $thread_url . $preserve_open : 'contact-messages.php');
     }
 
     if (isset($_GET['unread'])) {
@@ -80,7 +135,18 @@ if ($email !== '' && table_exists('contacts')) {
             $stmt->execute([':id' => $target_id]);
         }
 
-        redirect($thread_url);
+        redirect($thread_url . $preserve_open);
+    }
+
+    if (isset($_GET['read'])) {
+        $target_id = (int)$_GET['read'];
+
+        if ($target_id > 0) {
+            $stmt = $pdo->prepare("UPDATE contacts SET status='read' WHERE id=:id");
+            $stmt->execute([':id' => $target_id]);
+        }
+
+        redirect($thread_url . $preserve_open);
     }
 
     if (isset($_GET['star'])) {
@@ -95,7 +161,7 @@ if ($email !== '' && table_exists('contacts')) {
             $update->execute([':starred' => $current ? 0 : 1, ':id' => $target_id]);
         }
 
-        redirect($thread_url);
+        redirect($thread_url . $preserve_open);
     }
 
     if (isset($_GET['delete_all'])) {
@@ -112,7 +178,19 @@ if ($email !== '' && table_exists('contacts')) {
         $update->execute([':status' => $new_status, ':email' => $email]);
 
         flash('success', 'All messages from this sender marked as ' . $new_status . '.');
-        redirect($thread_url);
+        redirect($thread_url . $preserve_open);
+    }
+
+    if (isset($_GET['review_status'], $_GET['msg_id']) && column_exists('contacts', 'review_status')) {
+        $target_id = (int)$_GET['msg_id'];
+        $new_review_status = (string)$_GET['review_status'];
+
+        if ($target_id > 0 && array_key_exists($new_review_status, cmv_review_statuses())) {
+            $stmt = $pdo->prepare("UPDATE contacts SET review_status=:review_status WHERE id=:id");
+            $stmt->execute([':review_status' => $new_review_status, ':id' => $target_id]);
+        }
+
+        redirect($thread_url . '&open=' . $target_id);
     }
 }
 
@@ -125,6 +203,7 @@ $note_csrf_token = $_SESSION['admin_contact_note_csrf'];
 if ($email !== '' && table_exists('contacts') && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_note') {
     $posted_token = (string)($_POST['csrf_token'] ?? '');
     $target_id = (int)($_POST['msg_id'] ?? 0);
+    $is_ajax_save = ($_POST['ajax'] ?? '') === '1';
 
     if (hash_equals($note_csrf_token, $posted_token) && $target_id > 0) {
         $note_value = trim((string)($_POST['notes'] ?? ''));
@@ -132,24 +211,30 @@ if ($email !== '' && table_exists('contacts') && $_SERVER['REQUEST_METHOD'] === 
         $stmt = $pdo->prepare("UPDATE contacts SET notes=:notes WHERE id=:id");
         $stmt->execute([':notes' => $note_value !== '' ? $note_value : null, ':id' => $target_id]);
 
+        if ($is_ajax_save) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'notes' => $note_value]);
+            exit;
+        }
+
         flash('success', 'Note saved successfully.');
     } else {
+        if ($is_ajax_save) {
+            header('Content-Type: application/json');
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Security token mismatch.']);
+            exit;
+        }
+
         flash('error', 'Security token mismatch. Please try again.');
     }
 
-    redirect($thread_url);
+    redirect($thread_url . $preserve_open);
 }
 
 $messages = [];
 
 if ($email !== '' && table_exists('contacts')) {
-    /*
-     * Opening a conversation marks every message in it as read, matching
-     * how a normal inbox behaves when you open a thread.
-     */
-    $mark_read = $pdo->prepare("UPDATE contacts SET status='read' WHERE LOWER(email) = LOWER(:email) AND status='unread'");
-    $mark_read->execute([':email' => $email]);
-
     $stmt = $pdo->prepare("SELECT * FROM contacts WHERE LOWER(email) = LOWER(:email) ORDER BY created_at ASC, id ASC");
     $stmt->execute([':email' => $email]);
     $messages = $stmt->fetchAll();
@@ -192,14 +277,48 @@ if (table_exists('users')) {
 }
 
 $latest_message = $messages[count($messages) - 1];
-$display_name = trim((string)$latest_message['name']) !== '' ? trim((string)$latest_message['name']) : $email;
-$reply_href = 'mailto:' . rawurlencode($email) . '?subject=' . rawurlencode('Re: ' . ($latest_message['subject'] !== '' ? $latest_message['subject'] : '(no subject)'));
-$forward_body = "\n\n---------- Forwarded message ----------\n"
-    . "From: " . $display_name . " <" . $email . ">\n"
-    . "Date: " . date('M d, Y, h:i A', strtotime((string)($latest_message['created_at'] ?? 'now'))) . "\n"
-    . "Subject: " . ($latest_message['subject'] !== '' ? $latest_message['subject'] : '(no subject)') . "\n\n"
-    . (string)($latest_message['message'] ?? '');
-$forward_href = 'mailto:?subject=' . rawurlencode('Fwd: ' . ($latest_message['subject'] !== '' ? $latest_message['subject'] : '(no subject)')) . '&body=' . rawurlencode($forward_body);
+
+/*
+ * The list page links here with &open=<message id> so the specific row a
+ * user clicked opens expanded. When no valid &open= is present (e.g. a
+ * redirect back from star/read/unread/delete), nothing is force-expanded
+ * -- previously this defaulted to the latest message, which meant acting
+ * on any message could pop open one the admin never asked to see (or,
+ * combined with the read-marking below, silently re-read it).
+ */
+$explicitly_opened_id = isset($_GET['open']) ? (int)$_GET['open'] : 0;
+$open_message_ids = array_map('intval', array_column($messages, 'id'));
+
+if (!in_array($explicitly_opened_id, $open_message_ids, true)) {
+    $explicitly_opened_id = 0;
+}
+
+$open_message_id = $explicitly_opened_id;
+
+/*
+ * Only a message the user genuinely navigated to (a real &open=<id> from
+ * the list page) gets marked read here -- never the id this page merely
+ * defaults to displaying. Without that distinction, every action here
+ * (star, delete, "Mark Unread", ...) redirects back to a plain thread URL
+ * with no &open=, which would then default-open and instantly re-read the
+ * latest message, silently undoing a "Mark Unread" click whenever it
+ * happened to be the latest one.
+ */
+if ($explicitly_opened_id > 0) {
+    $mark_read = $pdo->prepare("UPDATE contacts SET status='read' WHERE id = :id AND status='unread'");
+    $mark_read->execute([':id' => $explicitly_opened_id]);
+}
+
+if ($explicitly_opened_id > 0) {
+    foreach ($messages as &$message_row) {
+        if ((int)$message_row['id'] === $explicitly_opened_id) {
+            $message_row['status'] = 'read';
+        }
+    }
+    unset($message_row);
+}
+
+$latest_message = $messages[count($messages) - 1];
 ?>
 
 <style>
@@ -495,16 +614,96 @@ $forward_href = 'mailto:?subject=' . rawurlencode('Fwd: ' . ($latest_message['su
         padding-bottom: 4px;
     }
 
-    .cmv-sender-email {
+    .cmv-item-subject {
+        display: none;
+        margin: 0;
+        padding: 14px 18px 0;
+        color: #0f172a;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .cmv-message-card.expanded .cmv-item-subject {
+        display: block;
+    }
+
+    .cmv-summary-email {
+        display: none;
         color: #57606a;
         font-size: 12px;
         font-weight: 400;
+        white-space: nowrap;
+    }
+
+    .cmv-message-card.expanded .cmv-summary-email {
+        display: inline;
+    }
+
+    .cmv-header-toggle {
+        margin: 2px 0 12px;
+        position: relative;
     }
 
     .cmv-sender-to {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
         color: #8c959f;
         font-size: 12px;
-        margin: 2px 0 12px 48px;
+        cursor: pointer;
+        list-style: none;
+        user-select: none;
+    }
+
+    .cmv-sender-to::-webkit-details-marker {
+        display: none;
+    }
+
+    .cmv-header-toggle:hover .cmv-sender-to {
+        color: #57606a;
+        text-decoration: underline;
+    }
+
+    .cmv-header-panel {
+        position: absolute;
+        z-index: 15;
+        margin-top: 8px;
+        padding: 16px 20px;
+        background: #ffffff;
+        border: 1px solid #dadce0;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(27, 31, 36, 0.14);
+    }
+
+    .cmv-header-panel table {
+        border-collapse: collapse;
+    }
+
+    .cmv-header-panel td {
+        padding: 4px 10px;
+        font-size: 13px;
+        line-height: 1.5;
+        color: #202124;
+        white-space: nowrap;
+        vertical-align: top;
+    }
+
+    .cmv-header-panel td:first-child {
+        color: #5f6368;
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .cmv-header-panel td:last-child {
+        white-space: normal;
+        min-width: 220px;
+    }
+
+    .cmv-message-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 0 0 16px;
     }
 
     .cmv-star-btn {
@@ -528,7 +727,7 @@ $forward_href = 'mailto:?subject=' . rawurlencode('Fwd: ' . ($latest_message['su
         border: 1px solid #eaeef2;
         color: #24292f;
         line-height: 1.7;
-        margin: 0 0 16px 48px;
+        margin: 0 0 16px;
     }
 
     .cmv-btn {
@@ -569,23 +768,52 @@ $forward_href = 'mailto:?subject=' . rawurlencode('Fwd: ' . ($latest_message['su
     }
 
     .cmv-note-box {
-        margin: 0 0 16px 48px;
+        margin: 0 0 16px;
         padding: 14px;
         border-radius: 8px;
         background: #f6f8fa;
         border: 1px dashed #d0d7de;
     }
 
+    .cmv-note-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
     .cmv-note-box h3 {
-        margin: 0 0 4px;
+        margin: 0;
         font-size: 13px;
         color: #57606a;
     }
 
-    .cmv-note-box p {
-        margin: 0 0 10px;
+    .cmv-note-view {
+        padding: 10px 12px;
+        margin-bottom: 4px;
+        border-radius: 6px;
+        background: #ffffff;
+        border: 1px solid #d0d7de;
+        color: #24292f;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .cmv-note-status {
         font-size: 12px;
         color: #8c959f;
+    }
+
+    .cmv-note-status.saving {
+        color: #9a6700;
+    }
+
+    .cmv-note-status.saved {
+        color: #1a7f37;
+    }
+
+    .cmv-note-status.error {
+        color: #cf222e;
     }
 
     .cmv-note-box textarea {
@@ -598,6 +826,132 @@ $forward_href = 'mailto:?subject=' . rawurlencode('Fwd: ' . ($latest_message['su
         font-size: 13px;
         line-height: 1.5;
         resize: vertical;
+    }
+
+    .cmv-request-panel {
+        margin: 0 0 16px;
+        padding: 14px 16px;
+        border-radius: 8px;
+        background: #f6f8fa;
+        border: 1px solid #d0d7de;
+    }
+
+    .cmv-request-panel-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #24292f;
+    }
+
+    .cmv-review-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 400;
+    }
+
+    .cmv-review-status label {
+        font-size: 12px;
+        color: #57606a;
+    }
+
+    .cmv-review-status select {
+        border: 0;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 10px;
+    }
+
+    .cmv-details-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 10px;
+        background: #ffffff;
+        border: 1px solid #eaeef2;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .cmv-details-table tr:not(:last-child) td {
+        border-bottom: 1px solid #eaeef2;
+    }
+
+    .cmv-details-table td {
+        padding: 7px 12px;
+        font-size: 13px;
+        vertical-align: top;
+    }
+
+    .cmv-details-label {
+        width: 220px;
+        color: #57606a;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .cmv-details-value {
+        color: #24292f;
+        word-break: break-word;
+    }
+
+    .cmv-attachments {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .cmv-attachment-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        width: 110px;
+        padding: 8px;
+        border-radius: 8px;
+        background: #ffffff;
+        border: 1px solid #d0d7de;
+        text-decoration: none;
+        color: #24292f;
+        font-size: 11px;
+        text-align: center;
+    }
+
+    .cmv-attachment-item:hover {
+        border-color: #0969da;
+        text-decoration: none;
+    }
+
+    .cmv-attachment-item img {
+        width: 100%;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 4px;
+        background: #f6f8fa;
+    }
+
+    .cmv-attachment-file-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 70px;
+        border-radius: 4px;
+        background: #f6f8fa;
+        color: #cf222e;
+        font-size: 26px;
+    }
+
+    .cmv-attachment-label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 100%;
     }
 
     .cmv-reply-composer {
@@ -690,23 +1044,33 @@ $forward_href = 'mailto:?subject=' . rawurlencode('Fwd: ' . ($latest_message['su
 <div class="cmv-thread" id="cmv-thread">
     <?php foreach ($messages as $index => $item): ?>
         <?php
-            $is_last = $index === count($messages) - 1;
+            $is_open = (int)$item['id'] === $open_message_id;
             $item_unread = ($item['status'] ?? 'unread') === 'unread';
             $item_starred = !empty($item['starred']);
             $item_name = trim((string)$item['name']) !== '' ? trim((string)$item['name']) : $item['email'];
             $item_initial = mb_strtoupper(mb_substr($item_name, 0, 1));
-            $item_reply_href = 'mailto:' . rawurlencode($item['email']) . '?subject=' . rawurlencode('Re: ' . ($item['subject'] !== '' ? $item['subject'] : '(no subject)'));
+            $item_subject_display = $item['subject'] !== '' ? $item['subject'] : '(no subject)';
+            $item_reply_href = 'mailto:' . rawurlencode($item['email']) . '?subject=' . rawurlencode('Re: ' . $item_subject_display);
+            $item_forward_body = "\n\n---------- Forwarded message ----------\n"
+                . "From: " . $item_name . " <" . $item['email'] . ">\n"
+                . "Date: " . date('M d, Y, h:i A', strtotime((string)($item['created_at'] ?? 'now'))) . "\n"
+                . "Subject: " . $item_subject_display . "\n\n"
+                . (string)($item['message'] ?? '');
+            $item_forward_href = 'mailto:?subject=' . rawurlencode('Fwd: ' . $item_subject_display) . '&body=' . rawurlencode($item_forward_body);
         ?>
-        <div class="cmv-message-card <?= $is_last ? 'expanded' : '' ?>" data-msg-id="<?= e((string)$item['id']) ?>">
+        <div class="cmv-message-card <?= $is_open ? 'expanded' : '' ?>" data-msg-id="<?= e((string)$item['id']) ?>" data-unread="<?= $item_unread ? '1' : '0' ?>">
+            <h2 class="cmv-item-subject"><?= e($item_subject_display) ?></h2>
+
             <div class="cmv-message-summary" onclick="cmvToggleMessage(<?= e((string)$item['id']) ?>)">
                 <div class="cmv-avatar" style="background:<?= e(cm_avatar_color($item['email'])) ?>;"><?= e($item_initial) ?></div>
 
                 <div class="cmv-summary-main">
                     <span class="cmv-summary-name"><?= e($item_name) ?></span>
+                    <span class="cmv-summary-email"><?php if ($customer): ?><span class="cmv-pill blue" style="margin-right:4px;">Customer</span><?php endif; ?>&lt;<?= e($item['email']) ?>&gt;</span>
                     <span class="cmv-summary-preview"><?= e($item['subject'] !== '' ? $item['subject'] . ' - ' : '') ?><?= e(mb_strimwidth((string)($item['message'] ?? ''), 0, 90, '...')) ?></span>
                 </div>
 
-                <?php if ($item_unread): ?><span class="cmv-pill blue">Unread</span><?php endif; ?>
+                <span class="cmv-pill blue cmv-unread-pill" id="cmv-unread-pill-<?= e((string)$item['id']) ?>" style="<?= $item_unread ? '' : 'display:none;' ?>">Unread</span>
 
                 <span class="cmv-summary-date"><?= e(date('M d, Y, h:i A', strtotime((string)($item['created_at'] ?? 'now')))) ?></span>
 
@@ -714,59 +1078,202 @@ $forward_href = 'mailto:?subject=' . rawurlencode('Fwd: ' . ($latest_message['su
                     <i class="fa <?= $item_starred ? 'fa-star' : 'fa-star-o' ?>"></i>
                 </a>
 
+                <a class="cmv-star-btn" href="<?= e($thread_url) ?>&open=<?= e((string)$item['id']) ?>" onclick="event.stopPropagation();" title="View">
+                    <i class="fa fa-eye"></i>
+                </a>
+
+                <a
+                    class="cmv-star-btn cmv-read-toggle-btn"
+                    id="cmv-read-toggle-btn-<?= e((string)$item['id']) ?>"
+                    href="<?= e($thread_url) ?>&<?= $item_unread ? 'read' : 'unread' ?>=<?= e((string)$item['id']) ?>"
+                    onclick="event.stopPropagation();"
+                    title="<?= $item_unread ? 'Mark Read' : 'Mark Unread' ?>"
+                    data-read-href="<?= e($thread_url) ?>&read=<?= e((string)$item['id']) ?>"
+                    data-unread-href="<?= e($thread_url) ?>&unread=<?= e((string)$item['id']) ?>"
+                >
+                    <i class="fa <?= $item_unread ? 'fa-envelope-open-o' : 'fa-envelope' ?>"></i>
+                </a>
+
                 <a class="cmv-star-btn" href="<?= e($item_reply_href) ?>" onclick="event.stopPropagation();" title="Reply">
                     <i class="fa fa-reply"></i>
                 </a>
 
-                <details class="cmv-kebab" onclick="event.stopPropagation();">
-                    <summary title="More"><i class="fa fa-ellipsis-v"></i></summary>
-                    <div class="cmv-kebab-menu">
-                        <?php if (!$item_unread): ?>
-                            <a href="<?= e($thread_url) ?>&unread=<?= e((string)$item['id']) ?>"><i class="fa fa-envelope"></i> Mark Unread</a>
-                        <?php endif; ?>
-                        <a
-                            href="<?= e($thread_url) ?>&delete=<?= e((string)$item['id']) ?>"
-                            onclick="return confirm('Delete this message?')"
-                        ><i class="fa fa-trash-o"></i> Delete</a>
-                    </div>
-                </details>
+                <a
+                    class="cmv-star-btn"
+                    href="<?= e($thread_url) ?>&delete=<?= e((string)$item['id']) ?>"
+                    onclick="event.stopPropagation(); return confirm('Delete this message?');"
+                    title="Delete"
+                >
+                    <i class="fa fa-trash-o"></i>
+                </a>
             </div>
 
             <div class="cmv-message-body-wrap">
-                <div class="cmv-sender-email">&lt;<?= e($item['email']) ?>&gt;<?php if ($customer): ?> <span class="cmv-pill blue">Customer</span><?php endif; ?></div>
-                <div class="cmv-sender-to">to me</div>
+                <details class="cmv-header-toggle" name="cmv-header-group">
+                    <summary class="cmv-sender-to">to me <i class="fa fa-caret-down"></i></summary>
+                    <div class="cmv-header-panel">
+                        <table>
+                            <tr><td>from:</td><td><strong><?= e($item_name) ?></strong> &lt;<?= e($item['email']) ?>&gt;</td></tr>
+                            <tr><td>reply-to:</td><td><?= e($item['email']) ?></td></tr>
+                            <tr><td>to:</td><td><?= e(defined('APP_NAME') ? APP_NAME : 'Admin') ?></td></tr>
+                            <tr><td>date:</td><td><?= e(date('M d, Y, h:i A', strtotime((string)($item['created_at'] ?? 'now')))) ?></td></tr>
+                            <tr><td>subject:</td><td><?= e($item_subject_display) ?></td></tr>
+                            <tr><td>message id:</td><td>#<?= e((string)$item['id']) ?></td></tr>
+                            <tr><td>status:</td><td><?= $item_unread ? 'Unread' : 'Read' ?><?= $item_starred ? ' · Starred' : '' ?></td></tr>
+                            <?php if ($customer): ?>
+                                <tr><td>customer:</td><td><i class="fa fa-check-circle" style="color:#1a7f37;"></i> Registered account match</td></tr>
+                            <?php endif; ?>
+                        </table>
+                    </div>
+                </details>
 
                 <div class="cmv-message-body">
                     <?= nl2br(e($item['message'] ?? '')) ?>
                 </div>
 
-                <div class="cmv-note-box">
-                    <h3>Internal Note</h3>
-                    <p>Only visible to admin/moderators. Not sent to the sender.</p>
+                <?php
+                    $item_request_type = trim((string)($item['request_type'] ?? ''));
+                    $item_form_data = [];
+                    $item_attachments = [];
 
-                    <form method="post">
+                    if ($item_request_type !== '') {
+                        $decoded_form_data = json_decode((string)($item['form_data'] ?? ''), true);
+                        $item_form_data = is_array($decoded_form_data) ? $decoded_form_data : [];
+
+                        $decoded_attachments = json_decode((string)($item['attachments'] ?? ''), true);
+                        $item_attachments = is_array($decoded_attachments) ? $decoded_attachments : [];
+                    }
+
+                    $item_review_status = (string)($item['review_status'] ?? 'new');
+                ?>
+
+                <?php if ($item_request_type !== ''): ?>
+                    <div class="cmv-request-panel">
+                        <div class="cmv-request-panel-head">
+                            <span><i class="fa fa-list-alt"></i> Request Details</span>
+
+                            <div class="cmv-review-status">
+                                <label for="cmv-review-status-<?= e((string)$item['id']) ?>">Review Status:</label>
+                                <select
+                                    id="cmv-review-status-<?= e((string)$item['id']) ?>"
+                                    class="cmv-pill <?= e(cmv_review_status_color($item_review_status)) ?>"
+                                    onchange='window.location.href = <?= e(json_encode($thread_url . "&open=" . $item['id'] . "&msg_id=" . $item['id'] . "&review_status=", JSON_HEX_APOS)) ?> + this.value;'
+                                >
+                                    <?php foreach (cmv_review_statuses() as $rs_key => $rs_label): ?>
+                                        <option value="<?= e($rs_key) ?>" <?= $item_review_status === $rs_key ? 'selected' : '' ?>><?= e($rs_label) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <?php if ($item_form_data): ?>
+                            <table class="cmv-details-table">
+                                <?php foreach ($item_form_data as $field_key => $field_value): ?>
+                                    <?php
+                                        $display_value = is_array($field_value) ? implode(', ', $field_value) : (string)$field_value;
+
+                                        if (trim($display_value) === '') {
+                                            continue;
+                                        }
+                                    ?>
+                                    <tr>
+                                        <td class="cmv-details-label"><?= e(cmv_field_label($item_request_type, (string)$field_key)) ?></td>
+                                        <td class="cmv-details-value"><?= nl2br(e($display_value)) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </table>
+                        <?php endif; ?>
+
+                        <?php if ($item_attachments): ?>
+                            <div class="cmv-attachments">
+                                <?php foreach ($item_attachments as $att_key => $att): ?>
+                                    <?php
+                                        $att_path = (string)($att['path'] ?? '');
+
+                                        if ($att_path === '') {
+                                            continue;
+                                        }
+
+                                        $att_url = site_url($att_path);
+                                        $att_mime = (string)($att['mime'] ?? '');
+                                        $att_is_image = strpos($att_mime, 'image/') === 0;
+                                        $att_label = (string)($att['field'] ?? $att_key);
+                                    ?>
+                                    <a class="cmv-attachment-item" href="<?= e($att_url) ?>" target="_blank" rel="noopener">
+                                        <?php if ($att_is_image): ?>
+                                            <img src="<?= e($att_url) ?>" alt="<?= e($att_label) ?>">
+                                        <?php else: ?>
+                                            <span class="cmv-attachment-file-icon"><i class="fa fa-file-pdf-o"></i></span>
+                                        <?php endif; ?>
+                                        <span class="cmv-attachment-label"><?= e($att_label) ?></span>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+
+                <div class="cmv-message-actions">
+                    <a class="cmv-btn primary" href="<?= e($item_reply_href) ?>"><i class="fa fa-reply"></i> Reply</a>
+                    <a class="cmv-btn" href="<?= e($item_forward_href) ?>"><i class="fa fa-share"></i> Forward</a>
+                </div>
+
+                <?php
+                    $item_note = trim((string)($item['notes'] ?? ''));
+                    $item_has_note = $item_note !== '';
+                ?>
+                <div class="cmv-note-box" data-has-note="<?= $item_has_note ? '1' : '0' ?>">
+                    <div class="cmv-note-header">
+                        <div>
+                            <h3>Note</h3>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="cmv-btn"
+                            id="cmv-note-toggle-btn-<?= e((string)$item['id']) ?>"
+                            onclick="cmvNoteEdit(<?= e((string)$item['id']) ?>)"
+                        >
+                            <?php if ($item_has_note): ?>
+                                <i class="fa fa-pencil"></i> Edit
+                            <?php else: ?>
+                                <i class="fa fa-plus"></i> Add Note
+                            <?php endif; ?>
+                        </button>
+                    </div>
+
+                    <?php if ($item_has_note): ?>
+                        <div class="cmv-note-view" id="cmv-note-view-<?= e((string)$item['id']) ?>">
+                            <?= nl2br(e($item_note)) ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <form method="post" class="cmv-note-form" id="cmv-note-form-<?= e((string)$item['id']) ?>" style="display:none;">
                         <input type="hidden" name="csrf_token" value="<?= e($note_csrf_token) ?>">
                         <input type="hidden" name="action" value="save_note">
                         <input type="hidden" name="msg_id" value="<?= e((string)$item['id']) ?>">
 
                         <textarea name="notes" rows="3" placeholder="Write a follow-up note for this message..."><?= e($item['notes'] ?? '') ?></textarea>
 
-                        <div style="margin-top:8px;">
-                            <button type="submit" class="cmv-btn primary"><i class="fa fa-floppy-o"></i> Save Note</button>
+                        <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
+                            <button type="submit" class="cmv-btn primary"><i class="fa fa-floppy-o"></i> Save</button>
+
+                            <button
+                                type="button"
+                                class="cmv-btn"
+                                id="cmv-note-delete-btn-<?= e((string)$item['id']) ?>"
+                                style="<?= $item_has_note ? '' : 'display:none;' ?>"
+                                onclick="cmvNoteDelete(<?= e((string)$item['id']) ?>)"
+                            ><i class="fa fa-trash-o"></i> Delete</button>
+
+                            <button type="button" class="cmv-btn" onclick="cmvNoteCancel(<?= e((string)$item['id']) ?>)">Cancel</button>
+                            <span class="cmv-note-status" id="cmv-note-status-<?= e((string)$item['id']) ?>"></span>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     <?php endforeach; ?>
-</div>
-
-<div class="cmv-reply-composer">
-    <span><i class="fa fa-reply"></i> Click Reply to respond to <?= e($display_name) ?></span>
-    <div style="display:flex;gap:8px;">
-        <a class="cmv-btn primary" href="<?= e($reply_href) ?>"><i class="fa fa-reply"></i> Reply</a>
-        <a class="cmv-btn" href="<?= e($forward_href) ?>"><i class="fa fa-share"></i> Forward</a>
-    </div>
 </div>
 
 <script>
@@ -778,8 +1285,219 @@ $forward_href = 'mailto:?subject=' . rawurlencode('Fwd: ' . ($latest_message['su
             return;
         }
 
+        var wasExpanded = card.classList.contains('expanded');
         card.classList.toggle('expanded');
+
+        /*
+         * Expanding a message (whether by clicking its row or the eye
+         * icon) marks it read, matching how opening a message in any real
+         * inbox behaves -- not just the explicit "Mark Read" action.
+         */
+        if (!wasExpanded && card.getAttribute('data-unread') === '1') {
+            cmvMarkMessageRead(id, card);
+        }
     }
+
+    function cmvMarkMessageRead(id, card) {
+        var toggleBtn = document.getElementById('cmv-read-toggle-btn-' + id);
+
+        fetch(toggleBtn ? toggleBtn.dataset.readHref : (window.location.pathname + window.location.search), {
+            method: 'GET',
+            credentials: 'same-origin'
+        }).then(function () {
+            card.setAttribute('data-unread', '0');
+
+            var pill = document.getElementById('cmv-unread-pill-' + id);
+            if (pill) pill.style.display = 'none';
+
+            if (toggleBtn) {
+                toggleBtn.href = toggleBtn.dataset.unreadHref;
+                toggleBtn.title = 'Mark Unread';
+                var icon = toggleBtn.querySelector('i');
+                if (icon) icon.className = 'fa fa-envelope';
+            }
+        }).catch(function () {
+            // Leave the UI as-is; the next full page load will reconcile it.
+        });
+    }
+
+    function cmvNoteEdit(id) {
+        var view = document.getElementById('cmv-note-view-' + id);
+        var form = document.getElementById('cmv-note-form-' + id);
+        var toggleBtn = document.getElementById('cmv-note-toggle-btn-' + id);
+
+        if (view) view.style.display = 'none';
+        if (form) form.style.display = 'block';
+        if (toggleBtn) toggleBtn.style.display = 'none';
+    }
+
+    function cmvNoteCancel(id) {
+        var view = document.getElementById('cmv-note-view-' + id);
+        var form = document.getElementById('cmv-note-form-' + id);
+        var toggleBtn = document.getElementById('cmv-note-toggle-btn-' + id);
+
+        if (form) {
+            var textarea = form.querySelector('textarea');
+            if (textarea) {
+                textarea.value = textarea.defaultValue;
+            }
+
+            form.style.display = 'none';
+        }
+
+        if (view) view.style.display = 'block';
+        if (toggleBtn) toggleBtn.style.display = '';
+    }
+
+    function cmvNoteDelete(id) {
+        if (!confirm('Delete this note?')) {
+            return;
+        }
+
+        var form = document.getElementById('cmv-note-form-' + id);
+        if (!form) return;
+
+        var textarea = form.querySelector('textarea');
+        if (textarea) {
+            textarea.value = '';
+        }
+
+        if (cmvNoteTimers[id]) {
+            window.clearTimeout(cmvNoteTimers[id]);
+        }
+
+        cmvNoteSave(id);
+    }
+
+    var cmvNoteTimers = {};
+
+    function cmvEscapeHtml(str) {
+        var div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function cmvNoteSetStatus(id, state, text) {
+        var status = document.getElementById('cmv-note-status-' + id);
+        if (!status) return;
+        status.className = 'cmv-note-status' + (state ? ' ' + state : '');
+        status.textContent = text || '';
+    }
+
+    function cmvNoteSave(id) {
+        var form = document.getElementById('cmv-note-form-' + id);
+        if (!form) return;
+
+        var textarea = form.querySelector('textarea');
+        var formData = new FormData(form);
+        formData.set('ajax', '1');
+
+        cmvNoteSetStatus(id, 'saving', 'Saving...');
+
+        fetch(window.location.href, {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin'
+        })
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                if (!data || !data.success) {
+                    throw new Error((data && data.message) || 'Save failed');
+                }
+
+                var noteText = (data.notes || '').trim();
+
+                if (textarea) {
+                    textarea.defaultValue = textarea.value;
+                }
+
+                var box = form.closest('.cmv-note-box');
+
+                if (box) {
+                    box.setAttribute('data-has-note', noteText !== '' ? '1' : '0');
+
+                    var toggleBtn = document.getElementById('cmv-note-toggle-btn-' + id);
+                    if (toggleBtn) {
+                        toggleBtn.innerHTML = noteText !== ''
+                            ? '<i class="fa fa-pencil"></i> Edit'
+                            : '<i class="fa fa-plus"></i> Add Note';
+                    }
+
+                    var deleteBtn = document.getElementById('cmv-note-delete-btn-' + id);
+                    if (deleteBtn) {
+                        deleteBtn.style.display = noteText !== '' ? '' : 'none';
+                    }
+
+                    var view = document.getElementById('cmv-note-view-' + id);
+
+                    if (!view && noteText !== '') {
+                        view = document.createElement('div');
+                        view.className = 'cmv-note-view';
+                        view.id = 'cmv-note-view-' + id;
+                        view.style.display = 'none';
+                        form.parentNode.insertBefore(view, form);
+                    }
+
+                    if (view) {
+                        view.innerHTML = cmvEscapeHtml(noteText).replace(/\n/g, '<br>');
+                    }
+                }
+
+                cmvNoteSetStatus(id, 'saved', 'Saved');
+
+                window.setTimeout(function () {
+                    cmvNoteSetStatus(id, '', '');
+                }, 2000);
+            })
+            .catch(function () {
+                cmvNoteSetStatus(id, 'error', 'Could not save. Try again.');
+            });
+    }
+
+    document.querySelectorAll('.cmv-note-form').forEach(function (form) {
+        var id = form.id.replace('cmv-note-form-', '');
+        var textarea = form.querySelector('textarea');
+
+        if (textarea) {
+            textarea.addEventListener('input', function () {
+                cmvNoteSetStatus(id, 'saving', 'Typing...');
+
+                if (cmvNoteTimers[id]) {
+                    window.clearTimeout(cmvNoteTimers[id]);
+                }
+
+                cmvNoteTimers[id] = window.setTimeout(function () {
+                    cmvNoteSave(id);
+                }, 1500);
+            });
+        }
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            if (cmvNoteTimers[id]) {
+                window.clearTimeout(cmvNoteTimers[id]);
+            }
+
+            cmvNoteSave(id);
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var opened = document.querySelector('.cmv-message-card.expanded[data-msg-id="<?= e((string)$open_message_id) ?>"]');
+
+        if (opened) {
+            opened.scrollIntoView({ block: 'center' });
+        }
+    });
+
+    document.addEventListener('click', function (event) {
+        document.querySelectorAll('.cmv-header-toggle[open]').forEach(function (details) {
+            if (!details.contains(event.target)) {
+                details.removeAttribute('open');
+            }
+        });
+    });
 </script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
