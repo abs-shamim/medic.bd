@@ -49,6 +49,8 @@ return [
     'enter_your_email' => 'Enter your email',
     'experience' => 'Experience',
     'featured' => 'Featured',
+    'filters' => 'Filters',
+    'all_areas' => 'All Areas',
     'find_doctor' => 'Find Doctor',
     'footer_about_text' => 'A lightweight doctor and hospital directory platform for finding trusted healthcare information, specialties and appointment details.',
     'gender' => 'Gender',

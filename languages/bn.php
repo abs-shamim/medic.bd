@@ -22,6 +22,8 @@ return [
     'search_button' => 'অনুসন্ধান',
     'all_locations' => 'সব লোকেশন',
     'all_specialties' => 'সব বিশেষজ্ঞতা',
+    'filters' => 'ফিল্টার',
+    'all_areas' => 'সব এলাকা',
     'overview' => 'ওভারভিউ',
     'home' => 'হোম',
     'doctors' => 'ডাক্তার',

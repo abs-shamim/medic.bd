@@ -390,10 +390,11 @@ function specialty_page_slug(string $text): string
     --medic-border-strong: #c9d1d9;
     --medic-text: #1f2328;
     --medic-muted: #656d76;
-    --medic-radius: 8px;
-    --medic-radius-card: 12px;
-    --medic-shadow: 0 1px 2px rgba(31, 35, 40, .06);
-    --medic-shadow-hover: 0 5px 14px rgba(31, 35, 40, .12);
+    --medic-radius: 12px;
+    --medic-radius-card: 16px;
+    --medic-shadow: 0 1px 2px rgba(15, 23, 32, .04);
+    --medic-shadow-hover: 0 16px 32px -14px rgba(15, 23, 32, .22);
+    --medic-gradient: linear-gradient(135deg, var(--medic-primary), var(--medic-accent));
   }
 
   .medic-specialties-page,
@@ -453,7 +454,8 @@ function specialty_page_slug(string $text): string
     max-width: 900px;
     margin: 0 0 8px;
     color: var(--medic-text);
-    font-size: clamp(26px, 4vw, 39px);
+    font-size: clamp(18px, 4vw, 20px);
+    font-weight: 500;
     line-height: 1.17;
     letter-spacing: -.028em;
   }
@@ -468,12 +470,12 @@ function specialty_page_slug(string $text): string
 
   /* Same premium search panel used by view.php. */
   .medic-search-box {
-    margin-bottom: 20px;
-    padding: 9px;
+    margin-bottom: 22px;
+    padding: 10px;
     border: 1px solid var(--medic-border);
-    border-radius: 12px;
+    border-radius: var(--medic-radius-card);
     background: var(--medic-surface);
-    box-shadow: 0 2px 5px rgba(31, 35, 40, .045);
+    box-shadow: var(--medic-shadow-hover);
   }
 
   .medic-search-row {
@@ -529,10 +531,10 @@ function specialty_page_slug(string $text): string
     justify-content: center;
     gap: 7px;
     min-height: 42px;
-    padding: 9px 17px;
-    border: 1px solid rgba(31, 35, 40, .14);
-    border-radius: 9px;
-    background: var(--medic-accent);
+    padding: 9px 19px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: var(--medic-gradient);
     color: #ffffff;
     cursor: pointer;
     font-size: 14px;
@@ -564,7 +566,8 @@ function specialty_page_slug(string $text): string
     padding: 0 0 12px;
     border-bottom: 1px solid var(--medic-border);
     color: var(--medic-text);
-    font-size: clamp(21px, 3vw, 27px);
+    font-size: clamp(18px, 3vw, 20px);
+    font-weight: 500;
     line-height: 1.3;
     letter-spacing: -.02em;
   }
@@ -597,7 +600,7 @@ function specialty_page_slug(string $text): string
   */
   .medic-specialty-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
     gap: 12px;
     margin: 16px 0 26px;
   }
@@ -611,7 +614,7 @@ function specialty_page_slug(string $text): string
     overflow: hidden;
     padding: 3px;
     border: 1px solid var(--medic-border);
-    border-radius: 11px;
+    border-radius: var(--medic-radius-card);
     background: var(--medic-surface);
     box-shadow: var(--medic-shadow);
     color: var(--medic-text);
@@ -703,7 +706,7 @@ function specialty_page_slug(string $text): string
   }
 
   @media (min-width: 1000px) {
-    .medic-specialty-grid { grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); }
+    .medic-specialty-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
   }
 
   @media (max-width: 840px) {
@@ -719,7 +722,7 @@ function specialty_page_slug(string $text): string
     .medic-specialties-page .container { width: min(100% - 20px, 1220px); }
     .medic-breadcrumb { margin-bottom: 10px; font-size: 12px; }
     .medic-page-head { margin-bottom: 16px; }
-    .medic-page-head h1 { font-size: 27px; }
+    .medic-page-head h1 { font-size: 20px; }
     .medic-page-head p { font-size: 14px; line-height: 1.58; }
     .medic-search-box { padding: 8px; border-radius: 11px; }
     .medic-search-row { grid-template-columns: 1fr; }

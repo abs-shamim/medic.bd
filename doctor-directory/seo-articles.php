@@ -232,14 +232,35 @@ function dp_seo_english_specialty_data(array $specialty): array
         ],
     ];
 
+    /*
+     * Priority: Title Name (explicit listing-title override, used as-is) >
+     * English Name (auto-formatted into a doctor label) > hardcoded fallback.
+     * The hardcoded list above always supplies the meta_suffix.
+     */
+    $title_name = trim((string)($specialty['title_name'] ?? ''));
+
+    if ($title_name !== '') {
+        return [
+            'label' => $title_name,
+            'meta_suffix' => $labels[$slug]['meta_suffix'] ?? '',
+        ];
+    }
+
+    $name = trim((string)($specialty['name'] ?? ''));
+
+    if ($name !== '') {
+        return [
+            'label' => dp_seo_specialty_doctor_label($name, 'en'),
+            'meta_suffix' => $labels[$slug]['meta_suffix'] ?? '',
+        ];
+    }
+
     if ($slug !== '' && isset($labels[$slug])) {
         return $labels[$slug];
     }
 
-    $specialty_name = dp_seo_row_name($specialty, 'en', 'Specialist');
-
     return [
-        'label' => dp_seo_specialty_doctor_label($specialty_name, 'en'),
+        'label' => 'Specialist Doctors',
         'meta_suffix' => '',
     ];
 }
@@ -305,7 +326,7 @@ function dp_seo_bangla_specialty_data(array $specialty): array
             'meta_suffix' => '',
         ],
         'cardiology' => [
-            'label' => 'হৃদরোগ বিশেষজ্ঞ ডাক্তার',
+            'label' => 'কার্ডিওলজিস্ট',
             'meta_suffix' => 'হার্ট স্পেশালিস্ট',
         ],
         'dentistry' => [
@@ -418,6 +439,29 @@ function dp_seo_bangla_specialty_data(array $specialty): array
         ],
     ];
 
+    /*
+     * Priority: Title Name Bangla (explicit listing-title override, used
+     * as-is) > Bangla Name (auto-formatted into a doctor label) > hardcoded
+     * fallback. The hardcoded list above always supplies the meta_suffix.
+     */
+    $title_name_bn = trim((string)($specialty['title_name_bn'] ?? ''));
+
+    if ($title_name_bn !== '') {
+        return [
+            'label' => $title_name_bn,
+            'meta_suffix' => $labels[$slug]['meta_suffix'] ?? '',
+        ];
+    }
+
+    $name_bn = trim((string)($specialty['name_bn'] ?? ''));
+
+    if ($name_bn !== '') {
+        return [
+            'label' => dp_seo_specialty_doctor_label($name_bn, 'bn'),
+            'meta_suffix' => $labels[$slug]['meta_suffix'] ?? '',
+        ];
+    }
+
     if ($slug !== '' && isset($labels[$slug])) {
         return $labels[$slug];
     }
@@ -500,11 +544,16 @@ function dp_seo_bangla_doctor_list_meta_title(
     string $site_name
 ): string {
     $specialty_label = dp_seo_bangla_specialty_label($specialty);
+    $location_name = dp_seo_location_name($district, $thana, 'bn');
     $meta_suffix = dp_seo_bangla_specialty_meta_suffix($specialty);
 
-    $title = !empty($district)
-        ? dp_seo_bangla_location_title_prefix($district, $thana) . ' ' . $specialty_label
-        : 'বাংলাদেশের ' . $specialty_label;
+    /*
+     * Specialty name first, then location, mirroring the English pattern
+     * (Cardiology Doctors in Dhaka -> কার্ডিওলজি বিশেষজ্ঞ ডাক্তার ঢাকা).
+     */
+    $title = $location_name !== '' && !empty($district)
+        ? $specialty_label . ' ' . $location_name
+        : $specialty_label . ' বাংলাদেশ';
 
     if ($meta_suffix !== '') {
         $title .= ' | ' . $meta_suffix;
@@ -610,13 +659,6 @@ function dp_page_title(
     }
 
     if ($page_step === 'doctor_list') {
-        /*
-         * Alternate names are used in both Bangla and English automatic meta
-         * descriptions. When no alternate names are saved, each language uses
-         * its existing natural specialty label as the fallback.
-         */
-        $specialty_doctor_label = dp_seo_specialty_doctor_label($specialty_name, $lang);
-
         if ($search !== '') {
             return $lang === 'bn'
                 ? $search . ' ডাক্তার খোঁজার ফলাফল | ' . $site_name
@@ -690,8 +732,6 @@ function dp_page_description(
     }
 
     if ($page_step === 'doctor_list') {
-        $specialty_doctor_label = dp_seo_specialty_doctor_label($specialty_name, $lang);
-
         if ($search !== '') {
             return $lang === 'bn'
                 ? $search . ' ডাক্তার খোঁজার ফলাফল দেখুন। বিশেষজ্ঞতা, চেম্বার, হাসপাতাল, ভিজিটিং সময় এবং অ্যাপয়েন্টমেন্টের তথ্য পাওয়া যাবে।'
@@ -752,23 +792,18 @@ function dp_auto_article_location_name(array $district, array $thana = [], strin
 
 function dp_auto_article_title(array $district, array $thana, array $specialty, string $lang): string
 {
-    $specialty_name = dp_seo_row_name(
-        $specialty,
-        $lang,
-        $lang === 'bn' ? 'বিশেষজ্ঞ' : 'Specialist'
-    );
-    $specialty_doctor_label = dp_seo_specialty_doctor_label($specialty_name, $lang);
     $location = dp_auto_article_location_name($district, $thana, $lang);
 
     if ($lang === 'bn') {
         $bangla_specialty_label = dp_seo_bangla_specialty_label($specialty);
 
+        /*
+         * Specialty name first, then location, mirroring the English pattern
+         * (Cardiologists in Mirpur, Dhaka -> কার্ডিওলজিস্ট বিশেষজ্ঞ মিরপুর, ঢাকা).
+         */
         return $location !== ''
-            ? dp_seo_bangla_location_title_prefix($district, $thana)
-                . ' '
-                . $bangla_specialty_label
-                . ' | তালিকা ও অ্যাপয়েন্টমেন্ট তথ্য'
-            : 'বাংলাদেশের ' . $bangla_specialty_label . ' | তালিকা ও অ্যাপয়েন্টমেন্ট তথ্য';
+            ? $bangla_specialty_label . ' ' . $location . ' | তালিকা ও অ্যাপয়েন্টমেন্ট তথ্য'
+            : $bangla_specialty_label . ' বাংলাদেশ | তালিকা ও অ্যাপয়েন্টমেন্ট তথ্য';
     }
 
     $english_specialty_label = dp_seo_english_specialty_label($specialty);
@@ -778,14 +813,8 @@ function dp_auto_article_title(array $district, array $thana, array $specialty, 
         : $english_specialty_label . ' in Bangladesh';
 }
 
-function dp_auto_article_intro(array $district, array $thana, array $specialty, int $total_doctors, string $lang): string
+function dp_auto_article_intro(array $district, array $thana, array $specialty, string $lang): string
 {
-    $specialty_name = dp_seo_row_name(
-        $specialty,
-        $lang,
-        $lang === 'bn' ? 'বিশেষজ্ঞ' : 'specialist'
-    );
-    $specialty_doctor_label = dp_seo_specialty_doctor_label($specialty_name, $lang);
     $location = dp_auto_article_location_name($district, $thana, $lang);
 
     if ($lang === 'bn') {
@@ -1113,12 +1142,6 @@ $heading_division_name = dp_seo_row_name(
     $lang === 'bn' ? 'নির্বাচিত বিভাগ' : 'Selected Division'
 );
 $heading_location_name = dp_seo_location_name($district, $thana, $lang);
-$heading_specialty_name = dp_seo_row_name(
-    $specialty,
-    $lang,
-    $lang === 'bn' ? 'বিশেষজ্ঞ' : 'Specialist'
-);
-$heading_specialty_doctor_label = dp_seo_specialty_doctor_label($heading_specialty_name, $lang);
 
 if (!empty($division) && empty($district)) {
     $doctor_list_heading = $lang === 'bn'
@@ -1337,7 +1360,8 @@ function dp_schema_site_setting_value(string $key, string $default = ''): string
         $value = trim((string)$stmt->fetchColumn());
 
         return $cache[$key] = ($value !== '' ? $value : $default);
-    } catch (Throwable $e) {
+    } catch (Throwable $lookup_error) {
+        error_log("Site setting lookup failed for {$key}: {$lookup_error->getMessage()}");
         return $cache[$key] = $default;
     }
 }

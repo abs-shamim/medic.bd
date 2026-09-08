@@ -31,7 +31,7 @@ if ($page_step === 'doctor_list') {
     $directory_article = dp_get_dynamic_directory_article($district, $thana, $specialty, $lang);
 
     $auto_article_title = dp_auto_article_title($district, $thana, $specialty, $lang);
-    $auto_article_intro = dp_auto_article_intro($district, $thana, $specialty, $total_doctors, $lang);
+    $auto_article_intro = dp_auto_article_intro($district, $thana, $specialty, $lang);
 
     /*
      * The directory-article admin can hide only the automatic 10-name list.
@@ -69,10 +69,11 @@ if ($page_step === 'doctor_list') {
     --dp-border-strong: #c9d1d9;
     --dp-text: #1f2328;
     --dp-muted: #656d76;
-    --dp-radius: 8px;
-    --dp-radius-card: 12px;
-    --dp-shadow: 0 1px 2px rgba(31, 35, 40, .06);
-    --dp-shadow-hover: 0 5px 14px rgba(31, 35, 40, .12);
+    --dp-radius: 12px;
+    --dp-radius-card: 16px;
+    --dp-shadow: 0 1px 2px rgba(15, 23, 32, .04);
+    --dp-shadow-hover: 0 16px 32px -14px rgba(15, 23, 32, .22);
+    --dp-gradient: linear-gradient(135deg, var(--dp-primary), var(--dp-accent));
   }
 
   * { box-sizing: border-box; }
@@ -116,8 +117,7 @@ if ($page_step === 'doctor_list') {
 
   .medic-search-box,
   .medic-empty-card,
-  .medic-auto-article,
-  .medic-doctor-card-shell {
+  .medic-auto-article {
     border: 1px solid var(--dp-border);
     background: var(--dp-surface);
     box-shadow: var(--dp-shadow);
@@ -153,12 +153,12 @@ if ($page_step === 'doctor_list') {
 
   /* Compact search panel with an inline search icon and a light premium finish. */
   .medic-search-box {
-    margin-bottom: 20px;
-    padding: 9px;
+    margin-bottom: 22px;
+    padding: 10px;
     border: 1px solid var(--dp-border);
-    border-radius: 12px;
+    border-radius: var(--dp-radius-card);
     background: #ffffff;
-    box-shadow: 0 2px 5px rgba(31, 35, 40, .045);
+    box-shadow: var(--dp-shadow-hover);
   }
 
   .medic-search-row {
@@ -213,10 +213,10 @@ if ($page_step === 'doctor_list') {
     justify-content: center;
     gap: 7px;
     min-height: 42px;
-    padding: 9px 17px;
-    border: 1px solid rgba(31, 35, 40, .14);
-    border-radius: 9px;
-    background: var(--dp-accent);
+    padding: 9px 19px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: var(--dp-gradient);
     color: #ffffff;
     cursor: pointer;
     font-size: 14px;
@@ -244,7 +244,7 @@ if ($page_step === 'doctor_list') {
   /* Desktop image cards: picture on top, clear centered name below. */
   .medic-step-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
     gap: 12px;
     margin: 16px 0 26px;
   }
@@ -258,7 +258,7 @@ if ($page_step === 'doctor_list') {
     overflow: hidden;
     padding: 3px;
     border: 1px solid var(--dp-border);
-    border-radius: 11px;
+    border-radius: var(--dp-radius-card);
     background: var(--dp-surface);
     box-shadow: var(--dp-shadow);
     color: var(--dp-text);
@@ -320,12 +320,57 @@ if ($page_step === 'doctor_list') {
   .medic-step-card:focus-visible .medic-step-card-media img { transform: scale(1.035); }
   .medic-step-card small { display: none; }
 
+  /* Area filters stay collapsed behind a toggle until opened. */
+  .medic-filters {
+    margin: 0 0 20px;
+  }
+
+  .medic-filters-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    border: 1px solid var(--dp-border-strong);
+    border-radius: 999px;
+    background: var(--dp-surface);
+    color: var(--dp-primary);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 20px;
+    list-style: none;
+    user-select: none;
+  }
+
+  .medic-filters-toggle::-webkit-details-marker { display: none; }
+  .medic-filters-toggle::marker { content: ''; }
+
+  .medic-filters-toggle svg {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+  }
+
+  .medic-filters-toggle:hover { border-color: var(--dp-primary); }
+
+  .medic-filters-chevron { transition: transform .16s ease; }
+  .medic-filters[open] .medic-filters-chevron { transform: rotate(180deg); }
+
+  .medic-filters-badge {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #f5faff;
+    color: var(--dp-primary);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
   /* Thana filter cards follow the same visual language. */
   .medic-area-tags {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
     gap: 12px;
-    margin: 0 0 20px;
+    margin: 14px 0 0;
   }
 
   .medic-area-tag {
@@ -336,7 +381,7 @@ if ($page_step === 'doctor_list') {
     overflow: hidden;
     padding: 3px;
     border: 1px solid var(--dp-border);
-    border-radius: 11px;
+    border-radius: var(--dp-radius-card);
     background: var(--dp-surface);
     box-shadow: var(--dp-shadow);
     color: var(--dp-text);
@@ -484,21 +529,30 @@ if ($page_step === 'doctor_list') {
     content: '';
   }
 
+  /*
+   * doctor-card.php now owns its own border, radius, shadow and hover
+   * animation, so the shell stays a plain pass-through by default and no
+   * longer duplicates a second border/shadow behind the card on hover.
+   */
   .medic-doctor-card-shell {
-    overflow: hidden;
-    border-radius: 12px;
-    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
-  }
-
-  .medic-doctor-card-shell:hover {
-    border-color: #8c959f;
-    box-shadow: var(--dp-shadow-hover);
-    transform: translateY(-1px);
+    border-radius: var(--dp-radius-card);
   }
 
   .medic-doctor-card-shell.is-featured-doctor {
-    border-color: #d4a72c;
+    overflow: hidden;
+    border: 1px solid #d4a72c;
     background: #fffdf3;
+  }
+
+  .medic-doctor-card-shell.is-featured-doctor .medic-doctor-list-item {
+    border: 0;
+    border-radius: 0;
+  }
+
+  .medic-doctor-card-shell.is-featured-doctor .medic-doctor-list-item:hover {
+    box-shadow: none;
+    transform: none;
+    background-color: transparent;
   }
 
   .medic-featured-ribbon {
@@ -531,13 +585,17 @@ if ($page_step === 'doctor_list') {
 
   .medic-pagination-inner {
     display: inline-flex;
-    overflow: hidden;
+    gap: 3px;
+    overflow-x: auto;
     max-width: 100%;
+    padding: 4px;
     border: 1px solid var(--dp-border);
-    border-radius: var(--dp-radius);
+    border-radius: 999px;
     background: var(--dp-surface);
-    box-shadow: var(--dp-shadow);
+    scrollbar-width: none;
   }
+
+  .medic-pagination-inner::-webkit-scrollbar { display: none; }
 
   .medic-pagination-desktop { display: inline-flex; }
   .medic-pagination-mobile { display: none; }
@@ -546,23 +604,24 @@ if ($page_step === 'doctor_list') {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 36px;
-    height: 36px;
+    min-width: 34px;
+    height: 34px;
     padding: 0 10px;
-    border-right: 1px solid var(--dp-border);
-    background: var(--dp-surface);
-    color: var(--dp-primary);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--dp-text);
     font-size: 14px;
     font-weight: 500;
     text-decoration: none;
+    transition: background-color .16s ease, color .16s ease;
   }
-  .medic-pagination a:last-child,
-  .medic-pagination span:last-child { border-right: 0; }
   .medic-pagination a:hover { background: var(--dp-surface-soft); }
-  .medic-pagination .active { background: var(--dp-primary); color: #ffffff; }
-  .medic-pagination .disabled { background: var(--dp-surface-soft); color: #8c959f; }
+  .medic-pagination .active { background: var(--dp-gradient); color: #ffffff; }
+  .medic-pagination .disabled { color: #8c959f; }
   .medic-pagination .dots { color: #8c959f; pointer-events: none; }
   .medic-pagination .nav-link { min-width: 78px; }
+  .medic-pagination .nav-link-icon { min-width: 34px; padding: 0; flex-shrink: 0; }
+  .medic-pagination .nav-link-icon svg { width: 16px; height: 16px; }
 
   .medic-pagination-summary {
     margin: 9px 0 0;
@@ -572,8 +631,8 @@ if ($page_step === 'doctor_list') {
   }
 
   @media (min-width: 1000px) {
-    .medic-step-grid { grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); }
-    .medic-area-tags { grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); }
+    .medic-step-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
+    .medic-area-tags { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
   }
 
   @media (max-width: 840px) {
@@ -722,7 +781,7 @@ if ($page_step === 'doctor_list') {
     </nav>
 
     <section class="medic-page-head">
-      <h1><?= e(str_replace(' | ' . $site_name, '', $page_title)) ?></h1>
+      <h1><?= e(str_replace(" | {$site_name}", '', $page_title)) ?></h1>
       <?php if (trim((string)$meta_description) !== ''): ?>
         <p><?= e($meta_description) ?></p>
       <?php endif; ?>
@@ -749,31 +808,42 @@ if ($page_step === 'doctor_list') {
       </div>
 
       <?php if ($page_step === 'doctor_list' && !empty($available_thanas)): ?>
-        <div class="medic-area-tags">
-          <a class="medic-area-tag <?= empty($thana) ? 'active' : '' ?>" href="<?= e(dp_doctors_url([
-            'district_slug' => dp_row_slug($district),
-            'specialty_slug' => dp_row_slug($specialty),
-            'search' => $filters['search'],
-          ])) ?>">
-            <span class="medic-area-tag-label"><?= e(__t('all_areas', 'All Areas')) ?></span>
-          </a>
+        <details class="medic-filters">
+          <summary class="medic-filters-toggle">
+            <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4h12M4.5 8h7M7 12h2"></path></svg>
+            <span><?= e(__t('filters', 'Filters')) ?></span>
+            <?php if (!empty($thana)): ?>
+              <span class="medic-filters-badge"><?= e($thana['name']) ?></span>
+            <?php endif; ?>
+            <svg class="medic-filters-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m4 6 4 4 4-4"></path></svg>
+          </summary>
 
-          <?php foreach ($available_thanas as $item): ?>
-            <a class="medic-area-tag<?= !empty($item['image']) ? ' has-image' : '' ?> <?= (!empty($thana) && (int)$thana['id'] === (int)$item['id']) ? 'active' : '' ?>" href="<?= e(dp_doctors_url([
+          <div class="medic-area-tags">
+            <a class="medic-area-tag <?= empty($thana) ? 'active' : '' ?>" href="<?= e(dp_doctors_url([
               'district_slug' => dp_row_slug($district),
-              'thana_slug' => dp_row_slug($item),
               'specialty_slug' => dp_row_slug($specialty),
               'search' => $filters['search'],
             ])) ?>">
-              <?php if (!empty($item['image'])): ?>
-                <span class="medic-area-tag-media">
-                  <img src="<?= e(dp_image_url((string)$item['image'])) ?>" alt="<?= e($item['name']) ?>" loading="lazy">
-                </span>
-              <?php endif; ?>
-              <span class="medic-area-tag-label"><?= e($item['name']) ?></span>
+              <span class="medic-area-tag-label"><?= e(__t('all_areas', 'All Areas')) ?></span>
             </a>
-          <?php endforeach; ?>
-        </div>
+
+            <?php foreach ($available_thanas as $item): ?>
+              <a class="medic-area-tag<?= !empty($item['image']) ? ' has-image' : '' ?> <?= (!empty($thana) && (int)$thana['id'] === (int)$item['id']) ? 'active' : '' ?>" href="<?= e(dp_doctors_url([
+                'district_slug' => dp_row_slug($district),
+                'thana_slug' => dp_row_slug($item),
+                'specialty_slug' => dp_row_slug($specialty),
+                'search' => $filters['search'],
+              ])) ?>">
+                <?php if (!empty($item['image'])): ?>
+                  <span class="medic-area-tag-media">
+                    <img src="<?= e(dp_image_url((string)$item['image'])) ?>" alt="<?= e($item['name']) ?>" loading="lazy">
+                  </span>
+                <?php endif; ?>
+                <span class="medic-area-tag-label"><?= e($item['name']) ?></span>
+              </a>
+            <?php endforeach; ?>
+          </div>
+        </details>
       <?php endif; ?>
     <?php endif; ?>
 
@@ -786,7 +856,7 @@ if ($page_step === 'doctor_list') {
          * - The notable-doctor names can be turned On/Off per article language.
          * - Normal doctor cards, filters and pagination always remain.
          */
-        $page_heading_title = trim(str_replace(' | ' . $site_name, '', $page_title));
+        $page_heading_title = trim(str_replace(" | {$site_name}", '', $page_title));
         $has_custom_article_title = $article_custom_title !== '';
         $show_article_title = $article_title !== ''
             && ($has_custom_article_title || $article_title !== $page_heading_title);
@@ -980,9 +1050,13 @@ if ($page_step === 'doctor_list') {
 
               <div class="medic-pagination-inner medic-pagination-mobile">
                 <?php if ($has_previous_page): ?>
-                  <a class="nav-link" rel="prev" href="<?= e($prev_page_url) ?>"><?= e(__t('previous', 'Previous')) ?></a>
+                  <a class="nav-link nav-link-icon" rel="prev" href="<?= e($prev_page_url) ?>" aria-label="<?= e(__t('previous', 'Previous')) ?>">
+                    <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 3.5 5 8l5 4.5"></path></svg>
+                  </a>
                 <?php else: ?>
-                  <span class="nav-link disabled" aria-disabled="true"><?= e(__t('previous', 'Previous')) ?></span>
+                  <span class="nav-link nav-link-icon disabled" aria-disabled="true" aria-label="<?= e(__t('previous', 'Previous')) ?>">
+                    <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 3.5 5 8l5 4.5"></path></svg>
+                  </span>
                 <?php endif; ?>
 
                 <?php foreach ($pagination_items_mobile as $item): ?>
@@ -1002,9 +1076,13 @@ if ($page_step === 'doctor_list') {
                 <?php endforeach; ?>
 
                 <?php if ($has_next_page): ?>
-                  <a class="nav-link" rel="next" href="<?= e($next_page_url) ?>"><?= e(__t('next', 'Next')) ?></a>
+                  <a class="nav-link nav-link-icon" rel="next" href="<?= e($next_page_url) ?>" aria-label="<?= e(__t('next', 'Next')) ?>">
+                    <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 3.5 5 4.5-5 4.5"></path></svg>
+                  </a>
                 <?php else: ?>
-                  <span class="nav-link disabled" aria-disabled="true"><?= e(__t('next', 'Next')) ?></span>
+                  <span class="nav-link nav-link-icon disabled" aria-disabled="true" aria-label="<?= e(__t('next', 'Next')) ?>">
+                    <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 3.5 5 4.5-5 4.5"></path></svg>
+                  </span>
                 <?php endif; ?>
               </div>
             </nav>

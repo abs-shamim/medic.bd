@@ -67,10 +67,11 @@ if (isset($hospital_page_heading) && trim((string) $hospital_page_heading) !== '
     --hp-border-strong: #c9d1d9;
     --hp-text: #1f2328;
     --hp-muted: #656d76;
-    --hp-radius: 8px;
-    --hp-radius-card: 12px;
-    --hp-shadow: 0 1px 2px rgba(31, 35, 40, .06);
-    --hp-shadow-hover: 0 5px 14px rgba(31, 35, 40, .12);
+    --hp-radius: 12px;
+    --hp-radius-card: 16px;
+    --hp-shadow: 0 1px 2px rgba(15, 23, 32, .04);
+    --hp-shadow-hover: 0 16px 32px -14px rgba(15, 23, 32, .22);
+    --hp-gradient: linear-gradient(135deg, var(--hp-primary), var(--hp-accent));
   }
 
   * { box-sizing: border-box; }
@@ -128,7 +129,8 @@ if (isset($hospital_page_heading) && trim((string) $hospital_page_heading) !== '
     max-width: 900px;
     margin: 0 0 8px;
     color: var(--hp-text);
-    font-size: clamp(26px, 4vw, 39px);
+    font-size: clamp(18px, 4vw, 20px);
+    font-weight: 500;
     line-height: 1.17;
     letter-spacing: -.028em;
   }
@@ -143,12 +145,12 @@ if (isset($hospital_page_heading) && trim((string) $hospital_page_heading) !== '
 
   /* Light premium search panel. */
   .medic-search-box {
-    margin-bottom: 20px;
-    padding: 9px;
+    margin-bottom: 22px;
+    padding: 10px;
     border: 1px solid var(--hp-border);
-    border-radius: 12px;
+    border-radius: var(--hp-radius-card);
     background: var(--hp-surface);
-    box-shadow: 0 2px 5px rgba(31, 35, 40, .045);
+    box-shadow: var(--hp-shadow-hover);
   }
 
   .medic-search-row {
@@ -204,10 +206,10 @@ if (isset($hospital_page_heading) && trim((string) $hospital_page_heading) !== '
     justify-content: center;
     gap: 7px;
     min-height: 42px;
-    padding: 9px 17px;
-    border: 1px solid rgba(31, 35, 40, .14);
-    border-radius: 9px;
-    background: var(--hp-accent);
+    padding: 9px 19px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: var(--hp-gradient);
     color: #ffffff;
     cursor: pointer;
     font-size: 14px;
@@ -234,10 +236,57 @@ if (isset($hospital_page_heading) && trim((string) $hospital_page_heading) !== '
   /* Same directory card language as Doctors: image above on desktop, overlay on mobile. */
   .medic-step-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
     gap: 12px;
     margin: 16px 0 26px;
   }
+
+  /* Thana filter stays collapsed behind a toggle until opened. */
+  .medic-filters {
+    margin: 0 0 20px;
+  }
+
+  .medic-filters-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    border: 1px solid var(--hp-border-strong);
+    border-radius: 999px;
+    background: var(--hp-surface);
+    color: var(--hp-primary);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 20px;
+    list-style: none;
+    user-select: none;
+  }
+
+  .medic-filters-toggle::-webkit-details-marker { display: none; }
+  .medic-filters-toggle::marker { content: ''; }
+
+  .medic-filters-toggle svg {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+  }
+
+  .medic-filters-toggle:hover { border-color: var(--hp-primary); }
+
+  .medic-filters-chevron { transition: transform .16s ease; }
+  .medic-filters[open] .medic-filters-chevron { transform: rotate(180deg); }
+
+  .medic-filters-badge {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #f5faff;
+    color: var(--hp-primary);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .medic-filters .medic-step-grid { margin: 14px 0 0; }
 
   .medic-step-card {
     position: relative;
@@ -248,7 +297,7 @@ if (isset($hospital_page_heading) && trim((string) $hospital_page_heading) !== '
     overflow: hidden;
     padding: 3px;
     border: 1px solid var(--hp-border);
-    border-radius: 11px;
+    border-radius: var(--hp-radius-card);
     background: var(--hp-surface);
     box-shadow: var(--hp-shadow);
     color: var(--hp-text);
@@ -342,9 +391,9 @@ if (isset($hospital_page_heading) && trim((string) $hospital_page_heading) !== '
     display: inline-flex;
     align-items: center;
     min-height: 36px;
-    padding: 7px 12px;
+    padding: 7px 14px;
     border: 1px solid var(--hp-border);
-    border-radius: 8px;
+    border-radius: 999px;
     background: var(--hp-surface);
     box-shadow: var(--hp-shadow);
     color: var(--hp-primary);
@@ -375,7 +424,8 @@ if (isset($hospital_page_heading) && trim((string) $hospital_page_heading) !== '
     padding: 0 0 12px;
     border-bottom: 1px solid var(--hp-border);
     color: var(--hp-text);
-    font-size: clamp(21px, 3vw, 27px);
+    font-size: clamp(18px, 3vw, 20px);
+    font-weight: 500;
     line-height: 1.3;
     letter-spacing: -.02em;
   }
@@ -394,7 +444,7 @@ if (isset($hospital_page_heading) && trim((string) $hospital_page_heading) !== '
   .medic-hospital-card-shell {
     overflow: hidden;
     border: 1px solid var(--hp-border);
-    border-radius: 12px;
+    border-radius: var(--hp-radius-card);
     background: var(--hp-surface);
     box-shadow: var(--hp-shadow);
     transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
@@ -427,13 +477,17 @@ if (isset($hospital_page_heading) && trim((string) $hospital_page_heading) !== '
 
   .medic-pagination-inner {
     display: inline-flex;
-    overflow: hidden;
+    gap: 3px;
+    overflow-x: auto;
     max-width: 100%;
+    padding: 4px;
     border: 1px solid var(--hp-border);
-    border-radius: var(--hp-radius);
+    border-radius: 999px;
     background: var(--hp-surface);
-    box-shadow: var(--hp-shadow);
+    scrollbar-width: none;
   }
+
+  .medic-pagination-inner::-webkit-scrollbar { display: none; }
 
   .medic-pagination.mobile-pagination { display: none; }
   .medic-pagination a,
@@ -441,23 +495,24 @@ if (isset($hospital_page_heading) && trim((string) $hospital_page_heading) !== '
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 36px;
-    height: 36px;
+    min-width: 34px;
+    height: 34px;
     padding: 0 10px;
-    border-right: 1px solid var(--hp-border);
-    background: var(--hp-surface);
-    color: var(--hp-primary);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--hp-text);
     font-size: 14px;
     text-decoration: none;
     white-space: nowrap;
+    transition: background-color .16s ease, color .16s ease;
   }
-  .medic-pagination a:last-child,
-  .medic-pagination span:last-child { border-right: 0; }
   .medic-pagination a:hover { background: var(--hp-surface-soft); }
-  .medic-pagination .active { background: var(--hp-primary); color: #ffffff; }
-  .medic-pagination .disabled { background: var(--hp-surface-soft); color: #8c959f; }
+  .medic-pagination .active { background: var(--hp-gradient); color: #ffffff; }
+  .medic-pagination .disabled { color: #8c959f; }
   .medic-pagination .dots { color: #8c959f; pointer-events: none; }
   .medic-pagination .nav-link { min-width: 78px; }
+  .medic-pagination .nav-link-icon { min-width: 34px; padding: 0; flex-shrink: 0; }
+  .medic-pagination .nav-link-icon svg { width: 16px; height: 16px; }
 
   .medic-pagination-summary {
     margin: 9px 0 0;
@@ -467,7 +522,7 @@ if (isset($hospital_page_heading) && trim((string) $hospital_page_heading) !== '
   }
 
   @media (min-width: 1000px) {
-    .medic-step-grid { grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); }
+    .medic-step-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
   }
 
   @media (max-width: 840px) {
@@ -483,7 +538,7 @@ if (isset($hospital_page_heading) && trim((string) $hospital_page_heading) !== '
     .medic-hospitals-page .container { width: min(100% - 20px, 1220px); }
     .medic-breadcrumb { margin-bottom: 10px; font-size: 12px; }
     .medic-page-head { margin-bottom: 16px; padding: 0; }
-    .medic-page-head h1 { font-size: 27px; }
+    .medic-page-head h1 { font-size: 20px; }
     .medic-page-head p { font-size: 14px; line-height: 1.58; }
     .medic-search-box { padding: 8px; border-radius: 11px; }
     .medic-search-row { grid-template-columns: 1fr; }
@@ -700,25 +755,33 @@ if (isset($hospital_page_heading) && trim((string) $hospital_page_heading) !== '
 
     <?php if ($page_step === 'thana_type'): ?>
 
-      <?php if (empty($thana)): ?>
-        <section class="medic-step-grid">
-          <?php foreach ($thanas as $item): ?>
-            <a
-              class="medic-step-card<?= !empty($item['image']) ? ' has-image' : '' ?>"
-              href="<?= e(hp_hospitals_url([
-                  'district_slug' => hp_row_slug($district),
-                  'thana_slug' => hp_row_slug($item),
-              ])) ?>"
-            >
-              <?php if (!empty($item['image'])): ?>
-                <span class="medic-step-card-media">
-                  <img src="<?= e(hp_image_url((string)$item['image'])) ?>" alt="<?= e(hp_display($item['name'])) ?>" loading="lazy">
-                </span>
-              <?php endif; ?>
-              <span class="medic-step-card-label"><?= e(hp_display($item['name'])) ?></span>
-            </a>
-          <?php endforeach; ?>
-        </section>
+      <?php if (empty($thana) && !empty($thanas)): ?>
+        <details class="medic-filters">
+          <summary class="medic-filters-toggle">
+            <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4h12M4.5 8h7M7 12h2"></path></svg>
+            <span><?= e(hp_display(hp_t('filters', 'Filters'))) ?></span>
+            <svg class="medic-filters-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m4 6 4 4 4-4"></path></svg>
+          </summary>
+
+          <section class="medic-step-grid">
+            <?php foreach ($thanas as $item): ?>
+              <a
+                class="medic-step-card<?= !empty($item['image']) ? ' has-image' : '' ?>"
+                href="<?= e(hp_hospitals_url([
+                    'district_slug' => hp_row_slug($district),
+                    'thana_slug' => hp_row_slug($item),
+                ])) ?>"
+              >
+                <?php if (!empty($item['image'])): ?>
+                  <span class="medic-step-card-media">
+                    <img src="<?= e(hp_image_url((string)$item['image'])) ?>" alt="<?= e(hp_display($item['name'])) ?>" loading="lazy">
+                  </span>
+                <?php endif; ?>
+                <span class="medic-step-card-label"><?= e(hp_display($item['name'])) ?></span>
+              </a>
+            <?php endforeach; ?>
+          </section>
+        </details>
       <?php endif; ?>
 
       <?php if (!empty($hospital_types)): ?>
@@ -834,15 +897,16 @@ if (isset($hospital_page_heading) && trim((string) $hospital_page_heading) !== '
             <div class="medic-pagination-inner">
               <?php if ($current_page > 1): ?>
                 <a
-                  class="nav-link"
+                  class="nav-link nav-link-icon"
                   rel="prev"
                   href="<?= e(hp_pagination_url($canonical_args, $current_page - 1)) ?>"
+                  aria-label="<?= e(hp_display(hp_t('hospitals_page_previous', 'Prev'))) ?>"
                 >
-                  ← <?= e(hp_display(hp_t('hospitals_page_previous', 'Prev'))) ?>
+                  <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 3.5 5 8l5 4.5"></path></svg>
                 </a>
               <?php else: ?>
-                <span class="nav-link disabled">
-                  ← <?= e(hp_display(hp_t('hospitals_page_previous', 'Prev'))) ?>
+                <span class="nav-link nav-link-icon disabled" aria-label="<?= e(hp_display(hp_t('hospitals_page_previous', 'Prev'))) ?>">
+                  <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 3.5 5 8l5 4.5"></path></svg>
                 </span>
               <?php endif; ?>
 
@@ -864,15 +928,16 @@ if (isset($hospital_page_heading) && trim((string) $hospital_page_heading) !== '
 
               <?php if ($current_page < $total_pages): ?>
                 <a
-                  class="nav-link"
+                  class="nav-link nav-link-icon"
                   rel="next"
                   href="<?= e(hp_pagination_url($canonical_args, $current_page + 1)) ?>"
+                  aria-label="<?= e(hp_display(hp_t('hospitals_page_next', 'Next'))) ?>"
                 >
-                  <?= e(hp_display(hp_t('hospitals_page_next', 'Next'))) ?> →
+                  <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 3.5 5 4.5-5 4.5"></path></svg>
                 </a>
               <?php else: ?>
-                <span class="nav-link disabled">
-                  <?= e(hp_display(hp_t('hospitals_page_next', 'Next'))) ?> →
+                <span class="nav-link nav-link-icon disabled" aria-label="<?= e(hp_display(hp_t('hospitals_page_next', 'Next'))) ?>">
+                  <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 3.5 5 4.5-5 4.5"></path></svg>
                 </span>
               <?php endif; ?>
             </div>

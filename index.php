@@ -47,10 +47,10 @@ include __DIR__ . '/includes/header.php';
 <style>
   :root {
     --medic-bg: <?= e($front_body_background) ?>;
-    --medic-dark: #24292f;
+    --medic-dark: #0f1720;
     --medic-muted: #57606a;
     --medic-border: #d0d7de;
-    --medic-border-soft: #d8dee4;
+    --medic-border-soft: #e2e6ea;
     --medic-card: #ffffff;
     --medic-green: <?= e($front_accent_color) ?>;
     --medic-green-dark: <?= e($front_accent_color) ?>;
@@ -59,7 +59,19 @@ include __DIR__ . '/includes/header.php';
     --medic-purple: <?= e($front_secondary_color) ?>;
     --medic-yellow-bg: #fff8c5;
     --medic-yellow-border: #d4a72c;
-    --medic-shadow: 0 8px 24px rgba(140, 149, 159, 0.15);
+
+    /* Simple-premium tokens: one accent gradient, soft shadows that only
+       appear on hover, generous rounding. Built on the admin-configurable
+       brand colors above, so settings changes still flow through. */
+    --medic-shadow-sm: 0 1px 2px rgba(15, 23, 32, 0.04);
+    --medic-shadow-md: 0 12px 28px -12px rgba(15, 23, 32, 0.16);
+    --medic-shadow-lg: 0 24px 48px -18px rgba(15, 23, 32, 0.22);
+    --medic-radius-sm: 12px;
+    --medic-radius-md: 18px;
+    --medic-radius-lg: 24px;
+    --medic-gradient-brand: linear-gradient(135deg, var(--medic-blue), var(--medic-purple));
+    --medic-ring: 0 0 0 4px color-mix(in srgb, var(--medic-blue) 14%, transparent);
+    --medic-tint: color-mix(in srgb, var(--medic-blue) 8%, transparent);
   }
 
 </style>
@@ -69,117 +81,99 @@ include __DIR__ . '/includes/header.php';
 
     <!-- Hero -->
     <section class="medic-hero">
-      <div class="medic-hero-content">
-        <div class="medic-badge">
-          <span></span>
-          <?= e($site_tagline) ?>
-        </div>
-
-        <h1><?= e($home_hero_title) ?></h1>
-
-        <p>
-          <?= e($home_hero_subtitle) ?>
-        </p>
-
-        <div class="medic-actions">
-          <a href="<?= e(front_url($home_hero_button_url)) ?>" class="medic-btn medic-btn-primary">
-            <?= e($home_hero_button_text) ?>
-          </a>
-
-          <a href="<?= e(front_url('hospitals')) ?>" class="medic-btn medic-btn-secondary">
-            <?= e(__t('browse_hospitals', 'Browse Hospitals')) ?>
-          </a>
-        </div>
+      <div class="medic-badge">
+        <span></span>
+        <?= e($site_tagline) ?>
       </div>
 
-      <div class="medic-preview-card">
-        <div class="medic-preview-header">
-          <span class="medic-dot"></span>
-          <span class="medic-dot"></span>
-          <span class="medic-dot"></span>
+      <h1><?= e($home_hero_title) ?></h1>
+
+      <p><?= e($home_hero_subtitle) ?></p>
+
+      <!-- Search -->
+      <?php if ($home_search_status !== 'inactive' && $home_search_status !== 'disabled'): ?>
+        <div class="medic-search-panel">
+          <form class="medic-search-form" action="<?= e($home_search_action) ?>" method="GET" id="homeDynamicSearchForm">
+            <select name="search_type" id="homeSearchType" aria-label="Search type">
+              <option value="doctors" <?= $home_search_default_type === 'doctors' ? 'selected' : '' ?>><?= e(__t('doctors', 'Doctors')) ?></option>
+              <option value="hospitals" <?= $home_search_default_type === 'hospitals' ? 'selected' : '' ?>><?= e(__t('hospitals', 'Hospitals')) ?></option>
+            </select>
+
+            <input
+              type="search"
+              name="search"
+              placeholder="<?= e($home_search_placeholder) ?>"
+              value="<?= e($_GET['search'] ?? '') ?>"
+            >
+
+            <select name="specialty" id="homeSpecialtySelect">
+              <option value=""><?= e($home_search_specialty_label) ?></option>
+
+              <?php if (!empty($specialties)): ?>
+                <?php foreach ($specialties as $specialty): ?>
+                  <?php $specialty_slug = trim((string)($specialty['slug'] ?? '')); ?>
+                  <option value="<?= e($specialty_slug) ?>" <?= (($_GET['specialty'] ?? '') === $specialty_slug) ? 'selected' : '' ?>>
+                    <?= e(lang_text((string)($specialty['name'] ?? ''), (string)($specialty['name_bn'] ?? ''))) ?>
+                  </option>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </select>
+
+            <select name="city">
+              <option value=""><?= e($home_search_location_label) ?></option>
+
+              <?php foreach ($home_search_locations as $location_name): ?>
+                <option value="<?= e($location_name) ?>" <?= (($_GET['city'] ?? '') === $location_name) ? 'selected' : '' ?>>
+                  <?= e($location_name) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+
+            <button type="submit" class="medic-btn medic-btn-primary medic-search-submit">
+              <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6.8" cy="6.8" r="4.6"></circle><path d="m10.4 10.4 3.3 3.3"></path></svg>
+              <span><?= e($home_search_button_text) ?></span>
+            </button>
+          </form>
+        </div>
+      <?php endif; ?>
+
+      <div class="medic-actions">
+        <a href="<?= e(front_url($home_hero_button_url)) ?>" class="medic-quick-link">
+          <?= e($home_hero_button_text) ?>
+        </a>
+
+        <span class="medic-actions-divider" aria-hidden="true"></span>
+
+        <a href="<?= e(front_url('hospitals')) ?>" class="medic-quick-link">
+          <?= e(__t('browse_hospitals', 'Browse Hospitals')) ?>
+        </a>
+      </div>
+
+      <!-- Stats -->
+      <div class="medic-stat-strip">
+        <div class="medic-stat-item">
+          <strong><?= number_format((int)($counts['doctors'] ?? 0)) ?>+</strong>
+          <span><?= e(__t('verified_doctors', 'Verified Doctors')) ?></span>
         </div>
 
-        <div class="medic-preview-body">
+        <div class="medic-stat-item">
+          <strong><?= number_format((int)($counts['hospitals'] ?? 0)) ?>+</strong>
+          <span><?= e(__t('listed_hospitals', 'Listed Hospitals')) ?></span>
+        </div>
 
-          <?php if ($home_hero_image !== ''): ?>
-            <div class="medic-home-hero-image">
-              <img src="<?= e($home_hero_image) ?>" alt="<?= e(front_site_name()) ?>">
-            </div>
-          <?php endif; ?>
-          <div class="medic-profile-row">
-            <div class="medic-avatar">M</div>
+        <div class="medic-stat-item">
+          <strong><?= number_format((int)($counts['specialties'] ?? 0)) ?>+</strong>
+          <span><?= e(__t('medical_specialties', 'Medical Specialties')) ?></span>
+        </div>
 
-            <div>
-              <h3><?= e(front_site_name()) ?> <?= e(__t('directory', 'Directory')) ?></h3>
-              <p><?= e($site_tagline) ?></p>
-            </div>
-          </div>
-
-          <div class="medic-mini-list">
-            <div class="medic-mini-item">
-              <strong><?= e(__t('doctors', 'Doctors')) ?></strong>
-              <span><?= number_format((int)($counts['doctors'] ?? 0)) ?> <?= e(__t('listed', 'listed')) ?></span>
-            </div>
-
-            <div class="medic-mini-item">
-              <strong><?= e(__t('hospitals', 'Hospitals')) ?></strong>
-              <span><?= number_format((int)($counts['hospitals'] ?? 0)) ?> <?= e(__t('listed', 'listed')) ?></span>
-            </div>
-
-            <div class="medic-mini-item">
-              <strong><?= e(__t('specialties', 'Specialties')) ?></strong>
-              <span><?= number_format((int)($counts['specialties'] ?? 0)) ?> <?= e(__t('available', 'available')) ?></span>
-            </div>
-          </div>
+        <div class="medic-stat-item">
+          <strong>24/7</strong>
+          <span><?= e(__t('appointment_support', 'Appointment Support')) ?></span>
         </div>
       </div>
     </section>
 
-    <!-- Search -->
     <?php if ($home_search_status !== 'inactive' && $home_search_status !== 'disabled'): ?>
-      <div class="medic-search-panel">
-        <form class="medic-search-form" action="<?= e($home_search_action) ?>" method="GET" id="homeDynamicSearchForm">
-          <select name="search_type" id="homeSearchType" aria-label="Search type">
-            <option value="doctors" <?= $home_search_default_type === 'doctors' ? 'selected' : '' ?>><?= e(__t('doctors', 'Doctors')) ?></option>
-            <option value="hospitals" <?= $home_search_default_type === 'hospitals' ? 'selected' : '' ?>><?= e(__t('hospitals', 'Hospitals')) ?></option>
-          </select>
-
-          <input
-            type="search"
-            name="search"
-            placeholder="<?= e($home_search_placeholder) ?>"
-            value="<?= e($_GET['search'] ?? '') ?>"
-          >
-
-          <select name="specialty" id="homeSpecialtySelect">
-            <option value=""><?= e($home_search_specialty_label) ?></option>
-
-            <?php if (!empty($specialties)): ?>
-              <?php foreach ($specialties as $specialty): ?>
-                <?php $specialty_slug = trim((string)($specialty['slug'] ?? '')); ?>
-                <option value="<?= e($specialty_slug) ?>" <?= (($_GET['specialty'] ?? '') === $specialty_slug) ? 'selected' : '' ?>>
-                  <?= e(lang_text((string)($specialty['name'] ?? ''), (string)($specialty['name_bn'] ?? ''))) ?>
-                </option>
-              <?php endforeach; ?>
-            <?php endif; ?>
-          </select>
-
-          <select name="city">
-            <option value=""><?= e($home_search_location_label) ?></option>
-
-            <?php foreach ($home_search_locations as $location_name): ?>
-              <option value="<?= e($location_name) ?>" <?= (($_GET['city'] ?? '') === $location_name) ? 'selected' : '' ?>>
-                <?= e($location_name) ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-
-          <button type="submit" class="medic-btn medic-btn-primary">
-            <?= e($home_search_button_text) ?>
-          </button>
-        </form>
-      </div>
-
       <script>
         document.addEventListener('DOMContentLoaded', function () {
           const form = document.getElementById('homeDynamicSearchForm');
@@ -256,43 +250,7 @@ include __DIR__ . '/includes/header.php';
       </script>
     <?php endif; ?>
 
-    <div class="medic-layout">
-
-      <!-- Main Content -->
-      <div class="medic-main">
-
-        <!-- Tabs -->
-        <nav class="medic-nav-tabs">
-          <a href="<?= e(front_url()) ?>" class="active"><?= e(__t('overview', 'Overview')) ?></a>
-          <a href="<?= e(front_url('doctors')) ?>"><?= e(__t('doctors', 'Doctors')) ?></a>
-          <a href="<?= e(front_url('hospitals')) ?>"><?= e(__t('hospitals', 'Hospitals')) ?></a>
-          <a href="<?= e(front_url('specialties')) ?>"><?= e(__t('specialties', 'Specialties')) ?></a>
-        </nav>
-
-        <!-- Stats -->
-        <section class="medic-stats">
-          <div class="medic-stat-card">
-            <h3><?= number_format((int)($counts['doctors'] ?? 0)) ?>+</h3>
-            <p><?= e(__t('verified_doctors', 'Verified Doctors')) ?></p>
-          </div>
-
-          <div class="medic-stat-card">
-            <h3><?= number_format((int)($counts['hospitals'] ?? 0)) ?>+</h3>
-            <p><?= e(__t('listed_hospitals', 'Listed Hospitals')) ?></p>
-          </div>
-
-          <div class="medic-stat-card">
-            <h3><?= number_format((int)($counts['specialties'] ?? 0)) ?>+</h3>
-            <p><?= e(__t('medical_specialties', 'Medical Specialties')) ?></p>
-          </div>
-
-          <div class="medic-stat-card">
-            <h3>24/7</h3>
-            <p><?= e(__t('appointment_support', 'Appointment Support')) ?></p>
-          </div>
-        </section>
-
-        <!-- Popular Specialties -->
+    <!-- Popular Specialties -->
         <section class="medic-section">
           <div class="medic-section-title">
             <div>
@@ -335,10 +293,7 @@ include __DIR__ . '/includes/header.php';
                     <?php endif; ?>
                   </div>
 
-                  <div>
-                    <h3><?= e(lang_text((string)($specialty['name'] ?? ''), (string)($specialty['name_bn'] ?? ''))) ?></h3>
-                    <p><?= e(lang_text((string)($specialty['description'] ?? ''), (string)($specialty['description_bn'] ?? ''))) ?></p>
-                  </div>
+                  <h3><?= e(lang_text((string)($specialty['name'] ?? ''), (string)($specialty['name_bn'] ?? ''))) ?></h3>
                 </a>
               <?php endforeach; ?>
             <?php else: ?>
@@ -405,60 +360,11 @@ include __DIR__ . '/includes/header.php';
           </div>
         </section>
 
-      </div>
-
-      <!-- Sidebar -->
-      <aside class="medic-sidebar">
-
-        <div class="medic-widget">
-          <div class="medic-widget-header">
-            <?= e(__t('about', 'About')) ?> <?= e(front_site_name()) ?>
-          </div>
-
-          <div class="medic-widget-body">
-            <p>
-              <?= e($site_description) ?>
-            </p>
-          </div>
-        </div>
-
-        <div class="medic-widget">
-          <div class="medic-widget-header">
-            <?= e(__t('directory_summary', 'Directory Summary')) ?>
-          </div>
-
-          <div class="medic-widget-body">
-            <ul class="medic-side-list">
-              <li>
-                <a href="<?= e(front_url('doctors')) ?>"><?= e(__t('doctors', 'Doctors')) ?></a>
-                <span><?= number_format((int)($counts['doctors'] ?? 0)) ?></span>
-              </li>
-
-              <li>
-                <a href="<?= e(front_url('hospitals')) ?>"><?= e(__t('hospitals', 'Hospitals')) ?></a>
-                <span><?= number_format((int)($counts['hospitals'] ?? 0)) ?></span>
-              </li>
-
-              <li>
-                <a href="<?= e(front_url('specialties')) ?>"><?= e(__t('specialties', 'Specialties')) ?></a>
-                <span><?= number_format((int)($counts['specialties'] ?? 0)) ?></span>
-              </li>
-
-              <li>
-                <a href="<?= e(front_url('contact')) ?>"><?= e(__t('contact', 'Contact')) ?></a>
-                <span><?= e(__t('help', 'Help')) ?></span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="medic-note">
-          <?= e(__t('search_tip', 'Tip: Use the search box to filter doctors by name, specialty or location. You can also browse hospitals and appointment details from the navigation.')) ?>
-        </div>
-
-      </aside>
-
-    </div>
+        <!-- About -->
+        <section class="medic-about">
+          <p><?= e($site_description) ?></p>
+          <p class="medic-about-tip"><?= e(__t('search_tip', 'Tip: Use the search box to filter doctors by name, specialty or location. You can also browse hospitals and appointment details from the navigation.')) ?></p>
+        </section>
 
   </div>
 </main>

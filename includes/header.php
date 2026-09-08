@@ -15,7 +15,7 @@ if (!function_exists('str_starts_with')) {
     }
 }
 
-$header_version = 'seo-social-meta-profile-20260624';
+$header_version = 'fix-double-border-behind-card-20260908h';
 
 /*
 |--------------------------------------------------------------------------

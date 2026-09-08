@@ -1112,6 +1112,19 @@ if (table_exists('profile_update_requests')) {
         box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
     }
 
+    /*
+     * doctor-card.php renders a complete card with its own border, radius,
+     * shadow and hover animation, so avoid drawing a second border/shadow
+     * (and clipping its hover shadow via overflow:hidden) behind it here.
+     */
+    .medic-list-card:has(.medic-doctor-list-item) {
+        background: transparent;
+        border: 0;
+        padding: 0;
+        overflow: visible;
+        box-shadow: none;
+    }
+
     .search-result-count {
         margin: 12px 0 0;
         color: #0969da;

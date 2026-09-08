@@ -1,28 +1,57 @@
 .medic-doctor-list-item {
-  display: grid;
-  grid-template-columns: 58px minmax(0, 1fr) 170px;
-  gap: 14px;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   background: #ffffff;
-  border: 1px solid #d0d7de;
-  border-radius: 6px;
-  padding: 12px;
+  border: 1px solid #e2e6ea;
+  border-radius: 18px;
+  padding: 16px;
   width: 100%;
+  transition: border-color .2s ease, box-shadow .25s ease, transform .25s ease, background-color .25s ease;
 }
 
 .medic-doctor-list-item:hover {
-  background: #f6f8fa;
-  border-color: #8c959f;
+  border-color: rgba(9, 105, 218, .32);
+  background-color: #f8fbff;
+  box-shadow: 0 22px 40px -18px rgba(9, 105, 218, .22), 0 10px 20px -12px rgba(15, 23, 32, .16);
+  transform: translateY(-4px);
+}
+
+.medic-doctor-list-item:hover .medic-doctor-list-photo {
+  box-shadow: 0 0 0 3px #f8fbff, 0 0 0 4px #0969da;
+}
+
+.medic-doctor-list-item:hover .medic-doctor-list-photo img {
+  transform: scale(1.08);
+}
+
+.medic-doctor-list-item:hover .medic-doctor-list-title h3 a {
+  color: #0969da;
+}
+
+.medic-doctor-list-item:hover .medic-doctor-list-fee {
+  transform: scale(1.05);
+}
+
+.medic-doctor-list-item:hover .medic-list-btn-primary {
+  box-shadow: 0 8px 18px -6px rgba(9, 105, 218, .45);
+}
+
+.medic-doctor-list-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
 }
 
 .medic-doctor-list-photo {
-  width: 58px;
-  height: 58px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   overflow: hidden;
   background: #f6f8fa;
-  border: 1px solid #d0d7de;
+  box-shadow: 0 0 0 3px #f6f8fa, 0 0 0 4px #e2e6ea;
   flex-shrink: 0;
+  transition: box-shadow .25s ease;
 }
 
 .medic-doctor-list-photo img {
@@ -30,10 +59,12 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform .3s ease;
 }
 
 .medic-doctor-list-main {
   min-width: 0;
+  flex: 1;
 }
 
 .medic-doctor-list-title {
@@ -46,201 +77,168 @@
 
 .medic-doctor-list-title h3 {
   margin: 0;
-  color: #24292f;
-  font-size: 16px;
+  color: #1f2328;
+  font-size: 16.5px;
   line-height: 1.35;
   font-weight: 700;
+  letter-spacing: -.01em;
 }
 
 .medic-doctor-list-title h3 a {
-  color: #0969da;
+  color: #1f2328;
   text-decoration: none;
+  transition: color .2s ease;
 }
 
 .medic-doctor-list-title h3 a:hover {
-  text-decoration: underline;
+  color: #0969da;
 }
 
 .medic-doctor-list-specialty {
   display: block;
   margin-bottom: 6px;
-  color: #57606a;
+  color: #0969da;
   font-size: 13px;
   line-height: 1.4;
   font-weight: 600;
-}
-
-.medic-doctor-list-info {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px 12px;
-  color: #57606a;
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.medic-doctor-list-info span {
-  display: inline-flex;
-  align-items: center;
-  max-width: 100%;
-  min-width: 0;
-}
-
-.medic-doctor-list-info strong {
-  color: #24292f;
-  font-weight: 600;
-  margin-right: 4px;
-  flex-shrink: 0;
-}
-
-.medic-doctor-list-info em {
-  color: #57606a;
-  font-style: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-}
-
-.medic-mobile-info {
-  display: none;
-}
-
-.medic-doctor-list-side {
-  text-align: right;
-}
-
-.medic-doctor-list-fee {
-  color: #24292f;
-  font-size: 15px;
-  font-weight: 700;
-  margin-bottom: 4px;
 }
 
 .medic-doctor-list-rating {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   color: #57606a;
-  font-size: 12px;
+  font-size: 12.5px;
   line-height: 1.4;
-  margin-bottom: 8px;
+}
+
+.medic-doctor-list-rating svg {
+  width: 13px;
+  height: 13px;
+  fill: #e8a83c;
+  flex-shrink: 0;
+}
+
+.medic-doctor-list-fee {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #f0fdf4;
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: transform .25s ease;
+}
+
+.medic-doctor-list-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0;
+  padding: 12px 0 0;
+  border-top: 1px solid #eef1f3;
+  list-style: none;
+}
+
+.medic-doctor-list-meta li {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  color: #1f2328;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.medic-doctor-list-meta svg {
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
+  color: #8c959f;
+  flex-shrink: 0;
+}
+
+.medic-doctor-list-meta span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.medic-doctor-list-meta strong {
+  font-weight: 600;
+  color: #57606a;
 }
 
 .medic-doctor-list-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 6px;
+  gap: 8px;
 }
 
 .medic-list-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 32px;
-  padding: 0 10px;
-  border-radius: 6px;
-  border: 1px solid #d0d7de;
+  min-height: 34px;
+  padding: 0 15px;
+  border-radius: 999px;
+  border: 1px solid #d8dee4;
   background: #ffffff;
-  color: #0969da;
+  color: #1f2328;
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
+  transition: border-color .16s ease, color .16s ease;
 }
 
 .medic-list-btn:hover {
-  background: #f6f8fa;
+  border-color: #0969da;
+  color: #0969da;
 }
 
 .medic-list-btn-primary {
-  background: #2da44e;
-  border-color: #2da44e;
+  border-color: transparent;
+  background: linear-gradient(135deg, #0969da, #2da44e);
   color: #ffffff;
+  transition: filter .16s ease, box-shadow .25s ease;
 }
 
 .medic-list-btn-primary:hover {
-  background: #1f883d;
-  border-color: #1f883d;
   color: #ffffff;
-}
-
-@media (max-width: 760px) {
-  .medic-doctor-list-item {
-    grid-template-columns: 52px minmax(0, 1fr);
-    align-items: start;
-  }
-
-  .medic-doctor-list-photo {
-    width: 52px;
-    height: 52px;
-  }
-
-  .medic-desktop-info {
-    display: none;
-  }
-
-  .medic-mobile-info {
-    grid-column: 1 / -1;
-    display: grid;
-    gap: 5px;
-    width: 100%;
-    margin-top: 8px;
-    padding-top: 10px;
-    border-top: 1px solid #d0d7de;
-    text-align: left;
-  }
-
-  .medic-mobile-info span {
-    display: grid;
-    grid-template-columns: 82px minmax(0, 1fr);
-    align-items: start;
-    gap: 0;
-    width: 100%;
-  }
-
-  .medic-mobile-info strong {
-    margin-right: 0;
-    color: #24292f;
-  }
-
-  .medic-mobile-info em {
-    white-space: normal;
-    text-align: left;
-  }
-
-  .medic-doctor-list-side {
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    text-align: left;
-    border-top: 1px solid #d0d7de;
-    padding-top: 10px;
-  }
-
-  .medic-doctor-list-actions {
-    justify-content: flex-end;
-  }
+  filter: brightness(1.04);
 }
 
 @media (max-width: 480px) {
   .medic-doctor-list-item {
-    grid-template-columns: 52px minmax(0, 1fr);
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .medic-doctor-list-photo {
+    width: 50px;
+    height: 50px;
+  }
+
+  .medic-doctor-list-head {
     gap: 10px;
   }
 
-  .medic-mobile-info span {
-    grid-template-columns: 78px minmax(0, 1fr);
+  .medic-doctor-list-fee {
+    padding: 4px 10px;
+    font-size: 12px;
   }
 
-  .medic-doctor-list-side {
-    align-items: stretch;
-    flex-direction: column;
+  .medic-doctor-list-meta {
+    gap: 8px 14px;
   }
 
   .medic-doctor-list-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
   }
 
   .medic-list-btn {
@@ -249,21 +247,11 @@
 }
 
 @media (max-width: 360px) {
-  .medic-doctor-list-item {
-    grid-template-columns: 1fr;
+  .medic-doctor-list-head {
+    flex-wrap: wrap;
   }
 
-  .medic-doctor-list-photo {
-    width: 56px;
-    height: 56px;
-  }
-
-  .medic-mobile-info span {
-    grid-template-columns: 1fr;
-    gap: 2px;
-  }
-
-  .medic-doctor-list-actions {
-    grid-template-columns: 1fr;
+  .medic-doctor-list-fee {
+    margin-left: 64px;
   }
 }

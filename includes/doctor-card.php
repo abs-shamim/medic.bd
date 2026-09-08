@@ -556,9 +556,6 @@
       ? implode(', ', $doctor_location_parts)
       : $not_specified_text;
 
-  $desktop_location = $doctor_location;
-  $mobile_location = $doctor_location;
-
   $card_consultation_fee = medic_dc_first_available_fee($doctor);
 
   $card_consultation_fee_text = $card_consultation_fee > 0
@@ -581,117 +578,45 @@
   $doctor_subtitle = $doctor_designation !== ''
       ? $doctor_designation
       : $doctor_specialty_name;
+
+  $has_meta_items = $doctor_degree !== ''
+      || !empty($doctor_chambers)
+      || $doctor_location !== $not_specified_text
+      || $years_experience_text !== $not_specified_text;
 ?>
 
 <article class="medic-doctor-list-item">
 
-  <div class="medic-doctor-list-photo">
-    <img
-      src="<?= e($doctor_image_url) ?>"
-      alt="<?= e(medic_dc_display_text($doctor_name)) ?>"
-      loading="lazy"
-      data-fallback="webp"
-      onerror="if(this.dataset.fallback==='webp'){this.dataset.fallback='png';this.src='<?= e($doctor_default_png_url) ?>';}else{this.onerror=null;this.style.display='none';}"
-    >
-  </div>
-
-  <div class="medic-doctor-list-main">
-    <div class="medic-doctor-list-title">
-      <h3>
-        <a href="<?= e($profile_link) ?>">
-          <?= e(medic_dc_display_text($doctor_name)) ?>
-        </a>
-      </h3>
-
-      <?= verified_badge((int)($doctor['is_verified'] ?? 0)) ?>
+  <div class="medic-doctor-list-head">
+    <div class="medic-doctor-list-photo">
+      <img
+        src="<?= e($doctor_image_url) ?>"
+        alt="<?= e(medic_dc_display_text($doctor_name)) ?>"
+        loading="lazy"
+        data-fallback="webp"
+        onerror="if(this.dataset.fallback==='webp'){this.dataset.fallback='png';this.src='<?= e($doctor_default_png_url) ?>';}else{this.onerror=null;this.style.display='none';}"
+      >
     </div>
 
-    <?php if ($doctor_subtitle !== ''): ?>
-      <span class="medic-doctor-list-specialty">
-        <?= e(medic_dc_display_text($doctor_subtitle)) ?>
-      </span>
-    <?php endif; ?>
+    <div class="medic-doctor-list-main">
+      <div class="medic-doctor-list-title">
+        <h3>
+          <a href="<?= e($profile_link) ?>">
+            <?= e(medic_dc_display_text($doctor_name)) ?>
+          </a>
+        </h3>
 
-    <div class="medic-doctor-list-info medic-desktop-info">
-      <?php if ($doctor_degree !== ''): ?>
-        <span>
-          <strong><?= e(medic_dc_display_text(medic_dc_t('degree', 'Degree'))) ?>:</strong>
-          <em><?= e(medic_dc_display_text($doctor_degree)) ?></em>
+        <?= verified_badge((int)($doctor['is_verified'] ?? 0)) ?>
+      </div>
+
+      <?php if ($doctor_subtitle !== ''): ?>
+        <span class="medic-doctor-list-specialty">
+          <?= e(medic_dc_display_text($doctor_subtitle)) ?>
         </span>
-      <?php endif; ?>
-
-      <?php if (!empty($doctor_chambers)): ?>
-        <?php if (count($doctor_chambers) === 1): ?>
-          <span>
-            <strong><?= e(medic_dc_display_text(medic_dc_t('chamber', 'Chamber'))) ?>:</strong>
-            <em><?= e(medic_dc_display_text($doctor_chambers[0])) ?></em>
-          </span>
-        <?php else: ?>
-          <?php foreach ($doctor_chambers as $chamber_index => $chamber_name): ?>
-            <span>
-              <strong><?= e(medic_dc_display_text(medic_dc_t('chamber', 'Chamber'))) ?> <?= e(medic_dc_display_text((string)($chamber_index + 1))) ?>:</strong>
-              <em><?= e(medic_dc_display_text($chamber_name)) ?></em>
-            </span>
-          <?php endforeach; ?>
-        <?php endif; ?>
-      <?php endif; ?>
-
-      <span>
-        <strong><?= e(medic_dc_display_text(medic_dc_t('location', 'Location'))) ?>:</strong>
-        <em><?= e(medic_dc_display_text($desktop_location)) ?></em>
-      </span>
-
-      <span>
-        <strong><?= e(medic_dc_display_text(medic_dc_t('experience', 'Experience'))) ?>:</strong>
-        <em><?= e(medic_dc_display_text($years_experience_text)) ?></em>
-      </span>
-    </div>
-  </div>
-
-  <div class="medic-doctor-list-info medic-mobile-info">
-    <?php if ($doctor_degree !== ''): ?>
-      <span>
-        <strong><?= e(medic_dc_display_text(medic_dc_t('degree', 'Degree'))) ?>:</strong>
-        <em><?= e(medic_dc_display_text($doctor_degree)) ?></em>
-      </span>
-    <?php endif; ?>
-
-    <?php if (!empty($doctor_chambers)): ?>
-      <?php if (count($doctor_chambers) === 1): ?>
-        <span>
-          <strong><?= e(medic_dc_display_text(medic_dc_t('chamber', 'Chamber'))) ?>:</strong>
-          <em><?= e(medic_dc_display_text($doctor_chambers[0])) ?></em>
-        </span>
-      <?php else: ?>
-        <?php foreach ($doctor_chambers as $chamber_index => $chamber_name): ?>
-          <span>
-            <strong><?= e(medic_dc_display_text(medic_dc_t('chamber', 'Chamber'))) ?> <?= e(medic_dc_display_text((string)($chamber_index + 1))) ?>:</strong>
-            <em><?= e(medic_dc_display_text($chamber_name)) ?></em>
-          </span>
-        <?php endforeach; ?>
-      <?php endif; ?>
-    <?php endif; ?>
-
-    <span>
-      <strong><?= e(medic_dc_display_text(medic_dc_t('location', 'Location'))) ?>:</strong>
-      <em><?= e(medic_dc_display_text($mobile_location)) ?></em>
-    </span>
-
-    <span>
-      <strong><?= e(medic_dc_display_text(medic_dc_t('experience', 'Experience'))) ?>:</strong>
-      <em><?= e(medic_dc_display_text($years_experience_text)) ?></em>
-    </span>
-  </div>
-
-  <div class="medic-doctor-list-side">
-    <div>
-      <?php if ($card_consultation_fee_text !== ''): ?>
-        <div class="medic-doctor-list-fee">
-          <?= e(medic_dc_display_text($card_consultation_fee_text)) ?>
-        </div>
       <?php endif; ?>
 
       <div class="medic-doctor-list-rating">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m8 1.6 1.9 3.9 4.3.6-3.1 3 .7 4.3L8 11.4l-3.8 2 .7-4.3-3.1-3 4.3-.6L8 1.6Z"></path></svg>
         <?= e(medic_dc_display_text((string)($doctor['rating'] ?? '0'))) ?>
         <?= e(medic_dc_display_text(medic_dc_t('rating', 'rating'))) ?>
         ·
@@ -700,15 +625,62 @@
       </div>
     </div>
 
-    <div class="medic-doctor-list-actions">
-      <a href="<?= e($profile_link) ?>" class="medic-list-btn">
-        <?= e(medic_dc_display_text(medic_dc_t('profile', 'Profile'))) ?>
-      </a>
+    <?php if ($card_consultation_fee_text !== ''): ?>
+      <div class="medic-doctor-list-fee">
+        <?= e(medic_dc_display_text($card_consultation_fee_text)) ?>
+      </div>
+    <?php endif; ?>
+  </div>
 
-      <a href="<?= e($profile_link) ?>" class="medic-list-btn medic-list-btn-primary">
-        <?= e(medic_dc_display_text(medic_dc_t('appointment', 'Appointment'))) ?>
-      </a>
-    </div>
+  <?php if ($has_meta_items): ?>
+  <ul class="medic-doctor-list-meta">
+    <?php if ($doctor_degree !== ''): ?>
+      <li>
+        <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1 5.5 8 2l7 3.5-7 3.5-7-3.5Z"></path><path d="M4 7.2v3c0 1 1.8 1.8 4 1.8s4-.8 4-1.8v-3"></path><path d="M14 5.5v4.2"></path></svg>
+        <span><?= e(medic_dc_display_text($doctor_degree)) ?></span>
+      </li>
+    <?php endif; ?>
+
+    <?php if (!empty($doctor_chambers)): ?>
+      <?php if (count($doctor_chambers) === 1): ?>
+        <li>
+          <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 14V3.5L8 1l6 2.5V14"></path><path d="M2 14h12"></path><path d="M6.5 14v-3h3v3"></path><path d="M6 5h1M9 5h1M6 8h1M9 8h1"></path></svg>
+          <span><?= e(medic_dc_display_text($doctor_chambers[0])) ?></span>
+        </li>
+      <?php else: ?>
+        <?php foreach ($doctor_chambers as $chamber_index => $chamber_name): ?>
+          <li>
+            <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 14V3.5L8 1l6 2.5V14"></path><path d="M2 14h12"></path><path d="M6.5 14v-3h3v3"></path><path d="M6 5h1M9 5h1M6 8h1M9 8h1"></path></svg>
+            <span><strong><?= e(medic_dc_display_text(medic_dc_t('chamber', 'Chamber'))) ?> <?= e(medic_dc_display_text((string)($chamber_index + 1))) ?>:</strong> <?= e(medic_dc_display_text($chamber_name)) ?></span>
+          </li>
+        <?php endforeach; ?>
+      <?php endif; ?>
+    <?php endif; ?>
+
+    <?php if ($doctor_location !== $not_specified_text): ?>
+      <li>
+        <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 14.5s5-4.2 5-8.2A5 5 0 0 0 3 6.3c0 4 5 8.2 5 8.2Z"></path><circle cx="8" cy="6.2" r="1.8"></circle></svg>
+        <span><?= e(medic_dc_display_text($doctor_location)) ?></span>
+      </li>
+    <?php endif; ?>
+
+    <?php if ($years_experience_text !== $not_specified_text): ?>
+      <li>
+        <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6.3"></circle><path d="M8 4.8v3.4l2.4 1.4"></path></svg>
+        <span><?= e(medic_dc_display_text($years_experience_text)) ?></span>
+      </li>
+    <?php endif; ?>
+  </ul>
+  <?php endif; ?>
+
+  <div class="medic-doctor-list-actions">
+    <a href="<?= e($profile_link) ?>" class="medic-list-btn">
+      <?= e(medic_dc_display_text(medic_dc_t('profile', 'Profile'))) ?>
+    </a>
+
+    <a href="<?= e($profile_link) ?>" class="medic-list-btn medic-list-btn-primary">
+      <?= e(medic_dc_display_text(medic_dc_t('appointment', 'Appointment'))) ?>
+    </a>
   </div>
 
 </article>

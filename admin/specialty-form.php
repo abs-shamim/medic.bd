@@ -355,7 +355,9 @@ if (!function_exists('specialty_form_boot_columns')) {
     function specialty_form_boot_columns(): void
     {
         specialty_form_add_column_if_missing('specialties', 'name_bn', "VARCHAR(255) NULL AFTER `name`");
-        specialty_form_add_column_if_missing('specialties', 'alternate_names', "TEXT NULL AFTER `name_bn`");
+        specialty_form_add_column_if_missing('specialties', 'title_name', "VARCHAR(255) NULL AFTER `name_bn`");
+        specialty_form_add_column_if_missing('specialties', 'title_name_bn', "VARCHAR(255) NULL AFTER `title_name`");
+        specialty_form_add_column_if_missing('specialties', 'alternate_names', "TEXT NULL AFTER `title_name_bn`");
         specialty_form_add_column_if_missing('specialties', 'alternate_names_bn', "TEXT NULL AFTER `alternate_names`");
         specialty_form_add_column_if_missing('specialties', 'image', "VARCHAR(500) NULL AFTER `slug`");
         specialty_form_add_column_if_missing('specialties', 'description_bn', "TEXT NULL");
@@ -373,6 +375,8 @@ if (!function_exists('specialty_form_boot_columns')) {
 specialty_form_boot_columns();
 
 $has_name_bn = specialty_form_column_exists('specialties', 'name_bn');
+$has_title_name = specialty_form_column_exists('specialties', 'title_name');
+$has_title_name_bn = specialty_form_column_exists('specialties', 'title_name_bn');
 $has_alternate_names = specialty_form_column_exists('specialties', 'alternate_names');
 $has_alternate_names_bn = specialty_form_column_exists('specialties', 'alternate_names_bn');
 $has_image = specialty_form_column_exists('specialties', 'image');
@@ -412,6 +416,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $name = trim((string)($_POST['name'] ?? ''));
     $name_bn = trim((string)($_POST['name_bn'] ?? ''));
+    $title_name = trim((string)($_POST['title_name'] ?? ''));
+    $title_name_bn = trim((string)($_POST['title_name_bn'] ?? ''));
     $alternate_names = trim((string)($_POST['alternate_names'] ?? ''));
     $alternate_names_bn = trim((string)($_POST['alternate_names_bn'] ?? ''));
     $slug = trim((string)($_POST['slug'] ?? ''));
@@ -464,6 +470,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($has_name_bn) {
         $data[':name_bn'] = $name_bn;
+    }
+
+    if ($has_title_name) {
+        $data[':title_name'] = $title_name;
+    }
+
+    if ($has_title_name_bn) {
+        $data[':title_name_bn'] = $title_name_bn;
     }
 
     if ($has_alternate_names) {
@@ -528,6 +542,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $sets[] = 'name_bn = :name_bn';
         }
 
+        if ($has_title_name) {
+            $sets[] = 'title_name = :title_name';
+        }
+
+        if ($has_title_name_bn) {
+            $sets[] = 'title_name_bn = :title_name_bn';
+        }
+
         if ($has_alternate_names) {
             $sets[] = 'alternate_names = :alternate_names';
         }
@@ -585,6 +607,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($has_name_bn) {
             $columns[] = 'name_bn';
             $values[] = ':name_bn';
+        }
+
+        if ($has_title_name) {
+            $columns[] = 'title_name';
+            $values[] = ':title_name';
+        }
+
+        if ($has_title_name_bn) {
+            $columns[] = 'title_name_bn';
+            $values[] = ':title_name_bn';
         }
 
         if ($has_alternate_names) {
@@ -1647,6 +1679,8 @@ $preview_image = $edit['image'] ?? '';
 
     <?php if (
         !$has_name_bn ||
+        !$has_title_name ||
+        !$has_title_name_bn ||
         !$has_alternate_names ||
         !$has_alternate_names_bn ||
         !$has_image ||
@@ -1709,6 +1743,34 @@ $preview_image = $edit['image'] ?? '';
                                     value="<?= e($edit['name_bn'] ?? '') ?>"
                                 >
                                 <small>Use Bangla name for Bangla frontend and local SEO.</small>
+                            </div>
+                        </div>
+
+                        <div class="sp-en-bn-row">
+                            <div class="sp-field">
+                                <label for="title_name">Title Name</label>
+                                <input
+                                    id="title_name"
+                                    class="sp-input"
+                                    type="text"
+                                    name="title_name"
+                                    placeholder="Example: Cardiologists"
+                                    value="<?= e($edit['title_name'] ?? '') ?>"
+                                >
+                                <small>Overrides the doctor-list page title/heading (e.g. "Cardiologists in Dhaka"). Leave blank to auto-generate from the English Name.</small>
+                            </div>
+
+                            <div class="sp-field">
+                                <label class="sp-label-bn" for="title_name_bn">Title Name (Bangla)</label>
+                                <input
+                                    id="title_name_bn"
+                                    class="sp-input"
+                                    type="text"
+                                    name="title_name_bn"
+                                    placeholder="উদাহরণ: কার্ডিওলজিস্ট"
+                                    value="<?= e($edit['title_name_bn'] ?? '') ?>"
+                                >
+                                <small>ডাক্তার লিস্ট পেজের টাইটেল/হেডিং override করে। খালি রাখলে Bangla Name থেকে auto-generate হবে।</small>
                             </div>
                         </div>
                     </section>
