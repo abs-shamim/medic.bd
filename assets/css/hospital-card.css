@@ -1,28 +1,53 @@
 .medic-hospital-list-item {
-  display: grid;
-  grid-template-columns: 58px minmax(0, 1fr) 170px;
-  gap: 14px;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   background: #ffffff;
-  border: 1px solid #d0d7de;
-  border-radius: 6px;
-  padding: 12px;
+  border: 1px solid #e2e6ea;
+  border-radius: 18px;
+  padding: 16px;
   width: 100%;
+  transition: border-color .2s ease, box-shadow .25s ease, transform .25s ease, background-color .25s ease;
 }
 
 .medic-hospital-list-item:hover {
-  background: #f6f8fa;
-  border-color: #8c959f;
+  border-color: rgba(9, 105, 218, .32);
+  background-color: #f8fbff;
+  box-shadow: 0 22px 40px -18px rgba(9, 105, 218, .22), 0 10px 20px -12px rgba(15, 23, 32, .16);
+  transform: translateY(-4px);
+}
+
+.medic-hospital-list-item:hover .medic-hospital-list-photo {
+  box-shadow: 0 0 0 3px #f8fbff, 0 0 0 4px #0969da;
+}
+
+.medic-hospital-list-item:hover .medic-hospital-list-photo img {
+  transform: scale(1.08);
+}
+
+.medic-hospital-list-item:hover .medic-hospital-list-title h2 a {
+  color: #0969da;
+}
+
+.medic-hospital-list-item:hover .medic-list-btn-primary {
+  box-shadow: 0 8px 18px -6px rgba(9, 105, 218, .45);
+}
+
+.medic-hospital-list-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
 }
 
 .medic-hospital-list-photo {
-  width: 58px;
-  height: 58px;
-  border-radius: 10px;
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
   overflow: hidden;
   background: #f6f8fa;
-  border: 1px solid #d0d7de;
+  box-shadow: 0 0 0 3px #f6f8fa, 0 0 0 4px #e2e6ea;
   flex-shrink: 0;
+  transition: box-shadow .25s ease;
 }
 
 .medic-hospital-list-photo img {
@@ -30,10 +55,12 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform .3s ease;
 }
 
 .medic-hospital-list-main {
   min-width: 0;
+  flex: 1;
 }
 
 .medic-hospital-list-title {
@@ -41,237 +68,208 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 3px;
+  margin-bottom: 6px;
 }
 
 .medic-hospital-list-title h2 {
   margin: 0;
-  color: #24292f;
-  font-size: 16px;
+  color: #1f2328;
+  font-size: 16.5px;
   line-height: 1.35;
   font-weight: 700;
+  letter-spacing: -.01em;
 }
 
 .medic-hospital-list-title h2 a {
-  color: #0969da;
+  color: #1f2328;
   text-decoration: none;
+  transition: color .2s ease;
 }
 
 .medic-hospital-list-title h2 a:hover {
-  text-decoration: underline;
+  color: #0969da;
 }
 
 .medic-hospital-list-type {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 6px;
 }
 
 .medic-hospital-list-tag {
   display: inline-flex;
   align-items: center;
   min-height: 22px;
-  padding: 2px 8px;
+  padding: 2px 10px;
   border-radius: 999px;
-  background: #ddf4ff;
+  background: #eef6ff;
   color: #0969da;
-  border: 1px solid rgba(9, 105, 218, 0.18);
+  border: 1px solid rgba(9, 105, 218, 0.16);
   font-size: 12px;
   font-weight: 600;
 }
 
 .medic-hospital-list-tag-success {
-  background: #dafbe1;
-  color: #1a7f37;
-  border-color: rgba(26, 127, 55, 0.2);
-}
-
-.medic-hospital-list-info {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px 12px;
-  color: #57606a;
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.medic-hospital-list-info span {
-  display: inline-flex;
-  align-items: center;
-  max-width: 100%;
-  min-width: 0;
-}
-
-.medic-hospital-list-info strong {
-  color: #24292f;
-  font-weight: 600;
-  margin-right: 4px;
-  flex-shrink: 0;
-}
-
-.medic-hospital-list-info em {
-  color: #57606a;
-  font-style: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-}
-
-.medic-hospital-list-desc {
-  margin: 6px 0 0;
-  color: #57606a;
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.medic-hospital-mobile-info {
-  display: none;
-}
-
-.medic-hospital-list-side {
-  text-align: right;
+  background: #f0fdf4;
+  color: #15803d;
+  border-color: rgba(21, 128, 61, 0.18);
 }
 
 .medic-hospital-list-status {
-  color: #57606a;
-  font-size: 12px;
-  line-height: 1.4;
-  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+  text-align: right;
 }
 
-.medic-hospital-list-status strong {
-  color: #1a7f37;
+.medic-hospital-list-status-badge {
+  display: inline-flex;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: #f0fdf4;
+  color: #15803d;
+  font-size: 12.5px;
   font-weight: 700;
+  white-space: nowrap;
+}
+
+.medic-hospital-list-status-text {
+  color: #8c959f;
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.medic-hospital-list-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0;
+  padding: 12px 0 0;
+  border-top: 1px solid #eef1f3;
+  list-style: none;
+}
+
+.medic-hospital-list-meta li {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  color: #1f2328;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.medic-hospital-list-meta svg {
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
+  color: #8c959f;
+  flex-shrink: 0;
+}
+
+.medic-hospital-list-meta span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.medic-hospital-list-meta strong {
+  font-weight: 600;
+  color: #57606a;
+}
+
+.medic-hospital-list-meta-mobile {
+  display: none;
+}
+
+.medic-hospital-list-desc {
+  margin: 0;
+  padding-top: 2px;
+  color: #57606a;
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 .medic-hospital-list-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 6px;
+  gap: 8px;
 }
 
 .medic-list-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 32px;
-  padding: 0 10px;
-  border-radius: 6px;
-  border: 1px solid #d0d7de;
+  min-height: 34px;
+  padding: 0 15px;
+  border-radius: 999px;
+  border: 1px solid #d8dee4;
   background: #ffffff;
-  color: #0969da;
+  color: #1f2328;
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
+  transition: border-color .16s ease, color .16s ease;
 }
 
 .medic-list-btn:hover {
-  background: #f6f8fa;
+  border-color: #0969da;
+  color: #0969da;
 }
 
 .medic-list-btn-primary {
-  background: #2da44e;
-  border-color: #2da44e;
+  border-color: transparent;
+  background: linear-gradient(135deg, #0969da, #2da44e);
   color: #ffffff;
+  transition: filter .16s ease, box-shadow .25s ease;
 }
 
 .medic-list-btn-primary:hover {
-  background: #1f883d;
-  border-color: #1f883d;
   color: #ffffff;
+  filter: brightness(1.04);
 }
 
-@media (max-width: 760px) {
-  .medic-hospital-list-item {
-    grid-template-columns: 52px minmax(0, 1fr);
-    align-items: start;
-  }
-
-  .medic-hospital-list-photo {
-    width: 52px;
-    height: 52px;
-  }
-
-  .medic-hospital-desktop-info {
+@media (max-width: 640px) {
+  .medic-hospital-list-meta-desktop {
     display: none;
   }
 
-  .medic-hospital-mobile-info {
-    grid-column: 1 / -1;
-    display: grid;
-    gap: 5px;
-    width: 100%;
-    margin-top: 8px;
-    padding-top: 10px;
-    border-top: 1px solid #d0d7de;
-    text-align: left;
-  }
-
-  .medic-hospital-mobile-info span {
-    display: grid;
-    grid-template-columns: 92px minmax(0, 1fr);
-    align-items: start;
-    gap: 0;
-    width: 100%;
-  }
-
-  .medic-hospital-mobile-info strong {
-    margin-right: 0;
-    color: #24292f;
-  }
-
-  .medic-hospital-mobile-info em {
-    white-space: normal;
-    text-align: left;
-    color: #57606a;
-    font-style: normal;
-  }
-
-  .medic-hospital-mobile-desc {
-    margin-top: 4px;
-    color: #57606a;
-    font-size: 13px;
-    line-height: 1.45;
-  }
-
-  .medic-hospital-list-side {
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    text-align: left;
-    border-top: 1px solid #d0d7de;
-    padding-top: 10px;
-  }
-
-  .medic-hospital-list-actions {
-    justify-content: flex-end;
+  .medic-hospital-list-meta-mobile {
+    display: inline;
   }
 }
 
 @media (max-width: 480px) {
   .medic-hospital-list-item {
-    grid-template-columns: 52px minmax(0, 1fr);
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .medic-hospital-list-photo {
+    width: 50px;
+    height: 50px;
+  }
+
+  .medic-hospital-list-head {
     gap: 10px;
   }
 
-  .medic-hospital-mobile-info span {
-    grid-template-columns: 88px minmax(0, 1fr);
+  .medic-hospital-list-status-badge {
+    padding: 3px 9px;
+    font-size: 12px;
   }
 
-  .medic-hospital-list-side {
-    align-items: stretch;
-    flex-direction: column;
+  .medic-hospital-list-meta {
+    gap: 8px 14px;
   }
 
   .medic-hospital-list-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
   }
 
   .medic-list-btn {
@@ -280,21 +278,13 @@
 }
 
 @media (max-width: 360px) {
-  .medic-hospital-list-item {
-    grid-template-columns: 1fr;
+  .medic-hospital-list-head {
+    flex-wrap: wrap;
   }
 
-  .medic-hospital-list-photo {
-    width: 56px;
-    height: 56px;
-  }
-
-  .medic-hospital-mobile-info span {
-    grid-template-columns: 1fr;
-    gap: 2px;
-  }
-
-  .medic-hospital-list-actions {
-    grid-template-columns: 1fr;
+  .medic-hospital-list-status {
+    align-items: flex-start;
+    text-align: left;
+    margin-left: 64px;
   }
 }

@@ -341,15 +341,15 @@ body {
 }
 
 .medic-specialty-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
+  width: 100px;
+  height: 100px;
+  border-radius: 16px;
   background: var(--medic-tint);
   color: var(--medic-blue);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 19px;
+  font-size: 32px;
   overflow: hidden;
 }
 
@@ -391,17 +391,19 @@ body {
 }
 
 /*
- * doctor-card.php renders a complete card with its own border, radius,
- * shadow and hover animation, so this wrapper stays a plain pass-through
- * here instead of drawing a second border/shadow behind it.
+ * doctor-card.php and hospital-card.php render a complete card with their
+ * own border, radius, shadow and hover animation, so this wrapper stays a
+ * plain pass-through here instead of drawing a second border/shadow behind it.
  */
-.medic-list-card:has(.medic-doctor-list-item) {
+.medic-list-card:has(.medic-doctor-list-item),
+.medic-list-card:has(.medic-hospital-list-item) {
   background: transparent;
   border: 0;
   padding: 0;
 }
 
-.medic-list-card:has(.medic-doctor-list-item):hover {
+.medic-list-card:has(.medic-doctor-list-item):hover,
+.medic-list-card:has(.medic-hospital-list-item):hover {
   box-shadow: none;
   border-color: transparent;
 }
@@ -452,13 +454,11 @@ body {
   }
 
   .medic-search-form {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 
-  .medic-search-form input {
-    grid-column: 1 / -1;
-  }
-
+  .medic-search-form input,
+  .medic-search-form select,
   .medic-search-submit {
     grid-column: 1 / -1;
   }

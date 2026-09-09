@@ -465,8 +465,8 @@ if (!function_exists('admin_site_upload_file')) {
         }
 
         $target = admin_site_upload_target($field_name, 'webp');
-        $max_width = in_array($field_name, ['home_hero_image', 'default_og_image'], true) ? 1920 : 1600;
-        $max_height = in_array($field_name, ['home_hero_image', 'default_og_image'], true) ? 1080 : 1600;
+        $max_width = $field_name === 'default_og_image' ? 1920 : 1600;
+        $max_height = $field_name === 'default_og_image' ? 1080 : 1600;
 
         $saved = admin_site_save_webp_with_gd($tmp_file, $target['path'], $mime, $max_width, $max_height, ADMIN_SITE_WEBP_QUALITY);
 
@@ -1274,11 +1274,12 @@ $settings_schema = [
         'icon' => 'H',
         'description' => 'Hero section, featured doctors, hospitals and homepage limits.',
         'fields' => [
-            ['key' => 'home_hero_title', 'label' => 'Hero Title', 'type' => 'text', 'default' => 'Find the Right Doctor Near You', 'full' => true],
-            ['key' => 'home_hero_subtitle', 'label' => 'Hero Subtitle', 'type' => 'textarea', 'full' => true],
+            ['key' => 'home_hero_title', 'label' => 'Hero Title', 'type' => 'text', 'default' => 'Find the Right Doctor Near You'],
+            ['key' => 'home_hero_title_bn', 'label' => 'Hero Title (Bangla)', 'type' => 'text', 'help' => 'Leave blank to use the default Bangla text.'],
+            ['key' => 'home_hero_subtitle', 'label' => 'Hero Subtitle', 'type' => 'textarea'],
+            ['key' => 'home_hero_subtitle_bn', 'label' => 'Hero Subtitle (Bangla)', 'type' => 'textarea', 'help' => 'Leave blank to use the default Bangla text.'],
             ['key' => 'home_hero_button_text', 'label' => 'Hero Button Text', 'type' => 'text', 'default' => 'Find Doctor'],
             ['key' => 'home_hero_button_url', 'label' => 'Hero Button URL', 'type' => 'text', 'default' => 'doctors.php'],
-            ['key' => 'home_hero_image', 'label' => 'Hero Image', 'type' => 'file', 'accept' => 'image/*', 'default' => '../assets/images/home-hero-image.webp', 'help' => 'Converted and saved as /assets/images/home-hero-image-YYMMDDHHMMSS.webp.'],
             ['key' => 'home_featured_specialties_limit', 'label' => 'Featured Specialties Limit', 'type' => 'number', 'default' => '12'],
             ['key' => 'home_featured_doctors_limit', 'label' => 'Featured Doctors Limit', 'type' => 'number', 'default' => '8'],
             ['key' => 'home_featured_hospitals_limit', 'label' => 'Featured Hospitals Limit', 'type' => 'number', 'default' => '8'],

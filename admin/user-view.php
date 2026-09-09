@@ -1113,11 +1113,13 @@ if (table_exists('profile_update_requests')) {
     }
 
     /*
-     * doctor-card.php renders a complete card with its own border, radius,
-     * shadow and hover animation, so avoid drawing a second border/shadow
-     * (and clipping its hover shadow via overflow:hidden) behind it here.
+     * doctor-card.php / hospital-card.php render a complete card with their
+     * own border, radius, shadow and hover animation, so avoid drawing a
+     * second border/shadow (and clipping the hover shadow via
+     * overflow:hidden) behind it here.
      */
-    .medic-list-card:has(.medic-doctor-list-item) {
+    .medic-list-card:has(.medic-doctor-list-item),
+    .medic-list-card:has(.medic-hospital-list-item) {
         background: transparent;
         border: 0;
         padding: 0;

@@ -15,7 +15,7 @@ if (!function_exists('str_starts_with')) {
     }
 }
 
-$header_version = 'fix-double-border-behind-card-20260908h';
+$header_version = 'home-mobile-search-stack-20260909d';
 
 /*
 |--------------------------------------------------------------------------

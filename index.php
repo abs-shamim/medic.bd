@@ -8,18 +8,37 @@
  */
 require_once __DIR__ . '/route.php';
 
-$home_hero_title = __t('home_hero_title', front_site_setting('home_hero_title', 'Find doctors and hospitals with confidence.'));
-$home_hero_subtitle = __t('home_hero_subtitle', front_site_setting('home_hero_subtitle', 'Search verified doctors, hospitals, specialties and appointment information from one simple healthcare platform built for fast discovery.'));
-$home_hero_button_text = __t('home_hero_button_text', front_site_setting('home_hero_button_text', 'Find Doctor'));
+/*
+ * languages/en.php and languages/bn.php both define default translations for
+ * these same keys (home_hero_title, etc.), so __t($key, $fallback) always
+ * finds a value in the translation table and never reaches $fallback -
+ * meaning an admin-entered Site Settings value was silently ignored.
+ * English pages prefer the Site Settings value (home_hero_title) when set;
+ * Bangla pages prefer the Bangla Site Settings value (home_hero_title_bn)
+ * when set, otherwise fall back to the bn.php translation.
+ */
+if (!function_exists('front_home_setting_text')) {
+    function front_home_setting_text(string $key, string $default, string $bn_key = ''): string
+    {
+        $is_bn = defined('CURRENT_LANG') && CURRENT_LANG === 'bn';
+        $setting_key = $is_bn && $bn_key !== '' ? $bn_key : $key;
+        $setting_value = trim((string) front_site_setting($setting_key, ''));
+
+        return $setting_value !== '' ? $setting_value : __t($key, $default);
+    }
+}
+
+$home_hero_title = front_home_setting_text('home_hero_title', 'Find doctors and hospitals with confidence.', 'home_hero_title_bn');
+$home_hero_subtitle = front_home_setting_text('home_hero_subtitle', 'Search verified doctors, hospitals, specialties and appointment information from one simple healthcare platform built for fast discovery.', 'home_hero_subtitle_bn');
+$home_hero_button_text = front_home_setting_text('home_hero_button_text', 'Find Doctor');
 $home_hero_button_url = front_site_setting('home_hero_button_url', 'doctors');
-$home_hero_image = front_setting_url('home_hero_image', '');
 $site_tagline = __t('site_tagline', front_site_setting('site_tagline', 'Doctor and Hospital Directory'));
 $site_description = __t('site_description', front_site_setting('site_description', 'A clean healthcare directory for finding doctors, hospitals, specialties and appointment information quickly.'));
 $default_og_image = front_setting_url('default_og_image', 'assets/images/default-og-image.webp');
 
-$home_featured_specialties_limit = front_setting_int('home_featured_specialties_limit', 8, 1, 50);
-$home_featured_doctors_limit = front_setting_int('home_featured_doctors_limit', 3, 1, 50);
-$home_featured_hospitals_limit = front_setting_int('home_featured_hospitals_limit', 3, 1, 50);
+$home_featured_specialties_limit = front_setting_int('home_featured_specialties_limit', 8, 0, 50);
+$home_featured_doctors_limit = front_setting_int('home_featured_doctors_limit', 3, 0, 50);
+$home_featured_hospitals_limit = front_setting_int('home_featured_hospitals_limit', 3, 0, 50);
 
 $home_search_status = front_site_setting('home_search_status', 'active');
 $home_search_default_type = front_site_setting('home_search_default_type', 'doctors');
@@ -38,8 +57,8 @@ $front_body_background = front_setting_color('body_background_color', '#f6f8fa')
 
 $counts = get_setting_counts();
 $specialties = get_specialties();
-$featured_doctors = get_featured_doctors($home_featured_doctors_limit);
-$featured_hospitals = get_featured_hospitals($home_featured_hospitals_limit);
+$featured_doctors = $home_featured_doctors_limit > 0 ? get_featured_doctors($home_featured_doctors_limit) : [];
+$featured_hospitals = $home_featured_hospitals_limit > 0 ? get_featured_hospitals($home_featured_hospitals_limit) : [];
 
 include __DIR__ . '/includes/header.php';
 ?>
@@ -200,12 +219,14 @@ include __DIR__ . '/includes/header.php';
 
               if (specialtySelect) {
                 specialtySelect.disabled = true;
+                specialtySelect.hidden = true;
               }
             } else {
               form.action = '<?= e(front_url('doctors')) ?>';
 
               if (specialtySelect) {
                 specialtySelect.disabled = false;
+                specialtySelect.hidden = false;
               }
             }
           }
@@ -251,6 +272,7 @@ include __DIR__ . '/includes/header.php';
     <?php endif; ?>
 
     <!-- Popular Specialties -->
+        <?php if ($home_featured_specialties_limit > 0): ?>
         <section class="medic-section">
           <div class="medic-section-title">
             <div>
@@ -303,8 +325,10 @@ include __DIR__ . '/includes/header.php';
             <?php endif; ?>
           </div>
         </section>
+        <?php endif; ?>
 
         <!-- Featured Doctors -->
+        <?php if ($home_featured_doctors_limit > 0): ?>
         <section class="medic-section">
           <div class="medic-section-title">
             <div>
@@ -331,8 +355,10 @@ include __DIR__ . '/includes/header.php';
             <?php endif; ?>
           </div>
         </section>
+        <?php endif; ?>
 
         <!-- Featured Hospitals -->
+        <?php if ($home_featured_hospitals_limit > 0): ?>
         <section class="medic-section">
           <div class="medic-section-title">
             <div>
@@ -359,6 +385,7 @@ include __DIR__ . '/includes/header.php';
             <?php endif; ?>
           </div>
         </section>
+        <?php endif; ?>
 
         <!-- About -->
         <section class="medic-about">

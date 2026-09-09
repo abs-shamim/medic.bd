@@ -441,19 +441,13 @@ if (isset($hospital_page_heading) && trim((string) $hospital_page_heading) !== '
     content: '';
   }
 
+  /*
+   * hospital-card.php now owns its own border, radius, shadow and hover
+   * animation, so the shell stays a plain pass-through and no longer
+   * duplicates a second border/shadow behind the card on hover.
+   */
   .medic-hospital-card-shell {
-    overflow: hidden;
-    border: 1px solid var(--hp-border);
     border-radius: var(--hp-radius-card);
-    background: var(--hp-surface);
-    box-shadow: var(--hp-shadow);
-    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
-  }
-
-  .medic-hospital-card-shell:hover {
-    border-color: #8c959f;
-    box-shadow: var(--hp-shadow-hover);
-    transform: translateY(-1px);
   }
 
   .medic-empty-card {

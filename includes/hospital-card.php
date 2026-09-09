@@ -393,101 +393,88 @@
    * Appointment button currently links to hospital profile.
    */
   $hospital_appointment_link = $hospital_link;
+
+  $hospital_not_specified_text = medic_hc_t('hospital_card_not_specified', 'Not specified');
+  $hospital_location_text = $hospital_desktop_location !== $hospital_not_specified_text
+      ? $hospital_desktop_location
+      : ($hospital_mobile_location !== $hospital_not_specified_text ? $hospital_mobile_location : '');
 ?>
 
 <article class="medic-hospital-list-item">
 
-  <div class="medic-hospital-list-photo">
-    <img
-      src="<?= e($hospital_image) ?>"
-      alt="<?= e($hospital_card_display($hospital_name)) ?>"
-      loading="lazy"
-    >
-  </div>
-
-  <div class="medic-hospital-list-main">
-    <div class="medic-hospital-list-title">
-      <h2>
-        <a href="<?= e($hospital_link) ?>">
-          <?= e($hospital_card_display($hospital_name)) ?>
-        </a>
-      </h2>
+  <div class="medic-hospital-list-head">
+    <div class="medic-hospital-list-photo">
+      <img
+        src="<?= e($hospital_image) ?>"
+        alt="<?= e($hospital_card_display($hospital_name)) ?>"
+        loading="lazy"
+      >
     </div>
 
-    <div class="medic-hospital-list-type">
-      <span class="medic-hospital-list-tag">
-        <?= e($hospital_card_display($hospital_type)) ?>
-      </span>
-
-      <span class="medic-hospital-list-tag medic-hospital-list-tag-success">
-        <?= e($hospital_card_display(medic_hc_t('hospital_card_emergency_24_7', 'Emergency 24/7'))) ?>
-      </span>
-    </div>
-
-    <div class="medic-hospital-list-info medic-hospital-desktop-info">
-      <span>
-        <strong><?= e($hospital_card_display(medic_hc_t('hospital_card_location', 'Location'))) ?>:</strong>
-        <em><?= e($hospital_card_display($hospital_desktop_location)) ?></em>
-      </span>
-
-      <span>
-        <strong><?= e($hospital_card_display(medic_hc_t('hospital_card_departments', 'Departments'))) ?>:</strong>
-        <em><?= e($hospital_card_display((string)$hospital_departments)) ?>+</em>
-      </span>
-
-      <span>
-        <strong><?= e($hospital_card_display(medic_hc_t('hospital_card_doctors', 'Doctors'))) ?>:</strong>
-        <em><?= e($hospital_card_display((string)$hospital_doctors)) ?>+</em>
-      </span>
-    </div>
-
-    <?php if ($hospital_description !== ''): ?>
-      <p class="medic-hospital-list-desc medic-hospital-desktop-info">
-        <?= e($hospital_card_display(mb_strimwidth($hospital_description, 0, 90, '...'))) ?>
-      </p>
-    <?php endif; ?>
-  </div>
-
-  <div class="medic-hospital-list-info medic-hospital-mobile-info">
-    <span>
-      <strong><?= e($hospital_card_display(medic_hc_t('hospital_card_location', 'Location'))) ?>:</strong>
-      <em><?= e($hospital_card_display($hospital_mobile_location)) ?></em>
-    </span>
-
-    <span>
-      <strong><?= e($hospital_card_display(medic_hc_t('hospital_card_departments', 'Departments'))) ?>:</strong>
-      <em><?= e($hospital_card_display((string)$hospital_departments)) ?>+</em>
-    </span>
-
-    <span>
-      <strong><?= e($hospital_card_display(medic_hc_t('hospital_card_doctors', 'Doctors'))) ?>:</strong>
-      <em><?= e($hospital_card_display((string)$hospital_doctors)) ?>+</em>
-    </span>
-
-    <?php if ($hospital_description !== ''): ?>
-      <div class="medic-hospital-mobile-desc">
-        <?= e($hospital_card_display(mb_strimwidth($hospital_description, 0, 110, '...'))) ?>
+    <div class="medic-hospital-list-main">
+      <div class="medic-hospital-list-title">
+        <h2>
+          <a href="<?= e($hospital_link) ?>">
+            <?= e($hospital_card_display($hospital_name)) ?>
+          </a>
+        </h2>
       </div>
-    <?php endif; ?>
-  </div>
 
-  <div class="medic-hospital-list-side">
-    <div>
-      <div class="medic-hospital-list-status">
-        <strong><?= e($hospital_card_display(medic_hc_t('hospital_card_open', 'Open'))) ?></strong><br>
+      <div class="medic-hospital-list-type">
+        <span class="medic-hospital-list-tag">
+          <?= e($hospital_card_display($hospital_type)) ?>
+        </span>
+
+        <span class="medic-hospital-list-tag medic-hospital-list-tag-success">
+          <?= e($hospital_card_display(medic_hc_t('hospital_card_emergency_24_7', 'Emergency 24/7'))) ?>
+        </span>
+      </div>
+    </div>
+
+    <div class="medic-hospital-list-status">
+      <span class="medic-hospital-list-status-badge">
+        <?= e($hospital_card_display(medic_hc_t('hospital_card_open', 'Open'))) ?>
+      </span>
+      <span class="medic-hospital-list-status-text">
         <?= e($hospital_card_display(medic_hc_t('hospital_card_service_24_7', '24/7 service'))) ?>
-      </div>
+      </span>
     </div>
+  </div>
 
-    <div class="medic-hospital-list-actions">
-      <a href="<?= e($hospital_link) ?>" class="medic-list-btn">
-        <?= e($hospital_card_display(medic_hc_t('hospital_card_details', 'Details'))) ?>
-      </a>
+  <ul class="medic-hospital-list-meta">
+    <?php if ($hospital_location_text !== ''): ?>
+      <li>
+        <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 14.5s5-4.2 5-8.2A5 5 0 0 0 3 6.3c0 4 5 8.2 5 8.2Z"></path><circle cx="8" cy="6.2" r="1.8"></circle></svg>
+        <span class="medic-hospital-list-meta-desktop"><?= e($hospital_card_display($hospital_desktop_location)) ?></span>
+        <span class="medic-hospital-list-meta-mobile"><?= e($hospital_card_display($hospital_mobile_location)) ?></span>
+      </li>
+    <?php endif; ?>
 
-      <a href="<?= e($hospital_appointment_link) ?>" class="medic-list-btn medic-list-btn-primary">
-        <?= e($hospital_card_display(medic_hc_t('hospital_card_appointment', 'Appointment'))) ?>
-      </a>
-    </div>
+    <li>
+      <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="2" width="5" height="5" rx="1"></rect><rect x="9" y="2" width="5" height="5" rx="1"></rect><rect x="2" y="9" width="5" height="5" rx="1"></rect><rect x="9" y="9" width="5" height="5" rx="1"></rect></svg>
+      <span><strong><?= e($hospital_card_display(medic_hc_t('hospital_card_departments', 'Departments'))) ?>:</strong> <?= e($hospital_card_display((string)$hospital_departments)) ?>+</span>
+    </li>
+
+    <li>
+      <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="5.3" r="2.6"></circle><path d="M2.8 14c.6-2.8 2.7-4.5 5.2-4.5s4.6 1.7 5.2 4.5"></path></svg>
+      <span><strong><?= e($hospital_card_display(medic_hc_t('hospital_card_doctors', 'Doctors'))) ?>:</strong> <?= e($hospital_card_display((string)$hospital_doctors)) ?>+</span>
+    </li>
+  </ul>
+
+  <?php if ($hospital_description !== ''): ?>
+    <p class="medic-hospital-list-desc">
+      <?= e($hospital_card_display(mb_strimwidth($hospital_description, 0, 140, '...'))) ?>
+    </p>
+  <?php endif; ?>
+
+  <div class="medic-hospital-list-actions">
+    <a href="<?= e($hospital_link) ?>" class="medic-list-btn">
+      <?= e($hospital_card_display(medic_hc_t('hospital_card_details', 'Details'))) ?>
+    </a>
+
+    <a href="<?= e($hospital_appointment_link) ?>" class="medic-list-btn medic-list-btn-primary">
+      <?= e($hospital_card_display(medic_hc_t('hospital_card_appointment', 'Appointment'))) ?>
+    </a>
   </div>
 
 </article>
