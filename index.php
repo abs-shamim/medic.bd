@@ -292,7 +292,7 @@ include __DIR__ . '/includes/header.php';
                   $specialty_slug = trim((string)($specialty['slug'] ?? ''));
 
                   $specialty_url = $specialty_slug !== ''
-                      ? front_url('specialty/' . rawurlencode($specialty_slug))
+                      ? front_url('doctors/' . rawurlencode($specialty_slug))
                       : front_url('specialties');
                 ?>
 

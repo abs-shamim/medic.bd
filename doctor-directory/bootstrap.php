@@ -345,6 +345,12 @@ function dp_doctors_url(array $params = []): string
         } elseif ($specialty !== '') {
             $path .= '/' . dp_url_slug($specialty);
         }
+    } elseif ($division !== '' && $specialty !== '') {
+        /*
+         * Specialty-first flow, division step:
+         * /doctors/{division-slug}/{specialty-slug}/
+         */
+        $path .= '/' . dp_url_slug($division) . '/' . dp_url_slug($specialty);
     } elseif ($specialty !== '') {
         /*
          * Specialty-only URL support:

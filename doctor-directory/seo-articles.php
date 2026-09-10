@@ -615,7 +615,6 @@ function dp_page_title(
 ): string {
     $site_name = dp_site_name();
     $lang = dp_current_seo_lang();
-
     $division_name = dp_seo_row_name(
         $division,
         $lang,
@@ -633,6 +632,26 @@ function dp_page_title(
     );
     $location_name = dp_seo_location_name($district, $thana, $lang);
     $search = trim((string)($filters['search'] ?? ''));
+
+    if ($page_step === 'division' && !empty($specialty)) {
+        $specialty_label = $lang === 'bn'
+            ? dp_seo_bangla_specialty_label($specialty)
+            : dp_seo_english_specialty_label($specialty);
+
+        return $lang === 'bn'
+            ? $specialty_label . ' খুঁজতে বিভাগ নির্বাচন করুন | ' . $site_name
+            : 'Choose Your Division for ' . $specialty_label . ' | ' . $site_name;
+    }
+
+    if ($page_step === 'district' && !empty($specialty)) {
+        $specialty_label = $lang === 'bn'
+            ? dp_seo_bangla_specialty_label($specialty)
+            : dp_seo_english_specialty_label($specialty);
+
+        return $lang === 'bn'
+            ? $division_name . ' বিভাগে ' . $specialty_label . ' খুঁজতে জেলা নির্বাচন করুন | ' . $site_name
+            : 'Choose District in ' . $division_name . ' for ' . $specialty_label . ' | ' . $site_name;
+    }
 
     if ($page_step === 'division') {
         return $lang === 'bn'
@@ -706,6 +725,26 @@ function dp_page_description(
     $specialty_alternate_names = dp_seo_specialty_alternate_names($specialty, $lang);
     $location_name = dp_seo_location_name($district, $thana, $lang);
     $search = trim((string)($filters['search'] ?? ''));
+
+    if ($page_step === 'division' && !empty($specialty)) {
+        $specialty_label = $lang === 'bn'
+            ? dp_seo_bangla_specialty_label($specialty)
+            : dp_seo_english_specialty_label($specialty);
+
+        return $lang === 'bn'
+            ? 'বাংলাদেশে ' . $specialty_label . ' খুঁজতে আপনার বিভাগ নির্বাচন করুন। বিভাগ বেছে নেওয়ার পর জেলা ও এলাকা অনুযায়ী আরও নির্দিষ্টভাবে খুঁজতে পারবেন।'
+            : 'Choose your division to find ' . $specialty_label . ' in Bangladesh. After selecting a division, you can narrow down further by district and area.';
+    }
+
+    if ($page_step === 'district' && !empty($specialty)) {
+        $specialty_label = $lang === 'bn'
+            ? dp_seo_bangla_specialty_label($specialty)
+            : dp_seo_english_specialty_label($specialty);
+
+        return $lang === 'bn'
+            ? $division_name . ' বিভাগে ' . $specialty_label . ' খুঁজতে জেলা নির্বাচন করুন। জেলা বেছে নেওয়ার পর নির্দিষ্ট এলাকা অনুযায়ীও খুঁজতে পারবেন।'
+            : 'Choose a district in ' . $division_name . ' to find ' . $specialty_label . '. You can narrow further by area after selecting a district.';
+    }
 
     if ($page_step === 'division') {
         return $lang === 'bn'

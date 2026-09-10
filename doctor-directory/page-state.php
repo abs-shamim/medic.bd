@@ -3,13 +3,19 @@
 |--------------------------------------------------------------------------
 | Page State
 |--------------------------------------------------------------------------
-| URL rule:
+| URL rule (district-first flow):
 | /doctors/                                      => Division list + all doctors
 | /doctors/{division-slug}/                      => District list + doctors from selected division
 | /doctors/{district-slug}/                      => Specialty list + doctors from selected district
 | /doctors/{district-slug}/{specialty}/          => Doctor list from selected district and specialty
 | /doctors/{district-slug}/{thana}/              => Specialty list + doctors from selected district and thana
 | /doctors/{district-slug}/{thana}/{specialty}/  => Doctor list from selected district, thana and specialty
+|
+| URL rule (specialty-first flow, e.g. clicking a specialty on the homepage):
+| /doctors/{specialty}/                          => Division list scoped to this specialty
+| /doctors/{division-slug}/{specialty}/          => District list scoped to this division + specialty
+| /doctors/{district-slug}/{specialty}/          => Doctor list (same URL/step as the district-first flow)
+| /doctors/{district-slug}/{thana}/{specialty}/  => Doctor list (same URL/step as the district-first flow)
 |--------------------------------------------------------------------------
 */
 
@@ -52,13 +58,36 @@ if ($first_slug !== '' && $second_slug === '') {
                 $specialty_candidate = dp_get_specialty_by_slug($first_slug);
 
                 if (!empty($specialty_candidate)) {
+                    /*
+                     * Specialty-first flow, step 1:
+                     * /doctors/{specialty-slug}/
+                     * Shows the division list scoped to this specialty
+                     * (plus the nationwide doctor list for this specialty,
+                     * same as the plain division step already does).
+                     */
                     $specialty = $specialty_candidate;
-                    $page_step = 'doctor_list';
+                    $page_step = 'division';
                 } else {
                     $page_step = 'not_found';
                 }
             }
         }
+    }
+} elseif ($first_slug !== '' && $second_slug !== '' && $third_slug === '' && substr($first_slug, -9) === '-division') {
+    /*
+     * Specialty-first flow, step 2:
+     * /doctors/{division-slug}/{specialty-slug}/
+     * Shows the district list scoped to this division + specialty.
+     */
+    $division_candidate = dp_get_division_by_slug($first_slug);
+    $specialty_candidate = dp_get_specialty_by_slug($second_slug);
+
+    if (!empty($division_candidate) && !empty($specialty_candidate)) {
+        $division = $division_candidate;
+        $specialty = $specialty_candidate;
+        $page_step = 'district';
+    } else {
+        $page_step = 'not_found';
     }
 } elseif ($first_slug !== '' && $second_slug !== '' && $third_slug === '') {
     /*
@@ -180,11 +209,11 @@ $thanas = [];
 $available_thanas = [];
 
 if ($page_step === 'division') {
-    $divisions = dp_filter_divisions_with_doctors(dp_get_divisions());
+    $divisions = dp_filter_divisions_with_doctors(dp_get_divisions(), $specialty);
 }
 
 if ($page_step === 'district' && !empty($division)) {
-    $districts = dp_filter_districts_with_doctors(dp_get_districts_by_division_id((int)$division['id']));
+    $districts = dp_filter_districts_with_doctors(dp_get_districts_by_division_id((int)$division['id']), $specialty);
 }
 
 if (in_array($page_step, ['specialty', 'thana_specialty'], true) && !empty($district)) {

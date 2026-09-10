@@ -29,9 +29,9 @@ function dp_has_doctors(array $filters): bool
     return $availability_cache[$cache_key];
 }
 
-function dp_filter_divisions_with_doctors(array $divisions): array
+function dp_filter_divisions_with_doctors(array $divisions, array $specialty = []): array
 {
-    return array_values(array_filter($divisions, static function ($division) {
+    return array_values(array_filter($divisions, static function ($division) use ($specialty) {
         return dp_has_doctors([
             'division_id' => (int)($division['id'] ?? 0),
             'division_name' => (string)($division['name'] ?? ''),
@@ -39,17 +39,17 @@ function dp_filter_divisions_with_doctors(array $divisions): array
             'district_name' => '',
             'thana_id' => 0,
             'thana_name' => '',
-            'specialty_id' => 0,
-            'specialty_slug' => '',
-            'specialty_name' => '',
+            'specialty_id' => (int)($specialty['id'] ?? 0),
+            'specialty_slug' => !empty($specialty) ? dp_row_slug($specialty) : '',
+            'specialty_name' => (string)($specialty['name'] ?? ''),
             'search' => '',
         ]);
     }));
 }
 
-function dp_filter_districts_with_doctors(array $districts): array
+function dp_filter_districts_with_doctors(array $districts, array $specialty = []): array
 {
-    return array_values(array_filter($districts, static function ($district) {
+    return array_values(array_filter($districts, static function ($district) use ($specialty) {
         return dp_has_doctors([
             'division_id' => 0,
             'division_name' => '',
@@ -57,9 +57,9 @@ function dp_filter_districts_with_doctors(array $districts): array
             'district_name' => (string)($district['name'] ?? ''),
             'thana_id' => 0,
             'thana_name' => '',
-            'specialty_id' => 0,
-            'specialty_slug' => '',
-            'specialty_name' => '',
+            'specialty_id' => (int)($specialty['id'] ?? 0),
+            'specialty_slug' => !empty($specialty) ? dp_row_slug($specialty) : '',
+            'specialty_name' => (string)($specialty['name'] ?? ''),
             'search' => '',
         ]);
     }));

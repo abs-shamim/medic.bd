@@ -745,7 +745,10 @@ if ($page_step === 'doctor_list') {
 
       <?php if (!empty($division) && empty($district)): ?>
         <span>/</span>
-        <a href="<?= e(dp_doctors_url(['division_slug' => dp_row_slug($division)])) ?>">
+        <a href="<?= e(dp_doctors_url([
+          'division_slug' => dp_row_slug($division),
+          'specialty_slug' => !empty($specialty) ? dp_row_slug($specialty) : '',
+        ])) ?>">
           <?= e($division['name']) ?>
         </a>
       <?php endif; ?>
@@ -770,11 +773,23 @@ if ($page_step === 'doctor_list') {
 
       <?php if (!empty($specialty)): ?>
         <span>/</span>
-        <a href="<?= e(dp_doctors_url(!empty($district) ? [
-          'district_slug' => dp_row_slug($district),
-          'thana_slug' => !empty($thana) ? dp_row_slug($thana) : '',
-          'specialty_slug' => dp_row_slug($specialty),
-        ] : ['specialty_slug' => dp_row_slug($specialty)])) ?>">
+        <?php
+          if (!empty($district)) {
+              $specialty_crumb_params = [
+                  'district_slug' => dp_row_slug($district),
+                  'thana_slug' => !empty($thana) ? dp_row_slug($thana) : '',
+                  'specialty_slug' => dp_row_slug($specialty),
+              ];
+          } elseif (!empty($division)) {
+              $specialty_crumb_params = [
+                  'division_slug' => dp_row_slug($division),
+                  'specialty_slug' => dp_row_slug($specialty),
+              ];
+          } else {
+              $specialty_crumb_params = ['specialty_slug' => dp_row_slug($specialty)];
+          }
+        ?>
+        <a href="<?= e(dp_doctors_url($specialty_crumb_params)) ?>">
           <?= e($specialty['name']) ?>
         </a>
       <?php endif; ?>
@@ -901,7 +916,10 @@ if ($page_step === 'doctor_list') {
     <?php if ($page_step === 'division'): ?>
       <section class="medic-step-grid">
         <?php foreach ($divisions as $item): ?>
-          <a class="medic-step-card<?= !empty($item['image']) ? ' has-image' : '' ?>" href="<?= e(dp_doctors_url(['division_slug' => dp_row_slug($item)])) ?>">
+          <a class="medic-step-card<?= !empty($item['image']) ? ' has-image' : '' ?>" href="<?= e(dp_doctors_url([
+            'division_slug' => dp_row_slug($item),
+            'specialty_slug' => !empty($specialty) ? dp_row_slug($specialty) : '',
+          ])) ?>">
             <?php if (!empty($item['image'])): ?>
               <span class="medic-step-card-media">
                 <img src="<?= e(dp_image_url((string)$item['image'])) ?>" alt="<?= e($item['name']) ?>" loading="lazy">
@@ -923,7 +941,10 @@ if ($page_step === 'doctor_list') {
     <?php if ($page_step === 'district'): ?>
       <section class="medic-step-grid">
         <?php foreach ($districts as $item): ?>
-          <a class="medic-step-card<?= !empty($item['image']) ? ' has-image' : '' ?>" href="<?= e(dp_doctors_url(['district_slug' => dp_row_slug($item)])) ?>">
+          <a class="medic-step-card<?= !empty($item['image']) ? ' has-image' : '' ?>" href="<?= e(dp_doctors_url([
+            'district_slug' => dp_row_slug($item),
+            'specialty_slug' => !empty($specialty) ? dp_row_slug($specialty) : '',
+          ])) ?>">
             <?php if (!empty($item['image'])): ?>
               <span class="medic-step-card-media">
                 <img src="<?= e(dp_image_url((string)$item['image'])) ?>" alt="<?= e($item['name']) ?>" loading="lazy">
