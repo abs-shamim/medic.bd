@@ -1,5 +1,5 @@
 <?php
-$footer_version = 'frontend-language-footer-20260609';
+$footer_version = function_exists('front_asset_version') ? front_asset_version() : 'frontend-language-footer-20260609';
 
 /*
 |--------------------------------------------------------------------------
@@ -9,58 +9,11 @@ $footer_version = 'frontend-language-footer-20260609';
 |--------------------------------------------------------------------------
 */
 
-if (!function_exists('medic_footer_table_exists')) {
-    function medic_footer_table_exists(string $table): bool
-    {
-        global $pdo;
-
-        try {
-            if (!isset($pdo)) {
-                return false;
-            }
-
-            $stmt = $pdo->prepare("
-                SELECT COUNT(*)
-                FROM INFORMATION_SCHEMA.TABLES
-                WHERE TABLE_SCHEMA = DATABASE()
-                AND TABLE_NAME = :table
-            ");
-            $stmt->execute([':table' => $table]);
-
-            return (int)$stmt->fetchColumn() > 0;
-        } catch (Throwable $e) {
-            return false;
-        }
-    }
-}
-
 if (!function_exists('medic_footer_setting')) {
     function medic_footer_setting(string $key, string $default = ''): string
     {
-        global $pdo;
-
-        static $settings_cache = null;
-
-        if ($settings_cache === null) {
-            $settings_cache = [];
-
-            try {
-                if (!isset($pdo) || !medic_footer_table_exists('site_settings')) {
-                    return $default;
-                }
-
-                $stmt = $pdo->query("SELECT setting_key, setting_value FROM site_settings");
-                $rows = $stmt->fetchAll();
-
-                foreach ($rows as $row) {
-                    $settings_cache[(string)$row['setting_key']] = (string)$row['setting_value'];
-                }
-            } catch (Throwable $e) {
-                $settings_cache = [];
-            }
-        }
-
-        $value = trim((string)($settings_cache[$key] ?? ''));
+        $settings = function_exists('medic_site_settings_all') ? medic_site_settings_all() : [];
+        $value = trim((string)($settings[$key] ?? ''));
 
         return $value !== '' ? $value : $default;
     }
@@ -70,19 +23,6 @@ if (!function_exists('medic_footer_site_name')) {
     function medic_footer_site_name(): string
     {
         return medic_footer_setting('site_name', defined('APP_NAME') ? APP_NAME : 'Deluti');
-    }
-}
-
-if (!function_exists('medic_footer_color')) {
-    function medic_footer_color(string $key, string $default): string
-    {
-        $value = medic_footer_setting($key, $default);
-
-        if (preg_match('/^#[0-9a-fA-F]{6}$/', $value)) {
-            return $value;
-        }
-
-        return $default;
     }
 }
 
@@ -207,25 +147,7 @@ $footer_copyright = medic_footer_setting(
 $footer_privacy_url = medic_footer_setting('privacy_policy_url', 'privacy-policy');
 $footer_terms_url = medic_footer_setting('terms_url', medic_footer_setting('terms_conditions_url', 'terms'));
 $footer_support_url = medic_footer_setting('support_url', 'support');
-
-$footer_primary_color = medic_footer_color('primary_color', '#0969da');
-$footer_accent_color = medic_footer_color('accent_color', '#2da44e');
-$footer_body_background = medic_footer_color('body_background_color', '#f6f8fa');
 ?>
-
-<footer class="medic-footer">
-
-<style>
-  :root {
-    --footer-primary: <?= e($footer_primary_color) ?>;
-    --footer-accent: <?= e($footer_accent_color) ?>;
-    --footer-bg: <?= e($footer_body_background) ?>;
-    --footer-dark: #24292f;
-    --footer-muted: #57606a;
-    --footer-border: #d0d7de;
-    --footer-card: #ffffff;
-  }
-</style>
 
 <footer class="medic-footer">
 
@@ -257,7 +179,7 @@ $footer_body_background = medic_footer_color('body_background_color', '#f6f8fa')
       <a href="<?= e(front_url()) ?>" class="medic-footer-logo">
         <span>
           <?php if ($footer_site_logo !== ''): ?>
-            <img src="<?= e($footer_site_logo) ?>" alt="<?= e($footer_site_name) ?>">
+            <img src="<?= e($footer_site_logo) ?>" alt="<?= e($footer_site_name) ?>" loading="lazy">
           <?php else: ?>
             +
           <?php endif; ?>
@@ -337,6 +259,8 @@ $footer_body_background = medic_footer_color('body_background_color', '#f6f8fa')
     </div>
   </div>
 </footer>
+
+<script src="<?= e(site_url('assets/js/image-fallback.js')) ?>?v=<?= e($footer_version) ?>" defer></script>
 
 </body>
 </html>

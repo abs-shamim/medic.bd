@@ -1128,27 +1128,10 @@ $meta_keywords = front_meta_translate(
 $meta_robots = 'noindex,follow';
 $robots_meta = 'noindex,follow';
 $canonical_url = front_current_route_url(CURRENT_LANG);
+$extra_head_html = '<link rel="stylesheet" href="' . e(site_url('assets/css/error-page.css')) . '?v=' . e(front_asset_version()) . '">';
 
 include __DIR__ . '/includes/header.php';
 ?>
-<style>
-    body { background: #f6f8fa; }
-    .medic-error-page { padding: 80px 16px; }
-    .medic-container { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
-    .medic-error-card {
-        max-width: 720px; margin: 0 auto; padding: 40px; text-align: center;
-        background: #fff; border: 1px solid #d0d7de; border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(140, 149, 159, .15);
-    }
-    .medic-error-card h1 { margin: 0 0 12px; color: #24292f; font-size: 34px; }
-    .medic-error-card p { margin: 0 0 24px; color: #57606a; font-size: 16px; }
-    .medic-btn {
-        display: inline-flex; align-items: center; justify-content: center;
-        min-height: 40px; padding: 0 18px; border: 1px solid rgba(27,31,36,.15);
-        border-radius: 6px; background: #2da44e; color: #fff; text-decoration: none;
-        font-size: 14px; font-weight: 600;
-    }
-</style>
 <main class="medic-error-page">
     <div class="medic-container">
         <div class="medic-error-card">

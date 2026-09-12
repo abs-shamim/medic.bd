@@ -50,50 +50,36 @@ $home_search_locations_limit = front_setting_int('home_search_locations_limit', 
 $home_search_locations = front_get_home_search_locations($home_search_locations_limit);
 $home_search_action = front_home_search_action($home_search_default_type);
 
-$front_primary_color = front_setting_color('primary_color', '#0969da');
-$front_accent_color = front_setting_color('accent_color', '#2da44e');
-$front_secondary_color = front_setting_color('secondary_color', '#14b8a6');
-$front_body_background = front_setting_color('body_background_color', '#f6f8fa');
+/*
+ * get_setting_counts() computes 10 counts (doctors, hospitals, specialties,
+ * locations, reviews, users, active_users, blocked_users, pending claims,
+ * pending update requests) for the admin dashboard, which costs up to ~19
+ * queries per call. The homepage stat strip only ever displays 3 of those
+ * numbers, so it fetches just those 3 directly instead of paying for the
+ * other 7 on every homepage load.
+ */
+if (!function_exists('front_home_stat_counts')) {
+    function front_home_stat_counts(): array
+    {
+        return [
+            'doctors' => safe_table_count('doctors', "status='active'"),
+            'hospitals' => safe_table_count('hospitals', "status='active'"),
+            'specialties' => safe_table_count('specialties', "status='active'"),
+        ];
+    }
+}
 
-$counts = get_setting_counts();
+$counts = front_home_stat_counts();
 $specialties = get_specialties();
 $featured_doctors = $home_featured_doctors_limit > 0 ? get_featured_doctors($home_featured_doctors_limit) : [];
 $featured_hospitals = $home_featured_hospitals_limit > 0 ? get_featured_hospitals($home_featured_hospitals_limit) : [];
 
+$medic_load_home_css = true;
+$medic_load_doctor_card_css = true;
+$medic_load_hospital_card_css = true;
+
 include __DIR__ . '/includes/header.php';
 ?>
-
-<style>
-  :root {
-    --medic-bg: <?= e($front_body_background) ?>;
-    --medic-dark: #0f1720;
-    --medic-muted: #57606a;
-    --medic-border: #d0d7de;
-    --medic-border-soft: #e2e6ea;
-    --medic-card: #ffffff;
-    --medic-green: <?= e($front_accent_color) ?>;
-    --medic-green-dark: <?= e($front_accent_color) ?>;
-    --medic-blue: <?= e($front_primary_color) ?>;
-    --medic-blue-light: #ddf4ff;
-    --medic-purple: <?= e($front_secondary_color) ?>;
-    --medic-yellow-bg: #fff8c5;
-    --medic-yellow-border: #d4a72c;
-
-    /* Simple-premium tokens: one accent gradient, soft shadows that only
-       appear on hover, generous rounding. Built on the admin-configurable
-       brand colors above, so settings changes still flow through. */
-    --medic-shadow-sm: 0 1px 2px rgba(15, 23, 32, 0.04);
-    --medic-shadow-md: 0 12px 28px -12px rgba(15, 23, 32, 0.16);
-    --medic-shadow-lg: 0 24px 48px -18px rgba(15, 23, 32, 0.22);
-    --medic-radius-sm: 12px;
-    --medic-radius-md: 18px;
-    --medic-radius-lg: 24px;
-    --medic-gradient-brand: linear-gradient(135deg, var(--medic-blue), var(--medic-purple));
-    --medic-ring: 0 0 0 4px color-mix(in srgb, var(--medic-blue) 14%, transparent);
-    --medic-tint: color-mix(in srgb, var(--medic-blue) 8%, transparent);
-  }
-
-</style>
 
 <main class="medic-home">
   <div class="medic-container">
@@ -112,7 +98,7 @@ include __DIR__ . '/includes/header.php';
       <!-- Search -->
       <?php if ($home_search_status !== 'inactive' && $home_search_status !== 'disabled'): ?>
         <div class="medic-search-panel">
-          <form class="medic-search-form" action="<?= e($home_search_action) ?>" method="GET" id="homeDynamicSearchForm">
+          <form class="medic-search-form" action="<?= e($home_search_action) ?>" method="GET" id="homeDynamicSearchForm" data-doctors-url="<?= e(front_url('doctors')) ?>" data-hospitals-url="<?= e(front_url('hospitals')) ?>">
             <select name="search_type" id="homeSearchType" aria-label="Search type">
               <option value="doctors" <?= $home_search_default_type === 'doctors' ? 'selected' : '' ?>><?= e(__t('doctors', 'Doctors')) ?></option>
               <option value="hospitals" <?= $home_search_default_type === 'hospitals' ? 'selected' : '' ?>><?= e(__t('hospitals', 'Hospitals')) ?></option>
@@ -193,82 +179,7 @@ include __DIR__ . '/includes/header.php';
     </section>
 
     <?php if ($home_search_status !== 'inactive' && $home_search_status !== 'disabled'): ?>
-      <script>
-        document.addEventListener('DOMContentLoaded', function () {
-          const form = document.getElementById('homeDynamicSearchForm');
-          const typeSelect = document.getElementById('homeSearchType');
-          const specialtySelect = document.getElementById('homeSpecialtySelect');
-
-          if (!form || !typeSelect) {
-            return;
-          }
-
-          function slugify(value) {
-            return String(value || '')
-              .trim()
-              .toLowerCase()
-              .replace(/[^\p{L}\p{N}\s-]+/gu, '')
-              .replace(/[\s_]+/gu, '-')
-              .replace(/-+/g, '-')
-              .replace(/^-|-$/g, '');
-          }
-
-          function updateSearchAction() {
-            if (typeSelect.value === 'hospitals') {
-              form.action = '<?= e(front_url('hospitals')) ?>';
-
-              if (specialtySelect) {
-                specialtySelect.disabled = true;
-                specialtySelect.hidden = true;
-              }
-            } else {
-              form.action = '<?= e(front_url('doctors')) ?>';
-
-              if (specialtySelect) {
-                specialtySelect.disabled = false;
-                specialtySelect.hidden = false;
-              }
-            }
-          }
-
-          typeSelect.addEventListener('change', updateSearchAction);
-          updateSearchAction();
-
-          form.addEventListener('submit', function (event) {
-            event.preventDefault();
-
-            const searchInput = form.querySelector('input[name="search"]');
-            const citySelect = form.querySelector('select[name="city"]');
-
-            const type = typeSelect.value || 'doctors';
-            const search = searchInput ? searchInput.value.trim() : '';
-            const city = citySelect ? citySelect.value.trim() : '';
-            const specialty = specialtySelect && !specialtySelect.disabled ? specialtySelect.value.trim() : '';
-
-            let path = type === 'hospitals'
-              ? '<?= e(front_url('hospitals')) ?>'
-              : '<?= e(front_url('doctors')) ?>';
-
-            if (city !== '') {
-              path += '/' + slugify(city);
-            }
-
-            if (type !== 'hospitals' && specialty !== '') {
-              path += '/' + slugify(specialty);
-            }
-
-            const params = new URLSearchParams();
-
-            if (search !== '') {
-              params.set('search', search);
-            }
-
-            const queryString = params.toString();
-
-            window.location.href = path + (queryString ? '?' + queryString : '');
-          });
-        });
-      </script>
+      <script src="<?= e(site_url('assets/js/home.js')) ?>" defer></script>
     <?php endif; ?>
 
     <!-- Popular Specialties -->
@@ -300,14 +211,13 @@ include __DIR__ . '/includes/header.php';
                   <div class="medic-specialty-icon" aria-hidden="true">
                     <?php if (!empty($specialty['image'])): ?>
                       <?php
-                        $specialty_image_src = (string)$specialty['image'];
-                        $specialty_image_src = preg_match('#^https?://#i', $specialty_image_src)
-                            ? $specialty_image_src
-                            : site_url(ltrim($specialty_image_src, '/'));
+                        $specialty_image_src = front_icon_thumb_url((string)$specialty['image'], 200);
                       ?>
                       <img
                         src="<?= e($specialty_image_src) ?>"
                         alt=""
+                        width="200"
+                        height="200"
                         loading="lazy"
                       >
                     <?php else: ?>
@@ -344,6 +254,7 @@ include __DIR__ . '/includes/header.php';
           <div class="medic-list">
             <?php if (!empty($featured_doctors)): ?>
               <?php foreach ($featured_doctors as $doctor): ?>
+                <?php front_line_break(); ?>
                 <div class="medic-list-card">
                   <?php include __DIR__ . '/includes/doctor-card.php'; ?>
                 </div>
@@ -374,6 +285,7 @@ include __DIR__ . '/includes/header.php';
           <div class="medic-list">
             <?php if (!empty($featured_hospitals)): ?>
               <?php foreach ($featured_hospitals as $hospital): ?>
+                <?php front_line_break(); ?>
                 <div class="medic-list-card">
                   <?php include __DIR__ . '/includes/hospital-card.php'; ?>
                 </div>

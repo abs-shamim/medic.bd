@@ -25,17 +25,13 @@ $prescription_config = [
 $prescription_config_json = json_encode(
     $prescription_config,
     JSON_UNESCAPED_UNICODE
-    | JSON_HEX_TAG
-    | JSON_HEX_AMP
-    | JSON_HEX_APOS
-    | JSON_HEX_QUOT
     | JSON_THROW_ON_ERROR
 );
 ?>
 
         </main>
 
-        <footer class="rx-footer">
+        <footer class="rx-footer" data-prescription-config="<?= prescription_e($prescription_config_json) ?>">
             <div>
                 <strong>Prescription Workspace</strong>
                 <span>Secure doctor-only patient and prescription management.</span>
@@ -48,9 +44,9 @@ $prescription_config_json = json_encode(
     </div>
 </div>
 
-<script>
-window.PRESCRIPTION_CONFIG = <?= $prescription_config_json ?>;
-</script>
+<script src="<?= prescription_e(
+    prescription_url('assets/js/prescription-config.js')
+) ?>"></script>
 
 <script src="<?= prescription_e(
     prescription_url('assets/js/prescription.js')

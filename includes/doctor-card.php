@@ -417,37 +417,48 @@
       }
   }
 
+  if (!function_exists('medic_dc_chamber_rows_to_names')) {
+      function medic_dc_chamber_rows_to_names(array $rows): array
+      {
+          $items = [];
+
+          foreach ($rows as $row) {
+              $name = '';
+
+              if (medic_dc_lang() === 'bn' && trim((string)($row['hospital_name_bn'] ?? '')) !== '') {
+                  $name = trim((string)$row['hospital_name_bn']);
+              } else {
+                  $name = trim((string)($row['hospital_name'] ?? ''));
+              }
+
+              if ($name !== '') {
+                  $items[] = $name;
+              }
+          }
+
+          return medic_dc_unique_clean_list($items);
+      }
+  }
+
   if (!function_exists('medic_dc_chamber_list')) {
       function medic_dc_chamber_list(array $doctor): array
       {
-          global $pdo;
+          global $pdo, $medic_dc_preloaded_chambers;
 
-          $items = [];
           $doctor_id = (int)($doctor['id'] ?? 0);
+
+          if ($doctor_id > 0 && isset($medic_dc_preloaded_chambers) && array_key_exists($doctor_id, $medic_dc_preloaded_chambers)) {
+              return medic_dc_chamber_rows_to_names($medic_dc_preloaded_chambers[$doctor_id]);
+          }
 
           if (!isset($pdo) || !$pdo instanceof PDO || $doctor_id <= 0) {
               return [];
           }
 
           try {
-              $hospital_name_bn_select = "'' AS hospital_name_bn";
-
-              try {
-                  $check_bn = $pdo->prepare("
-                      SELECT COUNT(*)
-                      FROM INFORMATION_SCHEMA.COLUMNS
-                      WHERE TABLE_SCHEMA = DATABASE()
-                        AND TABLE_NAME = 'hospitals'
-                        AND COLUMN_NAME = 'name_bn'
-                  ");
-                  $check_bn->execute();
-
-                  if ((int)$check_bn->fetchColumn() > 0) {
-                      $hospital_name_bn_select = "h.name_bn AS hospital_name_bn";
-                  }
-              } catch (Throwable $e) {
-                  $hospital_name_bn_select = "'' AS hospital_name_bn";
-              }
+              $hospital_name_bn_select = (function_exists('column_exists') && column_exists('hospitals', 'name_bn'))
+                  ? "h.name_bn AS hospital_name_bn"
+                  : "'' AS hospital_name_bn";
 
               $stmt = $pdo->prepare("
                   SELECT
@@ -467,26 +478,10 @@
                   ':doctor_id' => $doctor_id,
               ]);
 
-              $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-              foreach ($rows as $row) {
-                  $name = '';
-
-                  if (medic_dc_lang() === 'bn' && trim((string)($row['hospital_name_bn'] ?? '')) !== '') {
-                      $name = trim((string)$row['hospital_name_bn']);
-                  } else {
-                      $name = trim((string)($row['hospital_name'] ?? ''));
-                  }
-
-                  if ($name !== '') {
-                      $items[] = $name;
-                  }
-              }
+              return medic_dc_chamber_rows_to_names($stmt->fetchAll(PDO::FETCH_ASSOC));
           } catch (Throwable $e) {
               return [];
           }
-
-          return medic_dc_unique_clean_list($items);
       }
   }
 
@@ -594,7 +589,7 @@
         alt="<?= e(medic_dc_display_text($doctor_name)) ?>"
         loading="lazy"
         data-fallback="webp"
-        onerror="if(this.dataset.fallback==='webp'){this.dataset.fallback='png';this.src='<?= e($doctor_default_png_url) ?>';}else{this.onerror=null;this.style.display='none';}"
+        data-fallback-png="<?= e($doctor_default_png_url) ?>"
       >
     </div>
 

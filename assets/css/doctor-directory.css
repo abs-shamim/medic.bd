@@ -1,0 +1,668 @@
+  :root {
+    --dp-surface: #ffffff;
+    --dp-surface-soft: #f6f8fa;
+    --dp-border: #d8dee4;
+    --dp-border-strong: #c9d1d9;
+    --dp-text: #1f2328;
+    --dp-muted: #656d76;
+    --dp-radius: 12px;
+    --dp-radius-card: 16px;
+    --dp-shadow: 0 1px 2px rgba(15, 23, 32, .04);
+    --dp-shadow-hover: 0 16px 32px -14px rgba(15, 23, 32, .22);
+    --dp-gradient: linear-gradient(135deg, var(--dp-primary), var(--dp-accent));
+  }
+
+  * { box-sizing: border-box; }
+
+  /* Keep the directory typography consistently medium-weight. */
+  .medic-doctors-page,
+  .medic-doctors-page * {
+    font-weight: 500 !important;
+  }
+
+  .medic-doctors-page {
+    min-height: 100vh;
+    padding: 22px 0 44px;
+    background: var(--dp-bg);
+    color: var(--dp-text);
+  }
+
+  .medic-doctors-page .container {
+    width: min(100% - 32px, 1220px);
+    margin: 0 auto;
+  }
+
+  .medic-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 13px;
+    color: var(--dp-muted);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .medic-breadcrumb span { color: #8c959f; }
+  .medic-breadcrumb a {
+    color: var(--dp-primary);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .medic-breadcrumb a:hover { text-decoration: underline; }
+
+  .medic-search-box,
+  .medic-empty-card,
+  .medic-auto-article {
+    border: 1px solid var(--dp-border);
+    background: var(--dp-surface);
+    box-shadow: var(--dp-shadow);
+  }
+
+  /* Plain page heading: intentionally no box, border, shadow or decorative accent. */
+  .medic-page-head {
+    margin: 2px 0 18px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .medic-page-head h1 {
+    max-width: 900px;
+    margin: 0 0 8px;
+    color: var(--dp-text);
+    font-size: clamp(18px, 4vw, 20px);
+    font-weight: 500;
+    line-height: 1.17;
+    letter-spacing: -.028em;
+  }
+
+  .medic-page-head p {
+    max-width: 790px;
+    margin: 0;
+    color: var(--dp-muted);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  /* Compact search panel with an inline search icon and a light premium finish. */
+  .medic-search-box {
+    margin-bottom: 22px;
+    padding: 10px;
+    border: 1px solid var(--dp-border);
+    border-radius: var(--dp-radius-card);
+    background: #ffffff;
+    box-shadow: var(--dp-shadow-hover);
+  }
+
+  .medic-search-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .medic-search-input-wrap {
+    position: relative;
+    min-width: 0;
+  }
+
+  .medic-search-input-wrap svg {
+    position: absolute;
+    top: 50%;
+    left: 13px;
+    width: 16px;
+    height: 16px;
+    color: var(--dp-muted);
+    pointer-events: none;
+    transform: translateY(-50%);
+  }
+
+  .medic-search-row input {
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 12px 9px 39px;
+    border: 1px solid var(--dp-border-strong);
+    border-radius: 9px;
+    outline: none;
+    background: #ffffff;
+    color: var(--dp-text);
+    font: inherit;
+    font-size: 14px;
+    line-height: 20px;
+    transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
+  }
+
+  .medic-search-row input::placeholder { color: #8c959f; }
+  .medic-search-row input:hover { border-color: #8c959f; }
+  .medic-search-row input:focus {
+    border-color: var(--dp-primary);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(9, 105, 218, .13);
+  }
+
+  .medic-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 42px;
+    padding: 9px 19px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: var(--dp-gradient);
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    text-decoration: none;
+    transition: filter .16s ease, transform .16s ease, box-shadow .16s ease;
+  }
+
+  .medic-btn svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
+  .medic-btn:hover {
+    color: #ffffff;
+    filter: brightness(.97);
+    box-shadow: 0 3px 8px rgba(31, 35, 40, .12);
+    transform: translateY(-1px);
+  }
+
+  /* Desktop image cards: picture on top, clear centered name below. */
+  .medic-step-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+    gap: 12px;
+    margin: 16px 0 26px;
+  }
+
+  .medic-step-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 68px;
+    overflow: hidden;
+    padding: 3px;
+    border: 1px solid var(--dp-border);
+    border-radius: var(--dp-radius-card);
+    background: var(--dp-surface);
+    box-shadow: var(--dp-shadow);
+    color: var(--dp-text);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.35;
+    text-decoration: none;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+  }
+
+  .medic-step-card::after { display: none; }
+
+  .medic-step-card-media {
+    display: block;
+    width: 100%;
+    height: 112px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: var(--dp-surface-soft);
+  }
+
+  .medic-step-card-media img,
+  .medic-area-tag-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .22s ease;
+  }
+
+  .medic-step-card-label {
+    display: block;
+    min-width: 0;
+    padding: 9px 6px 8px;
+    overflow-wrap: anywhere;
+    color: var(--dp-text);
+    text-align: center;
+  }
+
+  .medic-step-card:not(.has-image) {
+    align-items: center;
+    justify-content: center;
+    min-height: 68px;
+    padding: 12px;
+    color: var(--dp-primary);
+    text-align: center;
+  }
+  .medic-step-card:not(.has-image) .medic-step-card-label { padding: 0; color: inherit; }
+
+  .medic-step-card:hover,
+  .medic-step-card:focus-visible {
+    border-color: var(--dp-primary);
+    box-shadow: var(--dp-shadow-hover);
+    outline: none;
+    transform: translateY(-2px);
+  }
+
+  .medic-step-card:hover .medic-step-card-media img,
+  .medic-step-card:focus-visible .medic-step-card-media img { transform: scale(1.035); }
+  .medic-step-card small { display: none; }
+
+  /* Area filters stay collapsed behind a toggle until opened. */
+  .medic-filters {
+    margin: 0 0 20px;
+  }
+
+  .medic-filters-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    border: 1px solid var(--dp-border-strong);
+    border-radius: 999px;
+    background: var(--dp-surface);
+    color: var(--dp-primary);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 20px;
+    list-style: none;
+    user-select: none;
+  }
+
+  .medic-filters-toggle::-webkit-details-marker { display: none; }
+  .medic-filters-toggle::marker { content: ''; }
+
+  .medic-filters-toggle svg {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+  }
+
+  .medic-filters-toggle:hover { border-color: var(--dp-primary); }
+
+  .medic-filters-chevron { transition: transform .16s ease; }
+  .medic-filters[open] .medic-filters-chevron { transform: rotate(180deg); }
+
+  .medic-filters-badge {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #f5faff;
+    color: var(--dp-primary);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* Thana filter cards follow the same visual language. */
+  .medic-area-tags {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+    gap: 12px;
+    margin: 14px 0 0;
+  }
+
+  .medic-area-tag {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 54px;
+    overflow: hidden;
+    padding: 3px;
+    border: 1px solid var(--dp-border);
+    border-radius: var(--dp-radius-card);
+    background: var(--dp-surface);
+    box-shadow: var(--dp-shadow);
+    color: var(--dp-text);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.35;
+    text-align: center;
+    text-decoration: none;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease, background-color .18s ease;
+  }
+
+  .medic-area-tag-media {
+    display: block;
+    width: 100%;
+    height: 88px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: var(--dp-surface-soft);
+  }
+
+  .medic-area-tag-label {
+    display: block;
+    padding: 8px 5px 7px;
+    overflow-wrap: anywhere;
+  }
+
+  .medic-area-tag:not(.has-image) {
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    color: var(--dp-primary);
+  }
+  .medic-area-tag:not(.has-image) .medic-area-tag-label { padding: 0; }
+
+  .medic-area-tag:hover,
+  .medic-area-tag.active {
+    border-color: var(--dp-primary);
+    background: #f5faff;
+    color: var(--dp-primary);
+    box-shadow: 0 4px 12px rgba(31, 35, 40, .10);
+    transform: translateY(-1px);
+  }
+  .medic-area-tag:hover .medic-area-tag-media img { transform: scale(1.035); }
+
+  .medic-auto-article {
+    margin: 0 0 22px;
+    padding: 23px;
+    border-radius: var(--dp-radius-card);
+  }
+
+  .medic-auto-article::before {
+    display: block;
+    width: 38px;
+    height: 3px;
+    margin-bottom: 14px;
+    border-radius: 99px;
+    background: var(--dp-primary);
+    content: '';
+  }
+
+  .medic-auto-article h2 {
+    margin: 0 0 10px;
+    color: var(--dp-text);
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+
+  .medic-auto-article h3 {
+    margin: 19px 0 8px;
+    color: var(--dp-text);
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  .medic-auto-article p,
+  .medic-auto-article-content {
+    color: #39414a;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .medic-auto-article p { margin: 0; }
+  .medic-auto-article ul,
+  .medic-auto-article ol,
+  .medic-auto-article-content ul,
+  .medic-auto-article-content ol { margin: 10px 0 0 22px; padding: 0; }
+  .medic-auto-article li,
+  .medic-auto-article-content li { margin: 7px 0; }
+  .medic-auto-article a { color: var(--dp-primary); font-weight: 500; text-decoration: none; }
+  .medic-auto-article a:hover { text-decoration: underline; }
+  .medic-auto-article-content { margin-top: 14px; }
+  .medic-auto-article-content p { margin: 0 0 13px; }
+  /* Keep all public article headings at or below 20px. */
+  .medic-auto-article-content h1,
+  .medic-auto-article-content h2 {
+    color: var(--dp-text);
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+
+  .medic-auto-article-content h3 {
+    color: var(--dp-text);
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .medic-auto-article-content h4,
+  .medic-auto-article-content h5,
+  .medic-auto-article-content h6 {
+    color: var(--dp-text);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.45;
+  }
+
+  .medic-doctor-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 22px;
+  }
+
+  .medic-list-title {
+    position: relative;
+    margin: 0;
+    padding: 0 0 12px;
+    border-bottom: 1px solid var(--dp-border);
+    color: var(--dp-text);
+    font-size: clamp(18px, 3vw, 20px);
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -.02em;
+  }
+
+  .medic-list-title::after {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 54px;
+    height: 3px;
+    border-radius: 99px;
+    background: var(--dp-primary);
+    content: '';
+  }
+
+  /*
+   * doctor-card.php now owns its own border, radius, shadow and hover
+   * animation, so the shell stays a plain pass-through by default and no
+   * longer duplicates a second border/shadow behind the card on hover.
+   */
+  .medic-doctor-card-shell {
+    border-radius: var(--dp-radius-card);
+  }
+
+  .medic-doctor-card-shell.is-featured-doctor {
+    overflow: hidden;
+    border: 1px solid #d4a72c;
+    background: #fffdf3;
+  }
+
+  .medic-doctor-card-shell.is-featured-doctor .medic-doctor-list-item {
+    border: 0;
+    border-radius: 0;
+  }
+
+  .medic-doctor-card-shell.is-featured-doctor .medic-doctor-list-item:hover {
+    box-shadow: none;
+    transform: none;
+    background-color: transparent;
+  }
+
+  .medic-featured-ribbon {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eac54f;
+    background: #fff8c5;
+    color: #7d4e00;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .medic-featured-ribbon span::before { content: '★'; margin-right: 6px; }
+
+  .medic-empty-card {
+    margin-top: 16px;
+    padding: 28px;
+    border-radius: var(--dp-radius-card);
+    color: var(--dp-muted);
+    text-align: center;
+  }
+  .medic-empty-card h2 { margin: 0 0 8px; color: var(--dp-text); font-size: 20px; font-weight: 500; }
+  .medic-empty-card p { max-width: 560px; margin: 0 auto 16px; line-height: 1.65; }
+
+  .medic-pagination {
+    display: flex;
+    justify-content: center;
+    margin: 24px 0 8px;
+  }
+
+  .medic-pagination-inner {
+    display: inline-flex;
+    gap: 3px;
+    overflow-x: auto;
+    max-width: 100%;
+    padding: 4px;
+    border: 1px solid var(--dp-border);
+    border-radius: 999px;
+    background: var(--dp-surface);
+    scrollbar-width: none;
+  }
+
+  .medic-pagination-inner::-webkit-scrollbar { display: none; }
+
+  .medic-pagination-desktop { display: inline-flex; }
+  .medic-pagination-mobile { display: none; }
+  .medic-pagination a,
+  .medic-pagination span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--dp-text);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color .16s ease, color .16s ease;
+  }
+  .medic-pagination a:hover { background: var(--dp-surface-soft); }
+  .medic-pagination .active { background: var(--dp-gradient); color: #ffffff; }
+  .medic-pagination .disabled { color: #8c959f; }
+  .medic-pagination .dots { color: #8c959f; pointer-events: none; }
+  .medic-pagination .nav-link { min-width: 78px; }
+  .medic-pagination .nav-link-icon { min-width: 34px; padding: 0; flex-shrink: 0; }
+  .medic-pagination .nav-link-icon svg { width: 16px; height: 16px; }
+
+  .medic-pagination-summary {
+    margin: 9px 0 0;
+    color: var(--dp-muted);
+    font-size: 13px;
+    text-align: center;
+  }
+
+  @media (min-width: 1000px) {
+    .medic-step-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
+    .medic-area-tags { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
+  }
+
+  @media (max-width: 840px) {
+    .medic-doctors-page { padding-top: 18px; }
+    .medic-doctors-page .container { width: min(100% - 24px, 1220px); }
+    .medic-step-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .medic-area-tags { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .medic-step-card-media { height: 98px; }
+    .medic-area-tag-media { height: 78px; }
+  }
+
+  /* Mobile screenshot layout: 2 photo tiles per row with names over the image. */
+  @media (max-width: 620px) {
+    .medic-doctors-page { padding: 14px 0 36px; }
+    .medic-doctors-page .container { width: min(100% - 20px, 1220px); }
+    .medic-breadcrumb { margin-bottom: 10px; font-size: 12px; }
+    .medic-page-head { margin-bottom: 16px; padding: 0; }
+    .medic-page-head h1 { font-size: 20px; }
+    .medic-page-head p { font-size: 14px; line-height: 1.58; }
+    .medic-search-box { padding: 8px; border-radius: 11px; }
+    .medic-search-row { grid-template-columns: 1fr; }
+    .medic-search-row input { min-height: 44px; }
+    .medic-btn { width: 100%; min-height: 43px; }
+
+    .medic-step-grid,
+    .medic-area-tags {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .medic-step-grid { margin-top: 14px; margin-bottom: 22px; }
+
+    .medic-step-card,
+    .medic-area-tag {
+      min-height: 0;
+      padding: 0;
+      border-radius: 12px;
+    }
+
+    .medic-step-card.has-image,
+    .medic-area-tag.has-image {
+      aspect-ratio: 1.26 / 1;
+    }
+
+    .medic-step-card.has-image .medic-step-card-media,
+    .medic-area-tag.has-image .medic-area-tag-media {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: #eaeef2;
+    }
+
+    .medic-step-card.has-image .medic-step-card-label,
+    .medic-area-tag.has-image .medic-area-tag-label {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 1;
+      min-height: 43%;
+      display: flex;
+      align-items: flex-end;
+      padding: 25px 9px 8px;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .78) 100%);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.25;
+      text-align: left;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, .55);
+    }
+
+    .medic-step-card:not(.has-image),
+    .medic-area-tag:not(.has-image) {
+      min-height: 74px;
+      padding: 10px;
+      border-radius: 12px;
+    }
+
+    .medic-auto-article { padding: 20px 17px; border-radius: 11px; }
+    .medic-auto-article h2 { font-size: 20px; }
+    .medic-doctor-card-shell { border-radius: 10px; }
+    .medic-pagination { justify-content: flex-start; overflow-x: auto; padding-bottom: 6px; }
+    .medic-pagination-desktop { display: none; }
+    .medic-pagination-mobile { display: inline-flex; margin: 0 auto; }
+  }
+
+  @media (max-width: 370px) {
+    .medic-step-card.has-image,
+    .medic-area-tag.has-image { aspect-ratio: 1.17 / 1; }
+    .medic-step-card.has-image .medic-step-card-label,
+    .medic-area-tag.has-image .medic-area-tag-label { font-size: 13px; padding: 23px 8px 7px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }

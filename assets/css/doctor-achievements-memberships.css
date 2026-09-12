@@ -1,0 +1,85 @@
+/*
+|--------------------------------------------------------------------------
+| Simple Light Design
+|--------------------------------------------------------------------------
+| Fully namespaced to avoid affecting other doctor profile sections.
+|--------------------------------------------------------------------------
+*/
+
+.medic-achievements-section {
+    margin: 0 0 20px;
+    padding: 22px;
+    background: #ffffff;
+    border: 1px solid #e5ebf1;
+    border-radius: 14px;
+    color: #415166;
+    box-shadow: 0 3px 12px rgba(15, 51, 89, 0.035);
+}
+
+.medic-achievements-section,
+.medic-achievements-section * {
+    box-sizing: border-box;
+    font-weight: 500;
+}
+
+.medic-achievements-heading {
+    margin: 0 0 15px;
+    color: #1e6ddb;
+    font-size: 23px;
+    line-height: 1.35;
+}
+
+.medic-achievements-list {
+    border-top: 1px solid #edf1f5;
+}
+
+.medic-achievements-item {
+    padding: 15px 0;
+    border-bottom: 1px solid #edf1f5;
+}
+
+.medic-achievements-item:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.medic-achievements-item h3 {
+    margin: 0 0 6px;
+    color: #273b52;
+    font-size: 16px;
+    line-height: 1.45;
+}
+
+.medic-achievements-item p {
+    margin: 0;
+    color: #5d6d7e;
+    font-size: 15px;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 576px) {
+    .medic-achievements-section {
+        margin-bottom: 16px;
+        padding: 16px;
+        border-radius: 12px;
+    }
+
+    .medic-achievements-heading {
+        margin-bottom: 12px;
+        font-size: 20px;
+    }
+
+    .medic-achievements-item {
+        padding: 13px 0;
+    }
+
+    .medic-achievements-item h3 {
+        font-size: 15px;
+    }
+
+    .medic-achievements-item p {
+        font-size: 14px;
+        line-height: 1.75;
+    }
+}

@@ -7,31 +7,77 @@ function hp_table_exists(string $table): bool
 {
     global $pdo;
 
-    try {
-        $stmt = $pdo->prepare("\n            SELECT COUNT(*)\n            FROM INFORMATION_SCHEMA.TABLES\n            WHERE TABLE_SCHEMA = DATABASE()\n            AND TABLE_NAME = :table\n        ");
-        $stmt->execute([':table' => $table]);
+    static $request_cache = [];
 
-        return (int)$stmt->fetchColumn() > 0;
-    } catch (Throwable $e) {
+    $table = trim($table);
+
+    if ($table === '') {
         return false;
     }
+
+    if (array_key_exists($table, $request_cache)) {
+        return $request_cache[$table];
+    }
+
+    $resolver = static function () use ($pdo, $table): bool {
+        try {
+            $stmt = $pdo->prepare("\n                SELECT COUNT(*)\n                FROM INFORMATION_SCHEMA.TABLES\n                WHERE TABLE_SCHEMA = DATABASE()\n                AND TABLE_NAME = :table\n            ");
+            $stmt->execute([':table' => $table]);
+
+            return (int)$stmt->fetchColumn() > 0;
+        } catch (Throwable $e) {
+            return false;
+        }
+    };
+
+    $value = function_exists('medic_schema_exists_cached')
+        ? medic_schema_exists_cached('table:' . $table, $resolver)
+        : $resolver();
+
+    $request_cache[$table] = $value;
+
+    return $value;
 }
 
 function hp_column_exists(string $table, string $column): bool
 {
     global $pdo;
 
-    try {
-        $stmt = $pdo->prepare("\n            SELECT COUNT(*)\n            FROM INFORMATION_SCHEMA.COLUMNS\n            WHERE TABLE_SCHEMA = DATABASE()\n            AND TABLE_NAME = :table\n            AND COLUMN_NAME = :column\n        ");
-        $stmt->execute([
-            ':table' => $table,
-            ':column' => $column,
-        ]);
+    static $request_cache = [];
 
-        return (int)$stmt->fetchColumn() > 0;
-    } catch (Throwable $e) {
+    $table = trim($table);
+    $column = trim($column);
+    $cache_key = $table . '.' . $column;
+
+    if ($table === '' || $column === '') {
         return false;
     }
+
+    if (array_key_exists($cache_key, $request_cache)) {
+        return $request_cache[$cache_key];
+    }
+
+    $resolver = static function () use ($pdo, $table, $column): bool {
+        try {
+            $stmt = $pdo->prepare("\n                SELECT COUNT(*)\n                FROM INFORMATION_SCHEMA.COLUMNS\n                WHERE TABLE_SCHEMA = DATABASE()\n                AND TABLE_NAME = :table\n                AND COLUMN_NAME = :column\n            ");
+            $stmt->execute([
+                ':table' => $table,
+                ':column' => $column,
+            ]);
+
+            return (int)$stmt->fetchColumn() > 0;
+        } catch (Throwable $e) {
+            return false;
+        }
+    };
+
+    $value = function_exists('medic_schema_exists_cached')
+        ? medic_schema_exists_cached('column:' . $cache_key, $resolver)
+        : $resolver();
+
+    $request_cache[$cache_key] = $value;
+
+    return $value;
 }
 
 

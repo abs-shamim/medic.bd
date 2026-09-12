@@ -200,6 +200,7 @@ if (!function_exists('admin_site_upload_target')) {
             'default_doctor_male_image' => 'default-doctor-male',
             'default_doctor_female_image' => 'default-doctor-female',
             'default_hospital_image' => 'default-hospital',
+            'default_hospital_cover_image' => 'default-hospital-cover',
         ];
 
         $base_name = $fixed_names[$field_name] ?? admin_site_image_slug($field_name);
@@ -1299,7 +1300,8 @@ $settings_schema = [
             ['key' => 'default_doctor_male_image', 'label' => 'Default Doctor Image - Male', 'type' => 'file', 'accept' => 'image/*', 'default' => '../assets/images/default-doctor-male.webp', 'help' => 'Used when doctor gender is Male and no profile image is uploaded. JPG, PNG, GIF or WebP will be converted and saved as /assets/images/default-doctor-male-YYMMDDHHMMSS.webp.'],
             ['key' => 'default_doctor_female_image', 'label' => 'Default Doctor Image - Female', 'type' => 'file', 'accept' => 'image/*', 'default' => '../assets/images/default-doctor-female.webp', 'help' => 'Used when doctor gender is Female and no profile image is uploaded. JPG, PNG, GIF or WebP will be converted and saved as /assets/images/default-doctor-female-YYMMDDHHMMSS.webp.'],
             ['key' => 'default_doctor_image', 'label' => 'Default Doctor Image - Fallback', 'type' => 'file', 'accept' => 'image/*', 'default' => '../assets/images/default-doctor.webp', 'help' => 'Used when gender is missing/Other or Male/Female default image is not set. JPG, PNG, GIF or WebP will be converted and saved as /assets/images/default-doctor-YYMMDDHHMMSS.webp.'],
-            ['key' => 'default_hospital_image', 'label' => 'Default Hospital Image', 'type' => 'file', 'accept' => 'image/*', 'default' => '../assets/images/default-hospital.webp', 'help' => 'JPG, PNG, GIF or WebP will be converted and saved as /assets/images/default-hospital-YYMMDDHHMMSS.webp.'],
+            ['key' => 'default_hospital_image', 'label' => 'Default Hospital Logo', 'type' => 'file', 'accept' => 'image/*', 'default' => '../assets/images/default-hospital.webp', 'help' => 'Small square logo shown next to a hospital\'s name when that hospital has not uploaded its own logo. JPG, PNG, GIF or WebP will be converted and saved as /assets/images/default-hospital-YYMMDDHHMMSS.webp.'],
+            ['key' => 'default_hospital_cover_image', 'label' => 'Default Hospital Cover Image', 'type' => 'file', 'accept' => 'image/*', 'default' => '../assets/images/default-hospital.webp', 'help' => 'Wide banner image shown behind a hospital\'s profile when that hospital has not uploaded its own cover photo. Kept separate from the logo above so a small logo is never stretched to fill the banner. JPG, PNG, GIF or WebP will be converted and saved as /assets/images/default-hospital-cover-YYMMDDHHMMSS.webp.'],
         ],
     ],
     'User Settings' => [

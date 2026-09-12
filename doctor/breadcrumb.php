@@ -592,31 +592,7 @@ $breadcrumb_specialty_url = ($breadcrumb_district_name !== '' && $breadcrumb_spe
 
 ?>
 
-<style>
-.medic-breadcrumb {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 7px;
-    align-items: center;
-    margin: 0 0 18px;
-    color: #57606a;
-    font-size: 14px;
-}
-
-.medic-breadcrumb a {
-    color: var(--doctor-primary, #0969da);
-    text-decoration: none;
-    font-weight: 600;
-}
-
-.medic-breadcrumb a:hover {
-    text-decoration: underline;
-}
-
-.medic-breadcrumb span {
-    color: #8c959f;
-}
-</style>
+<link rel="stylesheet" href="<?= e(site_url('assets/css/doctor-breadcrumb.css')) ?>">
 
 <nav class="medic-breadcrumb">
     <a href="<?= e(front_url()) ?>"><?= e(__t('home', 'Home')) ?></a>

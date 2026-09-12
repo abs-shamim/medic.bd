@@ -1037,6 +1037,60 @@ function dp_build_doctor_count_query(array $filters): array
     ];
 }
 
+/*
+ * Same shape as dp_build_doctor_count_query(), but for callers that only
+ * need to know whether ANY doctor matches (e.g. "does this division have
+ * doctors, so should it show as a clickable option"), not the exact
+ * count. Adding LIMIT 1 to the inner query lets MySQL stop scanning at
+ * the first match instead of walking every matching row just to discard
+ * the total - this is what dp_doctors_exist() below uses.
+ */
+function dp_build_doctor_exists_query(array $filters): array
+{
+    $query = dp_build_doctor_count_query($filters);
+
+    if (empty($query['sql'])) {
+        return $query;
+    }
+
+    $sql = (string)$query['sql'];
+    $group_pos = strpos($sql, 'GROUP BY d.id');
+
+    if ($group_pos === false) {
+        return $query;
+    }
+
+    $insert_at = $group_pos + strlen('GROUP BY d.id');
+    $sql = substr($sql, 0, $insert_at) . "\n                LIMIT 1" . substr($sql, $insert_at);
+
+    return [
+        'sql' => $sql,
+        'params' => $query['params'],
+    ];
+}
+
+function dp_doctors_exist(array $filters): bool
+{
+    global $pdo;
+
+    $query = dp_build_doctor_exists_query($filters);
+
+    if (empty($query['sql'])) {
+        return false;
+    }
+
+    try {
+        $stmt = $pdo->prepare($query['sql']);
+        $stmt->execute($query['params']);
+
+        return ((int)$stmt->fetchColumn()) > 0;
+    } catch (Throwable $e) {
+        error_log('Doctor existence query failed: ' . $e->getMessage());
+
+        return false;
+    }
+}
+
 function dp_get_doctors_count(array $filters): int
 {
     global $pdo;
@@ -1047,15 +1101,32 @@ function dp_get_doctors_count(array $filters): int
         return 0;
     }
 
-    try {
-        $stmt = $pdo->prepare($query['sql']);
-        $stmt->execute($query['params']);
+    $resolver = static function () use ($pdo, $query): int {
+        try {
+            $stmt = $pdo->prepare($query['sql']);
+            $stmt->execute($query['params']);
 
-        return max(0, (int)$stmt->fetchColumn());
-    } catch (Throwable $e) {
-        error_log('Doctor count query failed: ' . $e->getMessage());
-        return 0;
+            return max(0, (int)$stmt->fetchColumn());
+        } catch (Throwable $e) {
+            error_log('Doctor count query failed: ' . $e->getMessage());
+            return 0;
+        }
+    };
+
+    /*
+     * This count re-runs the same chambers/hospitals joins as the main
+     * listing query just to total the pages, and visitors browsing the
+     * same district/specialty combination hit it repeatedly. A 45-second
+     * cache keeps pagination correct within a normal browsing session
+     * while skipping that join+GROUP BY cost on every repeat view.
+     */
+    if (!function_exists('medic_cache_remember')) {
+        return $resolver();
     }
+
+    $cache_key = 'dp_doctors_count:' . (defined('CURRENT_LANG') ? CURRENT_LANG : '') . ':' . $query['sql'] . ':' . json_encode($query['params']);
+
+    return (int)medic_cache_remember($cache_key, 45, $resolver);
 }
 
 function dp_clean_pagination_items(array $items, int $total_pages): array

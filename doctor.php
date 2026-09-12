@@ -17,17 +17,18 @@ if (!$doctor || !is_array($doctor)) {
 
     $page_title = 'Doctor Not Found';
     $meta_description = 'The requested doctor profile could not be found.';
+    $extra_head_html = '<link rel="stylesheet" href="' . e(site_url('assets/css/doctor-profile.css')) . '?v=' . e(front_asset_version()) . '">';
 
     include __DIR__ . '/includes/header.php';
     ?>
 
     <main class="doctor-profile-page">
-        <div class="container" style="padding:60px 15px;">
-            <div style="max-width:720px;margin:0 auto;background:#fff;border:1px solid #d0d7de;border-radius:14px;padding:30px;text-align:center;">
-                <h1 style="margin:0 0 12px;color:#24292f;">Doctor Not Found</h1>
-                <p style="margin:0 0 22px;color:#57606a;">The doctor profile you are looking for is not available.</p>
+        <div class="container doctor-not-found-container">
+            <div class="doctor-not-found-card">
+                <h1 class="doctor-not-found-title">Doctor Not Found</h1>
+                <p class="doctor-not-found-text">The doctor profile you are looking for is not available.</p>
 
-                <a href="<?= e(function_exists('site_url') ? site_url('doctors') : '/doctors') ?>" style="display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 18px;border-radius:6px;background:#0969da;color:#fff;text-decoration:none;font-weight:700;">
+                <a href="<?= e(function_exists('site_url') ? site_url('doctors') : '/doctors') ?>" class="doctor-not-found-link">
                     Back to Doctors
                 </a>
             </div>
@@ -2089,181 +2090,11 @@ $doctor_tab_labels = [
     'reviews' => $is_bn_page ? 'রিভিউ' : 'Reviews',
 ];
 
+$medic_load_doctor_card_css = true;
+$extra_head_html = ($extra_head_html ?? '') . '<link rel="stylesheet" href="' . e(site_url('assets/css/doctor-profile.css')) . '?v=' . e(front_asset_version()) . '">';
+
 include __DIR__ . '/includes/header.php';
 ?>
-
-<style>
-.doctor-profile-page {
-    background: #f6f8fa;
-    padding: 24px 0 40px;
-}
-
-.doctor-profile-page .container {
-    width: 100%;
-    max-width: 1180px;
-    margin: 0 auto;
-    padding-left: 15px;
-    padding-right: 15px;
-}
-
-.doctor-profile-full-width {
-    width: 100%;
-}
-
-/* Profile navigation. All tab panel content stays server-rendered in the page. */
-.doctor-profile-tabs-wrap {
-    margin: 0 0 26px;
-    border-bottom: 1px solid #dfe4ea;
-}
-
-.doctor-profile-tabs {
-    display: flex;
-    align-items: stretch;
-    gap: 18px;
-    min-height: 58px;
-    overflow-x: auto;
-    scrollbar-width: thin;
-}
-
-.doctor-profile-tab {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    flex: 0 0 auto;
-    min-height: 58px;
-    padding: 0 10px;
-    border: 0;
-    border-bottom: 3px solid transparent;
-    background: transparent;
-    color: #657084;
-    font: inherit;
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 1.2;
-    cursor: pointer;
-    transition: color .18s ease, border-color .18s ease;
-}
-
-.doctor-profile-tab:hover,
-.doctor-profile-tab:focus-visible {
-    color: #126ff1;
-}
-
-.doctor-profile-tab:focus-visible {
-    outline: 2px solid #126ff1;
-    outline-offset: -2px;
-    border-radius: 5px 5px 0 0;
-}
-
-.doctor-profile-tab.is-active,
-.doctor-profile-tab[aria-selected="true"] {
-    border-bottom-color: #126ff1;
-    color: #126ff1;
-}
-
-.doctor-profile-tab-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    color: currentColor;
-}
-
-.doctor-profile-tab-icon svg {
-    width: 20px;
-    height: 20px;
-    fill: currentColor;
-}
-
-.doctor-profile-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 340px;
-    gap: 22px;
-    align-items: start;
-}
-
-.doctor-profile-main {
-    min-width: 0;
-}
-
-.doctor-profile-tab-panel {
-    min-width: 0;
-}
-
-/* Related doctors are intentionally outside the tab panels. */
-.doctor-profile-related-doctors {
-    min-width: 0;
-    margin-top: 26px;
-}
-
-/* Panels are only hidden after JavaScript has initialized the accessible tabs. */
-.doctor-profile-tabs-ready .doctor-profile-tab-panel:not(.is-active) {
-    display: none;
-}
-
-.doctor-profile-sidebar {
-    min-width: 0;
-    position: sticky;
-    top: 90px;
-}
-
-@media (max-width: 992px) {
-    .doctor-profile-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .doctor-profile-sidebar {
-        position: static;
-    }
-}
-
-@media (max-width: 576px) {
-    .doctor-profile-page {
-        padding: 16px 0 28px;
-    }
-
-    .doctor-profile-page .container {
-        padding-left: 12px;
-        padding-right: 12px;
-    }
-
-    .doctor-profile-tabs-wrap {
-        margin-bottom: 18px;
-    }
-
-    .doctor-profile-tabs {
-        gap: 5px;
-        min-height: 52px;
-    }
-
-    .doctor-profile-tab {
-        gap: 6px;
-        min-height: 52px;
-        padding: 0 8px;
-        font-size: 14px;
-    }
-
-    .doctor-profile-tab-icon,
-    .doctor-profile-tab-icon svg {
-        width: 18px;
-        height: 18px;
-    }
-.doctor-profile-tabs {
-    gap: 0;
-    min-height: 52px;
-    justify-content: space-evenly;
-}
-    .doctor-profile-layout {
-        gap: 16px;
-    }
-
-    .doctor-profile-related-doctors {
-        margin-top: 18px;
-    }
-}
-</style>
 
 <main class="doctor-profile-page">
     <div class="container">
@@ -2377,96 +2208,7 @@ include __DIR__ . '/includes/header.php';
     </div>
 </main>
 
-<script>
-(function () {
-    var tabList = document.querySelector('.doctor-profile-tabs[role="tablist"]');
-
-    if (!tabList) {
-        return;
-    }
-
-    var tabs = Array.prototype.slice.call(tabList.querySelectorAll('[role="tab"]'));
-    var panels = Array.prototype.slice.call(document.querySelectorAll('[data-doctor-tab-panel]'));
-    var page = document.querySelector('.doctor-profile-page');
-
-    if (!tabs.length || !panels.length || !page) {
-        return;
-    }
-
-    page.classList.add('doctor-profile-tabs-ready');
-
-    function activateTab(tabName, updateHash) {
-        var selectedTab = null;
-
-        tabs.forEach(function (tab) {
-            var isActive = tab.getAttribute('data-doctor-tab') === tabName;
-
-            tab.classList.toggle('is-active', isActive);
-            tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
-            tab.tabIndex = isActive ? 0 : -1;
-
-            if (isActive) {
-                selectedTab = tab;
-            }
-        });
-
-        panels.forEach(function (panel) {
-            var isActive = panel.getAttribute('data-doctor-tab-panel') === tabName;
-            panel.classList.toggle('is-active', isActive);
-            panel.hidden = !isActive;
-        });
-
-        if (selectedTab && updateHash && window.history && window.history.replaceState) {
-            window.history.replaceState(null, '', '#' + tabName);
-        }
-    }
-
-    var initialTab = window.location.hash.replace('#', '');
-    var allowedTabs = ['info', 'experience', 'reviews'];
-
-    if (allowedTabs.indexOf(initialTab) === -1) {
-        initialTab = 'info';
-    }
-
-    activateTab(initialTab, false);
-
-    tabs.forEach(function (tab, index) {
-        tab.addEventListener('click', function () {
-            activateTab(tab.getAttribute('data-doctor-tab'), true);
-        });
-
-        tab.addEventListener('keydown', function (event) {
-            var nextIndex = null;
-
-            if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
-                nextIndex = (index + 1) % tabs.length;
-            } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
-                nextIndex = (index - 1 + tabs.length) % tabs.length;
-            } else if (event.key === 'Home') {
-                nextIndex = 0;
-            } else if (event.key === 'End') {
-                nextIndex = tabs.length - 1;
-            }
-
-            if (nextIndex === null) {
-                return;
-            }
-
-            event.preventDefault();
-            tabs[nextIndex].focus();
-            activateTab(tabs[nextIndex].getAttribute('data-doctor-tab'), true);
-        });
-    });
-
-    window.addEventListener('hashchange', function () {
-        var hashTab = window.location.hash.replace('#', '');
-
-        if (allowedTabs.indexOf(hashTab) !== -1) {
-            activateTab(hashTab, false);
-        }
-    });
-}());
-</script>
+<script src="<?= e(site_url('assets/js/doctor-profile.js')) ?>" defer></script>
 
 <?php doctor_schema_output($doctor, $page_title, $meta_description); ?>
 

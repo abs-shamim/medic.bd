@@ -1,0 +1,23 @@
+.medic-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    align-items: center;
+    margin: 0 0 18px;
+    color: #57606a;
+    font-size: 14px;
+}
+
+.medic-breadcrumb a {
+    color: var(--doctor-primary, #0969da);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.medic-breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.medic-breadcrumb span {
+    color: #8c959f;
+}

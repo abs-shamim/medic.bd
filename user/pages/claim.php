@@ -506,7 +506,7 @@ if (!function_exists('uc_claim_get_latest_pending_claim')) {
 
 if (!table_exists('users')) {
     require_once __DIR__ . '/../includes/header.php';
-    echo '<div class="card" style="padding:20px;">
+    echo '<div class="card card-padded">
             <h2>Users table not found</h2>
             <p>Please import the updated database first.</p>
           </div>';
@@ -516,7 +516,7 @@ if (!table_exists('users')) {
 
 if (!table_exists('profile_claims')) {
     require_once __DIR__ . '/../includes/header.php';
-    echo '<div class="card" style="padding:20px;">
+    echo '<div class="card card-padded">
             <h2>Profile claims table not found</h2>
             <p>Please import the updated database first.</p>
           </div>';
@@ -549,7 +549,7 @@ try {
 
 if (!$user) {
     require_once __DIR__ . '/../includes/header.php';
-    echo '<div class="card" style="padding:20px;">
+    echo '<div class="card card-padded">
             <h2>User not found</h2>
             <p>Your account was not found.</p>
           </div>';
@@ -757,353 +757,7 @@ try {
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<style>
-    :root {
-        --dash-card-solid: #ffffff;
-        --dash-soft: #f6f8fa;
-        --dash-text: #24292f;
-        --dash-muted: #57606a;
-        --dash-border: #d0d7de;
-        --dash-blue: #0969da;
-        --dash-green: #2da44e;
-        --dash-green-dark: #1f883d;
-        --dash-red: #cf222e;
-        --dash-yellow: #9a6700;
-        --dash-yellow-bg: #fff8c5;
-        --dash-shadow-soft: 0 8px 24px rgba(140, 149, 159, 0.15);
-    }
-
-    .user-view-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-        flex-wrap: wrap;
-        margin-bottom: 18px;
-    }
-
-    .user-view-header h2 {
-        margin: 0 0 6px;
-        color: var(--dash-text);
-        font-size: 24px;
-        font-weight: 800;
-    }
-
-    .user-view-header p {
-        margin: 0;
-        color: var(--dash-muted);
-        font-size: 14px;
-    }
-
-    .user-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 18px;
-    }
-
-    .user-card {
-        background: var(--dash-card-solid);
-        border: 1px solid var(--dash-border);
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: var(--dash-shadow-soft);
-    }
-
-    .user-card h3,
-    .user-card h4 {
-        margin: 0;
-        padding: 14px 16px;
-        color: var(--dash-text);
-        font-size: 15px;
-        font-weight: 800;
-        background: var(--dash-soft);
-        border-bottom: 1px solid var(--dash-border);
-    }
-
-    .connected-profile-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        flex-wrap: wrap;
-        padding: 14px 16px;
-        background: var(--dash-soft);
-        border-bottom: 1px solid var(--dash-border);
-    }
-
-    .connected-profile-head h3 {
-        padding: 0;
-        background: transparent;
-        border: 0;
-    }
-
-    .user-card-body {
-        padding: 16px;
-    }
-
-    .user-info-row {
-        display: grid;
-        grid-template-columns: 170px 1fr;
-        gap: 12px;
-        padding: 10px 0;
-        border-bottom: 1px solid var(--dash-border);
-    }
-
-    .user-info-row:last-child {
-        border-bottom: 0;
-    }
-
-    .user-info-row span {
-        color: var(--dash-muted);
-        font-size: 13px;
-    }
-
-    .user-info-row strong {
-        color: var(--dash-text);
-        font-size: 13px;
-        font-weight: 600;
-    }
-
-    .user-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 24px;
-        padding: 3px 9px;
-        border-radius: 999px;
-        font-size: 12px;
-        font-weight: 700;
-        background: var(--dash-soft);
-        color: var(--dash-muted);
-        border: 1px solid var(--dash-border);
-    }
-
-    .user-badge.active,
-    .user-badge.approved {
-        background: rgba(45, 164, 78, 0.12);
-        color: var(--dash-green-dark);
-        border-color: rgba(45, 164, 78, 0.24);
-    }
-
-    .user-badge.rejected,
-    .user-badge.blocked,
-    .user-badge.declined {
-        background: rgba(207, 34, 46, 0.10);
-        color: var(--dash-red);
-        border-color: rgba(207, 34, 46, 0.22);
-    }
-
-    .user-badge.pending {
-        background: var(--dash-yellow-bg);
-        color: var(--dash-yellow);
-        border-color: rgba(154, 103, 0, 0.22);
-    }
-
-    .user-actions,
-    .claim-preview-actions {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-top: 14px;
-    }
-
-    .user-card .btn,
-    .user-actions .btn,
-    .claim-preview-actions .btn,
-    .user-card button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 34px;
-        padding: 6px 12px;
-        border-radius: 9px;
-        border: 1px solid var(--dash-border);
-        background: var(--dash-card-solid);
-        color: var(--dash-blue);
-        font-size: 13px;
-        font-weight: 700;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
-    .submit-claim-link {
-        background: var(--dash-green) !important;
-        color: #ffffff !important;
-        border-color: var(--dash-green) !important;
-    }
-
-    .btn-warning {
-        background: #fb8500 !important;
-        color: #ffffff !important;
-    }
-
-    .profile-empty-box {
-        padding: 14px;
-        border-radius: 12px;
-        background: var(--dash-soft);
-        border: 1px dashed var(--dash-border);
-        color: var(--dash-muted);
-        font-size: 14px;
-    }
-
-    .profile-action-note {
-        margin: 12px 0 0;
-        color: var(--dash-muted);
-        font-size: 13px;
-        line-height: 1.6;
-    }
-
-    .claim-search-box {
-        margin-top: 16px;
-        padding: 16px;
-        border-radius: 16px;
-        background: var(--dash-soft);
-        border: 1px solid var(--dash-border);
-    }
-
-    .claim-search-box h4 {
-        padding: 0;
-        margin: 0 0 12px;
-        background: transparent;
-        border: 0;
-        font-size: 14px;
-    }
-
-    .claim-search-grid {
-        display: grid;
-        grid-template-columns: 150px 1fr auto;
-        gap: 10px;
-        align-items: center;
-    }
-
-    .claim-search-grid input,
-    .claim-search-grid select {
-        min-height: 38px;
-        border: 1px solid var(--dash-border);
-        border-radius: 10px;
-        background: var(--dash-card-solid);
-        color: var(--dash-text);
-        font-size: 13px;
-        padding: 7px 11px;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .claim-type-fixed {
-        min-height: 38px;
-        border: 1px solid var(--dash-border);
-        border-radius: 10px;
-        background: var(--dash-card-solid);
-        color: var(--dash-text);
-        font-size: 13px;
-        padding: 9px 11px;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .user-alert {
-        padding: 12px 14px;
-        border-radius: 12px;
-        margin-bottom: 16px;
-        font-size: 14px;
-        border: 1px solid transparent;
-    }
-
-    .user-alert.success {
-        background: rgba(45, 164, 78, 0.12);
-        color: var(--dash-green-dark);
-        border-color: rgba(45, 164, 78, 0.24);
-    }
-
-    .user-alert.error {
-        background: rgba(207, 34, 46, 0.10);
-        color: var(--dash-red);
-        border-color: rgba(207, 34, 46, 0.22);
-    }
-
-    .medic-list-card {
-        background: var(--dash-card-solid);
-        border: 1px solid var(--dash-border);
-        border-radius: 12px;
-        padding: 12px;
-        margin-top: 14px;
-        overflow: hidden;
-    }
-
-    .mini-table-wrap table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .mini-table-wrap th,
-    .mini-table-wrap td {
-        padding: 10px 12px;
-        border-bottom: 1px solid var(--dash-border);
-        font-size: 13px;
-        text-align: left;
-    }
-
-    .mini-table-wrap th {
-        background: var(--dash-soft);
-        color: var(--dash-muted);
-    }
-
-    .search-result-count {
-        margin: 12px 0 0;
-        color: var(--dash-blue);
-        font-size: 13px;
-        font-weight: 700;
-    }
-
-    .connected-note {
-        width: 100%;
-        font-size: 13px;
-        color: var(--dash-yellow);
-        background: var(--dash-yellow-bg);
-        border: 1px solid rgba(154, 103, 0, 0.25);
-        border-radius: 10px;
-        padding: 10px 12px;
-    }
-
-    .claim-result-item.is-hidden-result {
-        display: none;
-    }
-
-    .show-more-wrap {
-        margin-top: 18px;
-        padding-top: 16px;
-        border-top: 1px solid var(--dash-border);
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-
-    .show-more-wrap button {
-        min-height: 36px;
-        padding: 6px 14px;
-        border-radius: 10px;
-        border: 1px solid var(--dash-green);
-        background: var(--dash-green);
-        color: #ffffff;
-        font-size: 13px;
-        font-weight: 700;
-        cursor: pointer;
-    }
-
-    @media (max-width: 900px) {
-        .user-info-row,
-        .claim-search-grid {
-            grid-template-columns: 1fr;
-        }
-
-        table {
-            display: block;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-    }
-</style>
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/user/assets/css/user-claim.css">
 
 <div class="user-view-header">
     <div>
@@ -1222,7 +876,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
 
                 <?php if ($connection_status === 'pending'): ?>
-                    <div class="connected-note" style="margin-top:14px;">
+                    <div class="connected-note connected-note-spaced">
                         Your claim request has been submitted and is waiting for admin approval.
                     </div>
                 <?php endif; ?>
@@ -1250,6 +904,8 @@ require_once __DIR__ . '/../includes/header.php';
                             <input
                                 type="text"
                                 name="profile_input"
+                                id="profile_input"
+                                aria-label="Search profile by name, profile link, or slug"
                                 placeholder="Name, Profile link, slug"
                                 value="<?= e($searched_profile_input) ?>"
                                 required
@@ -1266,7 +922,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <?php if (!empty($searched_profiles)): ?>
 
 
-                        <div style="margin-top:16px;">
+                        <div class="search-result-preview">
                             <h4>Search Result Preview</h4>
 
                             <?php foreach ($searched_profiles as $index => $searched_profile): ?>
@@ -1327,7 +983,7 @@ require_once __DIR__ . '/../includes/header.php';
     <div class="user-card" id="profile-claims">
         <h3>Recent Profile Claims</h3>
 
-        <div class="user-card-body" style="padding:0;">
+        <div class="user-card-body user-card-body-flush">
             <div class="mini-table-wrap">
                 <table>
                     <thead>
@@ -1344,7 +1000,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <tbody>
                         <?php if (!$claims): ?>
                             <tr>
-                                <td colspan="6" style="text-align:center;color:var(--dash-muted);">No claims found.</td>
+                                <td colspan="6" class="mini-table-empty-cell">No claims found.</td>
                             </tr>
                         <?php endif; ?>
 
@@ -1384,49 +1040,6 @@ require_once __DIR__ . '/../includes/header.php';
 
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const showMoreBtn = document.getElementById('claimShowMoreBtn');
-    const counter = document.getElementById('claimResultCounter');
-
-    if (showMoreBtn) {
-        const step = parseInt(showMoreBtn.dataset.step || '10', 10);
-
-        function hiddenItems() {
-            return Array.from(document.querySelectorAll('.claim-result-item.is-hidden-result'));
-        }
-
-        const allItems = Array.from(document.querySelectorAll('.claim-result-item'));
-
-        function updateCounter() {
-            if (!counter) {
-                return;
-            }
-
-            const visibleCount = allItems.filter(function (item) {
-                return !item.classList.contains('is-hidden-result');
-            }).length;
-
-            counter.textContent = 'Showing ' + visibleCount + ' of ' + allItems.length + ' results.';
-        }
-
-        showMoreBtn.addEventListener('click', function () {
-            const itemsToShow = hiddenItems().slice(0, step);
-
-            itemsToShow.forEach(function (item) {
-                item.classList.remove('is-hidden-result');
-            });
-
-            updateCounter();
-
-            if (hiddenItems().length === 0) {
-                showMoreBtn.style.display = 'none';
-            }
-        });
-
-        updateCounter();
-    }
-});
-</script>
+<script src="<?php echo BASE_URL; ?>/user/assets/js/claim.js" defer></script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

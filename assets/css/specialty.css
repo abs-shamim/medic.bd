@@ -1,0 +1,531 @@
+  :root {
+    --sp-primary: #0969da;
+    --sp-accent: #2da44e;
+    --sp-bg: #f6f8fa;
+    --sp-surface: #ffffff;
+    --sp-surface-soft: #f6f8fa;
+    --sp-border: #d8dee4;
+    --sp-border-strong: #c9d1d9;
+    --sp-text: #1f2328;
+    --sp-muted: #656d76;
+    --sp-radius: 8px;
+    --sp-radius-card: 12px;
+    --sp-shadow: 0 1px 2px rgba(31, 35, 40, .06);
+    --sp-shadow-hover: 0 5px 14px rgba(31, 35, 40, .12);
+  }
+
+  * { box-sizing: border-box; }
+
+  .specialty-clean-page,
+  .specialty-clean-page * {
+    font-weight: 500 !important;
+  }
+
+  .specialty-clean-page {
+    min-height: 100vh;
+    padding: 22px 0 52px;
+    background: var(--sp-bg);
+    color: var(--sp-text);
+  }
+
+  .specialty-clean-page .container {
+    width: min(100% - 32px, 1220px);
+    margin: 0 auto;
+  }
+
+  .specialty-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 13px;
+    color: var(--sp-muted);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .specialty-breadcrumb a {
+    color: var(--sp-primary);
+    text-decoration: none;
+  }
+
+  .specialty-breadcrumb a:hover { text-decoration: underline; }
+
+  .specialty-breadcrumb > span:not([aria-current="page"]) { color: #8c959f; }
+
+  .specialty-breadcrumb span[aria-current="page"] {
+    overflow: hidden;
+    max-width: 440px;
+    color: var(--sp-muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Matches the clean heading treatment used on the directory page. */
+  .specialty-header {
+    margin: 2px 0 20px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .specialty-header-row {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+
+  .specialty-icon {
+    display: grid;
+    width: 112px;
+    height: 112px;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid var(--sp-border);
+    border-radius: 11px;
+    background: var(--sp-surface);
+    box-shadow: var(--sp-shadow);
+    color: var(--sp-primary);
+    font-size: 38px;
+  }
+
+  .specialty-icon i { font-size: 34px; }
+
+  .specialty-icon img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .specialty-header h1 {
+    max-width: 920px;
+    margin: 0 0 8px;
+    color: var(--sp-text);
+    font-size: clamp(27px, 4vw, 39px);
+    line-height: 1.17;
+    letter-spacing: -.028em;
+  }
+
+  .specialty-short-description {
+    max-width: 790px;
+    margin: 0;
+    color: var(--sp-muted);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .specialty-alternate-names {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    max-width: 850px;
+    margin: 16px 0 0;
+    padding-top: 15px;
+    border-top: 1px solid var(--sp-border);
+  }
+
+  .specialty-alternate-label {
+    color: var(--sp-muted);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .specialty-alternate-list {
+    display: flex;
+    flex: 1 1 260px;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .specialty-alternate-list li {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 6px 10px;
+    border: 1px solid var(--sp-border);
+    border-radius: 8px;
+    background: var(--sp-surface);
+    box-shadow: var(--sp-shadow);
+    color: var(--sp-primary);
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .specialty-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 286px;
+    gap: 16px;
+    align-items: start;
+  }
+
+  .specialty-article-card,
+  .specialty-doctors-side {
+    overflow: hidden;
+    border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius-card);
+    background: var(--sp-surface);
+    box-shadow: var(--sp-shadow);
+  }
+
+  .specialty-article-content {
+    padding: 28px;
+    color: var(--sp-text);
+    font-size: 16px;
+    line-height: 1.72;
+    overflow-wrap: anywhere;
+  }
+
+  .specialty-article-content > :first-child { margin-top: 0; }
+  .specialty-article-content p { margin: 0 0 17px; }
+  .specialty-article-content p:last-child { margin-bottom: 0; }
+
+  .specialty-article-content h2,
+  .specialty-article-content h3,
+  .specialty-article-content h4 {
+    margin: 1.55em 0 .72em;
+    color: var(--sp-text);
+    font-weight: 600 !important;
+    line-height: 1.25;
+    scroll-margin-top: 24px;
+  }
+
+  .specialty-article-content h2 {
+    position: relative;
+    padding: 0 0 11px;
+    border-bottom: 1px solid var(--sp-border);
+    font-size: 1.5em;
+  }
+
+  .specialty-article-content h2::after {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 44px;
+    height: 3px;
+    border-radius: 99px;
+    background: var(--sp-primary);
+    content: '';
+  }
+
+  .specialty-article-content h3 { font-size: 1.22em; }
+  .specialty-article-content h4 { font-size: 1em; }
+  .specialty-article-content strong { font-weight: 600 !important; }
+
+  .specialty-article-content a {
+    color: var(--sp-primary);
+    text-decoration: none;
+  }
+
+  .specialty-article-content a:hover { text-decoration: underline; }
+
+  .specialty-article-content ul,
+  .specialty-article-content ol {
+    margin: 0 0 17px;
+    padding-left: 1.8em;
+  }
+
+  .specialty-article-content li + li { margin-top: 5px; }
+
+  .specialty-article-content blockquote {
+    margin: 18px 0;
+    padding: 2px 0 2px 16px;
+    border-left: 4px solid var(--sp-primary);
+    color: var(--sp-muted);
+  }
+
+  .specialty-article-content blockquote p:last-child { margin-bottom: 0; }
+
+  .specialty-article-content img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 18px auto;
+    border-radius: 10px;
+  }
+
+  .specialty-article-content figure { margin: 18px 0; }
+
+  .specialty-article-content figcaption {
+    margin-top: 8px;
+    color: var(--sp-muted);
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .specialty-article-content hr {
+    height: 1px;
+    margin: 26px 0;
+    border: 0;
+    background: var(--sp-border);
+  }
+
+  .specialty-article-content table {
+    display: block;
+    width: max-content;
+    min-width: 100%;
+    max-width: 100%;
+    margin: 18px 0;
+    overflow: auto;
+    border-spacing: 0;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .specialty-article-content th,
+  .specialty-article-content td {
+    padding: 8px 13px;
+    border: 1px solid var(--sp-border);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .specialty-article-content th {
+    background: var(--sp-surface-soft);
+    font-weight: 600 !important;
+  }
+
+  .specialty-article-content tr:nth-child(2n) { background: #fafbfc; }
+
+  .specialty-article-content code {
+    padding: .2em .4em;
+    border-radius: 5px;
+    background: rgba(175, 184, 193, .2);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 85%;
+  }
+
+  .specialty-article-content pre {
+    margin: 18px 0;
+    padding: 16px;
+    overflow: auto;
+    border-radius: 9px;
+    background: var(--sp-surface-soft);
+    font-size: 85%;
+    line-height: 1.45;
+  }
+
+  .specialty-article-content pre code { padding: 0; background: transparent; }
+
+  .specialty-article-content .specialty-callout,
+  .specialty-article-content .specialty-highlight {
+    margin: 20px 0;
+    padding: 15px 16px;
+    border: 1px solid var(--sp-border);
+    border-left: 4px solid var(--sp-primary);
+    border-radius: 9px;
+    background: var(--sp-surface-soft);
+  }
+
+  .specialty-article-content .specialty-callout > :last-child,
+  .specialty-article-content .specialty-highlight > :last-child { margin-bottom: 0; }
+
+  .specialty-empty-article {
+    margin: 22px;
+    padding: 24px;
+    border: 1px dashed var(--sp-border-strong);
+    border-radius: 10px;
+    background: var(--sp-surface-soft);
+    color: var(--sp-muted);
+    line-height: 1.65;
+    text-align: center;
+  }
+
+  .specialty-doctors-side {
+    position: sticky;
+    top: 16px;
+  }
+
+  .specialty-doctors-side-head {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--sp-border);
+    background: var(--sp-surface-soft);
+    color: var(--sp-text);
+    font-size: 15px;
+  }
+
+  .specialty-doctors-side-body { padding: 18px; }
+
+  .specialty-doctors-side-body h2 {
+    margin: 0 0 8px;
+    color: var(--sp-text);
+    font-size: 20px;
+    line-height: 1.32;
+  }
+
+  .specialty-doctors-side-body p {
+    margin: 0 0 17px;
+    color: var(--sp-muted);
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .specialty-doctors-side .specialty-button { width: 100%; }
+
+  .specialty-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 42px;
+    padding: 9px 17px;
+    border: 1px solid rgba(31, 35, 40, .14);
+    border-radius: 9px;
+    background: var(--sp-accent);
+    box-shadow: 0 1px 0 rgba(31, 35, 40, .08);
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 20px;
+    text-decoration: none;
+    transition: filter .16s ease, transform .16s ease, box-shadow .16s ease;
+  }
+
+  .specialty-button:hover {
+    color: #ffffff;
+    filter: brightness(.97);
+    box-shadow: 0 3px 8px rgba(31, 35, 40, .12);
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 930px) {
+    .specialty-layout { grid-template-columns: minmax(0, 1fr); }
+    .specialty-doctors-side { position: static; }
+  }
+
+  @media (max-width: 700px) {
+    .specialty-clean-page { padding: 16px 0 42px; }
+    .specialty-clean-page .container { width: min(100% - 20px, 1220px); }
+    .specialty-breadcrumb { margin-bottom: 10px; font-size: 12px; }
+    .specialty-breadcrumb span[aria-current="page"] { max-width: 190px; }
+
+    .specialty-header { margin-bottom: 18px; }
+    .specialty-header-row {
+      grid-template-columns: 84px minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    .specialty-icon {
+      width: 84px;
+      height: 84px;
+      border-radius: 10px;
+      font-size: 29px;
+    }
+
+    .specialty-icon i { font-size: 27px; }
+    .specialty-header h1 { font-size: 28px; }
+    .specialty-short-description { font-size: 14px; line-height: 1.58; }
+    .specialty-alternate-names { margin-top: 14px; padding-top: 13px; }
+    .specialty-alternate-list { flex-basis: 100%; }
+    .specialty-article-content { padding: 22px 18px; font-size: 15px; }
+    .specialty-empty-article { margin: 16px; padding: 20px; }
+  }
+
+  @media (max-width: 460px) {
+    .specialty-header-row { grid-template-columns: 1fr; }
+    .specialty-icon {
+      width: 100%;
+      height: 155px;
+      border-radius: 12px;
+    }
+    .specialty-icon:not(:has(img)) { width: 84px; height: 84px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      scroll-behavior: auto !important;
+      transition-duration: .01ms !important;
+      animation-duration: .01ms !important;
+    }
+  }
+
+:root {
+  --sp-primary: #0969da;
+  --sp-accent: #2da44e;
+  --sp-bg: #f6f8fa;
+  --sp-surface: #fff;
+  --sp-border: #d8dee4;
+  --sp-text: #1f2328;
+  --sp-muted: #656d76;
+  --sp-radius: 12px;
+}
+
+.specialty-not-found-page * {
+  box-sizing: border-box;
+}
+
+.specialty-not-found-page {
+  min-height: 100vh;
+  padding: 30px 0 56px;
+  background: var(--sp-bg);
+  color: var(--sp-text);
+}
+
+.specialty-not-found-page .container {
+  width: min(100% - 32px, 760px);
+  margin: 0 auto;
+}
+
+.specialty-not-found {
+  padding: 30px;
+  border: 1px solid var(--sp-border);
+  border-radius: var(--sp-radius);
+  background: var(--sp-surface);
+  box-shadow: 0 1px 2px rgba(31, 35, 40, .06);
+  text-align: center;
+}
+
+.specialty-not-found h1 {
+  margin: 0 0 10px;
+  font-size: 28px;
+  line-height: 1.25;
+}
+
+.specialty-not-found p {
+  margin: 0 0 20px;
+  color: var(--sp-muted);
+  line-height: 1.6;
+}
+
+.specialty-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 9px 17px;
+  border: 1px solid rgba(31, 35, 40, .14);
+  border-radius: 9px;
+  background: var(--sp-accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  text-decoration: none;
+}
+
+.specialty-button:hover {
+  background: #248a43;
+  color: #fff;
+}
+
+@media (max-width: 620px) {
+  .specialty-not-found-page {
+    padding: 20px 0 42px;
+  }
+
+  .specialty-not-found-page .container {
+    width: min(100% - 20px, 760px);
+  }
+
+  .specialty-not-found {
+    padding: 24px 18px;
+  }
+}

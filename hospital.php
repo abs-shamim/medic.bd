@@ -254,17 +254,6 @@ function hospital_page_setting_url(string $key, string $default = ''): string
     return '/' . $value;
 }
 
-function hospital_page_setting_color(string $key, string $default): string
-{
-    $value = hospital_page_site_setting($key, $default);
-
-    if (preg_match('/^#[0-9a-fA-F]{6}$/', $value)) {
-        return $value;
-    }
-
-    return $default;
-}
-
 function hospital_page_asset_url(string $path, string $fallback = ''): string
 {
     $path = trim($path);
@@ -827,10 +816,23 @@ $meta_description = $hospital_seo_description !== ''
     );
 
 $default_hospital_image = hospital_page_site_setting('default_hospital_image', 'assets/images/default-hospital.webp');
+$default_hospital_cover_image = hospital_page_site_setting('default_hospital_cover_image', 'assets/images/default-hospital.webp');
 
+/*
+ * Cover (hero banner) and logo (small badge) are separate images with
+ * separate purposes, so neither should fall back to the other. A hospital
+ * that only uploaded a small square logo used to have that logo stretched
+ * across the full-width, 270px-tall cover banner (background-size: cover)
+ * - blurry and oversized. Each field now falls back only to its own
+ * generic placeholder - configurable separately in Admin > Site Settings >
+ * Directory Settings ("Default Hospital Logo" vs "Default Hospital Cover
+ * Image") - matching includes/hospital-card.php's pattern for the logo.
+ */
 $cover_image = !empty($hospital['cover_image'])
-    ? hospital_page_asset_url((string)$hospital['cover_image'], $default_hospital_image)
-    : hospital_page_asset_url((string)($hospital['image'] ?? ''), $default_hospital_image);
+    ? hospital_page_asset_url((string)$hospital['cover_image'], $default_hospital_cover_image)
+    : hospital_page_asset_url('', $default_hospital_cover_image);
+
+$hospital_logo = hospital_page_asset_url((string)($hospital['image'] ?? ''), $default_hospital_image);
 
 $hospital_phone = trim((string)hospital_value($hospital, 'phone'));
 $hospital_email = trim((string)hospital_value($hospital, 'email'));
@@ -959,9 +961,6 @@ if ((float)($hospital['rating'] ?? 0) > 0 && $hospital_review_count > 0) {
     ];
 }
 
-$hospital_page_primary_color = hospital_page_setting_color('primary_color', '#0969da');
-$hospital_page_accent_color = hospital_page_setting_color('accent_color', '#2da44e');
-$hospital_page_body_background = hospital_page_setting_color('body_background_color', '#f6f8fa');
 $hospital_page_og_image = !empty(hospital_value($hospital, 'og_image'))
     ? hospital_page_asset_url((string)hospital_value($hospital, 'og_image'))
     : hospital_page_setting_url('default_og_image', 'assets/images/default-og-image.webp');
@@ -977,463 +976,11 @@ $og_type = 'website';
 $og_image = $hospital_page_og_image;
 $og_locale = $hospital_page_current_lang === 'bn' ? 'bn_BD' : 'en_US';
 
+$medic_load_doctor_card_css = true;
+$extra_head_html = '<link rel="stylesheet" href="' . e(site_url('assets/css/hospital.css')) . '?v=' . e(front_asset_version()) . '">';
+
 include __DIR__ . '/includes/header.php';
 ?>
-<style>
-  :root {
-    --hospital-primary: <?= e($hospital_page_primary_color) ?>;
-    --hospital-accent: <?= e($hospital_page_accent_color) ?>;
-    --hospital-bg: <?= e($hospital_page_body_background) ?>;
-  }
-
-  /*
-   * Keep all typography inside the hospital profile at a consistent medium weight.
-   * The !important flag protects this page from stronger global theme rules.
-   */
-  .medic-hospital-page,
-  .medic-hospital-page * {
-    font-weight: 500 !important;
-  }
-
-  .hospital-hidden-tag {
-    display: none !important;
-  }
-
-  .hospital-more-tag {
-    font: inherit;
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-  }
-
-  .hospital-more-tag:focus {
-    outline: none;
-  }
-
-  .medic-hospital-page {
-    background:
-      radial-gradient(circle at top left, rgba(9, 105, 218, 0.10), transparent 32%),
-      radial-gradient(circle at top right, rgba(45, 164, 78, 0.10), transparent 34%),
-      var(--hospital-bg);
-    padding: 28px 0 56px;
-  }
-
-  .medic-breadcrumb {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 7px;
-    align-items: center;
-    margin: 0 0 18px;
-    color: #57606a;
-    font-size: 14px;
-  }
-
-  .medic-breadcrumb a {
-    color: var(--hospital-primary);
-    text-decoration: none;
-    font-weight: 500;
-  }
-
-  .medic-breadcrumb a:hover {
-    text-decoration: underline;
-  }
-
-  .medic-breadcrumb span {
-    color: #8c959f;
-  }
-
-  .medic-hospital-hero {
-    overflow: hidden;
-    background: #ffffff;
-    border: 1px solid #d0d7de;
-    border-radius: 14px;
-    margin-bottom: 20px;
-    box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
-  }
-
-  .medic-hospital-cover {
-    position: relative;
-    min-height: 270px;
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    align-items: flex-end;
-    padding: 22px;
-  }
-
-  .medic-cover-badge {
-    display: inline-flex;
-    align-items: center;
-    min-height: 34px;
-    padding: 0 12px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(255, 255, 255, 0.55);
-    color: #24292f;
-    font-size: 13px;
-    font-weight: 500;
-    box-shadow: 0 8px 24px rgba(27, 31, 36, 0.20);
-  }
-
-  .medic-single-hospital-main {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 22px;
-    align-items: start;
-    padding: 24px;
-  }
-
-  .medic-title-line {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .medic-title-line h1 {
-    margin: 0;
-    color: #24292f;
-    font-size: clamp(30px, 4vw, 46px);
-    line-height: 1.1;
-    letter-spacing: -0.04em;
-    font-weight: 500;
-  }
-
-  .medic-hospital-description {
-    max-width: 790px;
-    margin: 12px 0 0;
-    color: #57606a;
-    font-size: 16px;
-    line-height: 1.7;
-  }
-
-  .medic-tag-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 16px;
-  }
-
-  .medic-tag,
-  .hospital-more-tag {
-    display: inline-flex;
-    align-items: center;
-    min-height: 30px;
-    padding: 0 10px;
-    border-radius: 999px;
-    background: #ddf4ff;
-    border: 1px solid rgba(9, 105, 218, 0.20);
-    color: var(--hospital-primary);
-    font-size: 13px;
-    font-weight: 500;
-    text-decoration: none;
-  }
-
-  .hospital-more-tag {
-    min-height: 30px;
-  }
-
-  .medic-tag:hover,
-  .hospital-more-tag:hover {
-    background: #b6e3ff;
-    color: var(--hospital-primary);
-  }
-
-  .medic-hero-actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 10px;
-  }
-
-  .medic-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 42px;
-    padding: 0 18px;
-    border-radius: 6px;
-    border: 1px solid rgba(27, 31, 36, 0.15);
-    background: var(--hospital-accent);
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    cursor: pointer;
-    transition: 0.2s ease;
-    white-space: nowrap;
-  }
-
-  .medic-btn:hover {
-    background: var(--hospital-accent);
-    color: #ffffff;
-  }
-
-  .medic-btn-outline {
-    background: #ffffff;
-    color: var(--hospital-primary);
-    border-color: #d0d7de;
-  }
-
-  .medic-btn-outline:hover {
-    background: var(--hospital-bg);
-    color: var(--hospital-primary);
-  }
-
-  .medic-hospital-stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    border-top: 1px solid #d0d7de;
-    background: var(--hospital-bg);
-  }
-
-  .medic-stat-item {
-    padding: 18px;
-    border-right: 1px solid #d0d7de;
-  }
-
-  .medic-stat-item:last-child {
-    border-right: 0;
-  }
-
-  .medic-stat-item h3 {
-    margin: 0 0 5px;
-    color: #24292f;
-    font-size: 24px;
-    letter-spacing: -0.03em;
-  }
-
-  .medic-stat-item p {
-    margin: 0;
-    color: #57606a;
-    font-size: 13px;
-    font-weight: 500;
-  }
-
-  .medic-content-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
-    gap: 24px;
-    align-items: start;
-  }
-
-  .medic-main-column {
-    display: grid;
-    gap: 18px;
-    min-width: 0;
-  }
-
-  .medic-sidebar {
-    position: sticky;
-    top: 88px;
-    display: grid;
-    gap: 16px;
-  }
-
-  .medic-card {
-    background: #ffffff;
-    border: 1px solid #d0d7de;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
-  }
-
-  .medic-card h2 {
-    margin: 0 0 12px;
-    color: #24292f;
-    font-size: 22px;
-    letter-spacing: -0.03em;
-    font-weight: 500;
-  }
-
-  .medic-card h3 {
-    margin: 18px 0 10px;
-    color: #24292f;
-    font-size: 17px;
-    letter-spacing: -0.02em;
-    font-weight: 500;
-  }
-
-  .medic-card p {
-    color: #57606a;
-    line-height: 1.7;
-  }
-
-  .medic-info-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    margin-top: 18px;
-  }
-
-  .medic-info-box {
-    padding: 14px;
-    background: var(--hospital-bg);
-    border: 1px solid #d0d7de;
-    border-radius: 10px;
-  }
-
-  .medic-info-box span {
-    display: block;
-    color: #57606a;
-    font-size: 12px;
-    margin-bottom: 5px;
-    font-weight: 500;
-  }
-
-  .medic-info-box strong {
-    display: block;
-    color: #24292f;
-    font-size: 14px;
-    line-height: 1.5;
-  }
-
-  .medic-hospital-doctor-list {
-    display: grid;
-    gap: 14px;
-    margin-top: 16px;
-  }
-
-  .medic-appointment-card,
-  .medic-contact-card {
-    background: #ffffff;
-    border: 1px solid #d0d7de;
-    border-radius: 12px;
-    padding: 18px;
-    box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
-  }
-
-  .medic-appointment-card h2,
-  .medic-contact-card h2 {
-    margin: 0 0 14px;
-    color: #24292f;
-    font-size: 20px;
-    letter-spacing: -0.03em;
-    font-weight: 500;
-  }
-
-  .medic-emergency-box {
-    background: var(--hospital-bg);
-    border: 1px solid #d0d7de;
-    border-radius: 10px;
-    padding: 14px;
-    margin-bottom: 14px;
-  }
-
-  .medic-emergency-box span {
-    display: block;
-    color: #57606a;
-    font-size: 13px;
-    margin-bottom: 4px;
-  }
-
-  .medic-emergency-box h3 {
-    margin: 0;
-    color: #24292f;
-    font-size: 24px;
-    line-height: 1.25;
-  }
-
-  .medic-emergency-box a {
-    color: #24292f;
-    text-decoration: none;
-  }
-
-  .medic-contact-card p {
-    margin: 0 0 10px;
-    color: #57606a;
-    line-height: 1.55;
-  }
-
-  .medic-contact-card a {
-    color: var(--hospital-primary);
-    text-decoration: none;
-    font-weight: 500;
-  }
-
-  .medic-contact-card a:hover {
-    text-decoration: underline;
-  }
-
-  .medic-map-box {
-    margin-top: 14px;
-    min-height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px dashed #d0d7de;
-    border-radius: 10px;
-    background: var(--hospital-bg);
-    color: #57606a;
-    font-weight: 500;
-  }
-
-  @media (max-width: 980px) {
-    .medic-content-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .medic-sidebar {
-      position: static;
-    }
-
-    .medic-single-hospital-main {
-      grid-template-columns: 1fr;
-    }
-
-    .medic-hero-actions {
-      justify-content: flex-start;
-    }
-
-    .medic-hospital-stats {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .medic-stat-item:nth-child(2) {
-      border-right: 0;
-    }
-
-    .medic-stat-item:nth-child(1),
-    .medic-stat-item:nth-child(2) {
-      border-bottom: 1px solid #d0d7de;
-    }
-  }
-
-  @media (max-width: 700px) {
-    .medic-hospital-page {
-      padding-top: 18px;
-    }
-
-    .medic-hospital-cover {
-      min-height: 190px;
-      padding: 16px;
-    }
-
-    .medic-single-hospital-main {
-      padding: 18px;
-    }
-
-    .medic-hospital-stats,
-    .medic-info-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .medic-stat-item {
-      border-right: 0;
-      border-bottom: 1px solid #d0d7de;
-    }
-
-    .medic-stat-item:last-child {
-      border-bottom: 0;
-    }
-
-    .medic-hero-actions .medic-btn,
-    .medic-appointment-card .medic-btn,
-    .medic-contact-card .medic-btn {
-      width: 100%;
-    }
-  }
-</style>
 
 <script type="application/ld+json">
 <?= json_encode($schema_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) ?>
@@ -1481,15 +1028,29 @@ include __DIR__ . '/includes/header.php';
     <section class="medic-hospital-hero">
       <div
         class="medic-hospital-cover"
-        style="background-image:linear-gradient(180deg, rgba(15,23,42,.12), rgba(15,23,42,.48)), url('<?= e($cover_image) ?>');"
+        style="background-image:linear-gradient(180deg, rgba(15,23,42,.12), rgba(15,23,42,.48)), url('<?= e($cover_image) ?>')"
       >
-        <?php if ((int)hospital_value($hospital, 'emergency_available', 0)): ?>
-          <span class="medic-cover-badge"><?= e(hospital_page_localize_digits(__t('hospital_profile_open_24_7_emergency', 'Open 24/7 Emergency Service'))) ?></span>
-        <?php elseif ($opening_hours): ?>
-          <span class="medic-cover-badge"><?= e(hospital_page_localize_digits($opening_hours)) ?></span>
-        <?php else: ?>
-          <span class="medic-cover-badge"><?= e(hospital_page_localize_digits($hospital_type)) ?></span>
-        <?php endif; ?>
+        <?php /*
+         * The type/emergency/hours badge that used to overlay the cover here
+         * was removed - hospital_type is already the first .medic-tag pill
+         * below (and emergency shows there too), so the cover was showing
+         * the same fact twice while also colliding visually with the logo
+         * badge.
+         *
+         * The logo always renders (falling back to the "Default Hospital
+         * Logo" site setting when a hospital has no logo of its own) now
+         * that the cover has its own separate "Default Hospital Cover
+         * Image" setting - the two defaults are different pictures, so
+         * showing both is no longer the same image duplicated.
+         */ ?>
+        <img
+          class="medic-hospital-logo"
+          src="<?= e($hospital_logo) ?>"
+          alt="<?= e(hospital_page_localize_digits($hospital_name)) ?>"
+          width="96"
+          height="96"
+          loading="eager"
+        >
       </div>
 
       <div class="medic-single-hospital-main">
@@ -1670,6 +1231,7 @@ include __DIR__ . '/includes/header.php';
           <div class="medic-hospital-doctor-list">
             <?php if (!empty($hospital_doctors)): ?>
               <?php foreach ($hospital_doctors as $doctor): ?>
+                <?php front_line_break(); ?>
                 <?php include __DIR__ . '/includes/doctor-card.php'; ?>
               <?php endforeach; ?>
             <?php else: ?>
@@ -1726,7 +1288,7 @@ include __DIR__ . '/includes/header.php';
               </h3>
             </div>
 
-            <a href="tel:<?= e($appointment_call_number) ?>" class="medic-btn" style="width:100%;">
+            <a href="tel:<?= e($appointment_call_number) ?>" class="medic-btn medic-btn-full">
               <?= e(__t('hospital_profile_call_for_appointment', 'Call for Appointment')) ?>
             </a>
           <?php else: ?>
@@ -1772,7 +1334,7 @@ include __DIR__ . '/includes/header.php';
           <?php endif; ?>
 
           <?php if ($hospital_map_url): ?>
-            <a href="<?= e($hospital_map_url) ?>" target="_blank" rel="noopener" class="medic-btn medic-btn-outline" style="width:100%;">
+            <a href="<?= e($hospital_map_url) ?>" target="_blank" rel="noopener" class="medic-btn medic-btn-outline medic-btn-full">
               <?= e(__t('hospital_profile_view_google_map', 'View Google Map')) ?>
             </a>
           <?php else: ?>
@@ -1785,30 +1347,6 @@ include __DIR__ . '/includes/header.php';
   </div>
 </main>
 
-<script>
-  document.addEventListener('click', function(event) {
-    const button = event.target.closest('[data-show-more]');
-
-    if (!button) {
-      return;
-    }
-
-    event.preventDefault();
-
-    const wrapper = button.closest('.hospital-limited-tags');
-
-    if (!wrapper) {
-      return;
-    }
-
-    const hiddenTags = wrapper.querySelectorAll('.hospital-hidden-tag');
-
-    hiddenTags.forEach(function(tag) {
-      tag.classList.remove('hospital-hidden-tag');
-    });
-
-    button.remove();
-  });
-</script>
+<script src="<?= e(site_url('assets/js/hospital.js')) ?>" defer></script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

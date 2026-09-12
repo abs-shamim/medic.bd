@@ -21,21 +21,27 @@ function dp_table_exists(string $table): bool
         return $table_exists_cache[$table];
     }
 
-    try {
-        $stmt = $pdo->prepare("
-            SELECT COUNT(*)
-            FROM INFORMATION_SCHEMA.TABLES
-            WHERE TABLE_SCHEMA = DATABASE()
-            AND TABLE_NAME = :table
-        ");
-        $stmt->execute([':table' => $table]);
+    $resolver = static function () use ($pdo, $table): bool {
+        try {
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.TABLES
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = :table
+            ");
+            $stmt->execute([':table' => $table]);
 
-        $table_exists_cache[$table] = (int)$stmt->fetchColumn() > 0;
-        return $table_exists_cache[$table];
-    } catch (Throwable $e) {
-        $table_exists_cache[$table] = false;
-        return false;
-    }
+            return (int)$stmt->fetchColumn() > 0;
+        } catch (Throwable $e) {
+            return false;
+        }
+    };
+
+    $table_exists_cache[$table] = function_exists('medic_schema_exists_cached')
+        ? medic_schema_exists_cached('table:' . $table, $resolver)
+        : $resolver();
+
+    return $table_exists_cache[$table];
 }
 
 function dp_column_exists(string $table, string $column): bool
@@ -56,25 +62,31 @@ function dp_column_exists(string $table, string $column): bool
         return $column_exists_cache[$cache_key];
     }
 
-    try {
-        $stmt = $pdo->prepare("
-            SELECT COUNT(*)
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = DATABASE()
-            AND TABLE_NAME = :table
-            AND COLUMN_NAME = :column
-        ");
-        $stmt->execute([
-            ':table' => $table,
-            ':column' => $column,
-        ]);
+    $resolver = static function () use ($pdo, $table, $column): bool {
+        try {
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = :table
+                AND COLUMN_NAME = :column
+            ");
+            $stmt->execute([
+                ':table' => $table,
+                ':column' => $column,
+            ]);
 
-        $column_exists_cache[$cache_key] = (int)$stmt->fetchColumn() > 0;
-        return $column_exists_cache[$cache_key];
-    } catch (Throwable $e) {
-        $column_exists_cache[$cache_key] = false;
-        return false;
-    }
+            return (int)$stmt->fetchColumn() > 0;
+        } catch (Throwable $e) {
+            return false;
+        }
+    };
+
+    $column_exists_cache[$cache_key] = function_exists('medic_schema_exists_cached')
+        ? medic_schema_exists_cached('column:' . $cache_key, $resolver)
+        : $resolver();
+
+    return $column_exists_cache[$cache_key];
 }
 
 function dp_name_column(string $table = ''): string

@@ -25,10 +25,10 @@ $meta_description = trim($metaDescription) !== ''
 $meta_keywords = $meta_keywords ?? '';
 $meta_robots = 'index,follow';
 $canonical_url = medic_static_page_url($slug);
+$extra_head_html = ($extra_head_html ?? '') . '<link rel="stylesheet" href="' . e(site_url('assets/css/legal-pages.css')) . '?v=' . e(front_asset_version()) . '">';
 
 include __DIR__ . '/includes/header.php';
 ?>
-<link rel="stylesheet" href="<?= e(site_url('assets/css/legal-pages.css')) ?>">
 
 <main class="medic-static-page">
   <div class="container medic-static-container">

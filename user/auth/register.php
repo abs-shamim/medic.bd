@@ -225,513 +225,7 @@ $user = null;
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<style>
-    :root {
-        --register-bg: #f6f8fa;
-        --register-card: #ffffff;
-        --register-soft: #f6f8fa;
-        --register-border: #d0d7de;
-        --register-text: #24292f;
-        --register-muted: #57606a;
-        --register-blue: #0969da;
-        --register-green: #1f883d;
-        --register-green-hover: #1a7f37;
-        --register-red-bg: rgba(207, 34, 46, 0.10);
-        --register-red-border: rgba(207, 34, 46, 0.28);
-        --register-red-text: #cf222e;
-        --register-success-bg: rgba(31, 136, 61, 0.10);
-        --register-success-border: rgba(31, 136, 61, 0.28);
-        --register-success-text: #1a7f37;
-        --register-shadow: 0 24px 70px rgba(27, 31, 36, 0.10);
-        --register-field-bg: #ffffff;
-    }
-
-    html[data-theme="dark"] {
-        --register-bg: #0d1117;
-        --register-card: #161b22;
-        --register-soft: #21262d;
-        --register-border: #30363d;
-        --register-text: #f0f6fc;
-        --register-muted: #8b949e;
-        --register-blue: #2f81f7;
-        --register-green: #238636;
-        --register-green-hover: #2ea043;
-        --register-red-bg: rgba(248, 81, 73, 0.12);
-        --register-red-border: rgba(248, 81, 73, 0.35);
-        --register-red-text: #ff7b72;
-        --register-success-bg: rgba(46, 160, 67, 0.12);
-        --register-success-border: rgba(46, 160, 67, 0.35);
-        --register-success-text: #7ee787;
-        --register-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
-        --register-field-bg: #0d1117;
-    }
-
-    body {
-        background:
-            radial-gradient(circle at top left, rgba(9, 105, 218, 0.12), transparent 34%),
-            radial-gradient(circle at bottom right, rgba(31, 136, 61, 0.10), transparent 32%),
-            var(--register-bg) !important;
-        color: var(--register-text);
-    }
-
-    html[data-theme="dark"] body {
-        background:
-            radial-gradient(circle at top left, rgba(47, 129, 247, 0.22), transparent 34%),
-            radial-gradient(circle at bottom right, rgba(35, 134, 54, 0.16), transparent 32%),
-            var(--register-bg) !important;
-    }
-
-    .premium-register-wrapper {
-        min-height: calc(100vh - 160px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 60px 16px;
-        color: var(--register-text);
-    }
-
-    .premium-register-shell {
-        width: 100%;
-        max-width: 1180px;
-        display: grid;
-        grid-template-columns: 0.95fr 1.05fr;
-        gap: 28px;
-        align-items: stretch;
-    }
-
-    .register-info-panel,
-    .register-card-panel {
-        border: 1px solid var(--register-border);
-        background: color-mix(in srgb, var(--register-card) 92%, transparent);
-        box-shadow: var(--register-shadow);
-        backdrop-filter: blur(18px);
-        border-radius: 22px;
-        overflow: hidden;
-    }
-
-    .register-info-panel {
-        padding: 38px;
-    }
-
-    .register-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 9px;
-        padding: 8px 13px;
-        border: 1px solid var(--register-border);
-        background: var(--register-soft);
-        border-radius: 999px;
-        color: var(--register-muted);
-        font-size: 13px;
-        margin-bottom: 24px;
-    }
-
-    .register-badge span {
-        width: 9px;
-        height: 9px;
-        background: var(--register-green);
-        border-radius: 50%;
-        box-shadow: 0 0 0 5px rgba(35, 134, 54, 0.15);
-    }
-
-    .register-info-panel h1 {
-        color: var(--register-text);
-        font-size: clamp(32px, 4vw, 52px);
-        line-height: 1.08;
-        letter-spacing: -1.5px;
-        margin: 0 0 16px;
-        font-weight: 800;
-    }
-
-    .register-info-panel p {
-        color: var(--register-muted);
-        font-size: 16px;
-        line-height: 1.75;
-        max-width: 560px;
-        margin: 0 0 26px;
-    }
-
-    .register-stat-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 14px;
-        margin: 28px 0;
-    }
-
-    .register-stat {
-        padding: 16px;
-        border: 1px solid var(--register-border);
-        background: color-mix(in srgb, var(--register-soft) 72%, transparent);
-        border-radius: 16px;
-    }
-
-    .register-stat strong {
-        display: block;
-        color: var(--register-text);
-        font-size: 22px;
-        margin-bottom: 5px;
-    }
-
-    .register-stat small {
-        color: var(--register-muted);
-        font-size: 13px;
-        line-height: 1.5;
-    }
-
-    .register-feature-list {
-        display: grid;
-        gap: 14px;
-        margin-top: 26px;
-    }
-
-    .register-feature {
-        display: flex;
-        gap: 13px;
-        align-items: flex-start;
-        padding: 15px;
-        border: 1px solid var(--register-border);
-        background: color-mix(in srgb, var(--register-soft) 72%, transparent);
-        border-radius: 16px;
-    }
-
-    .register-feature-icon {
-        width: 36px;
-        height: 36px;
-        flex: 0 0 36px;
-        display: grid;
-        place-items: center;
-        border-radius: 12px;
-        background: rgba(47, 129, 247, 0.15);
-        color: var(--register-blue);
-        font-size: 17px;
-    }
-
-    .register-feature strong {
-        display: block;
-        color: var(--register-text);
-        font-size: 14px;
-        margin-bottom: 4px;
-    }
-
-    .register-feature small {
-        color: var(--register-muted);
-        font-size: 13px;
-        line-height: 1.55;
-    }
-
-    .register-card-panel {
-        padding: 34px;
-    }
-
-    .register-card-header {
-        text-align: center;
-        margin-bottom: 26px;
-    }
-
-    .register-avatar {
-        width: 66px;
-        height: 66px;
-        display: grid;
-        place-items: center;
-        margin: 0 auto 16px;
-        border-radius: 50%;
-        background: linear-gradient(145deg, var(--register-soft), var(--register-card));
-        border: 1px solid var(--register-border);
-        color: var(--register-blue);
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-    }
-
-    .register-avatar svg {
-        width: 32px;
-        height: 32px;
-    }
-
-    .register-card-header h2 {
-        color: var(--register-text);
-        font-size: 26px;
-        margin: 0 0 8px;
-        letter-spacing: -0.5px;
-        font-weight: 750;
-    }
-
-    .register-card-header p {
-        color: var(--register-muted);
-        margin: 0;
-        font-size: 14px;
-        line-height: 1.6;
-    }
-
-    .premium-alert {
-        padding: 13px 14px;
-        border-radius: 12px;
-        margin-bottom: 18px;
-        font-size: 14px;
-        line-height: 1.5;
-    }
-
-    .premium-alert.error {
-        background: var(--register-red-bg);
-        border: 1px solid var(--register-red-border);
-        color: var(--register-red-text);
-    }
-
-    .premium-alert.success {
-        background: var(--register-success-bg);
-        border: 1px solid var(--register-success-border);
-        color: var(--register-success-text);
-    }
-
-    .premium-register-form {
-        display: grid;
-        gap: 16px;
-    }
-
-    .field-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-    }
-
-    .premium-field label {
-        display: block;
-        color: var(--register-text);
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 8px;
-    }
-
-    .premium-field label span {
-        color: var(--register-red-text);
-        margin-left: 3px;
-    }
-
-    .premium-field input,
-    .premium-field select,
-    .premium-field textarea {
-        width: 100%;
-        border: 1px solid var(--register-border);
-        border-radius: 12px;
-        background: var(--register-field-bg);
-        color: var(--register-text);
-        outline: none;
-        padding: 0 14px;
-        font-size: 15px;
-        transition: 0.2s ease;
-        box-sizing: border-box;
-    }
-
-    .premium-field input,
-    .premium-field select {
-        height: 48px;
-    }
-
-    .premium-field textarea {
-        min-height: 96px;
-        padding-top: 12px;
-        resize: vertical;
-        line-height: 1.5;
-    }
-
-    .premium-field select {
-        cursor: pointer;
-    }
-
-    .premium-field input::placeholder,
-    .premium-field textarea::placeholder {
-        color: var(--register-muted);
-        opacity: 0.8;
-    }
-
-    .premium-field input:focus,
-    .premium-field select:focus,
-    .premium-field textarea:focus {
-        border-color: var(--register-blue);
-        box-shadow: 0 0 0 4px rgba(47, 129, 247, 0.18);
-    }
-
-    .conditional-fields {
-        display: none;
-        padding: 16px;
-        border: 1px solid rgba(47, 129, 247, 0.22);
-        background: color-mix(in srgb, var(--register-soft) 58%, transparent);
-        border-radius: 16px;
-    }
-
-    .conditional-fields.active {
-        display: grid;
-        gap: 16px;
-    }
-
-    .conditional-title {
-        color: var(--register-blue);
-        font-size: 14px;
-        font-weight: 700;
-        margin-bottom: -2px;
-    }
-
-    .password-wrap {
-        position: relative;
-    }
-
-    .password-wrap input {
-        padding-right: 86px;
-    }
-
-    .toggle-password {
-        position: absolute;
-        right: 8px;
-        top: 50%;
-        transform: translateY(-50%);
-        border: 0;
-        background: transparent;
-        color: var(--register-blue);
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        padding: 8px 10px;
-        border-radius: 9px;
-    }
-
-    .toggle-password:hover {
-        background: rgba(47, 129, 247, 0.12);
-    }
-
-    .account-type-help {
-        margin-top: 8px;
-        color: var(--register-muted);
-        font-size: 12.5px;
-        line-height: 1.5;
-    }
-
-    .register-rules {
-        padding: 14px;
-        border: 1px solid rgba(47, 129, 247, 0.24);
-        background: rgba(47, 129, 247, 0.08);
-        color: var(--register-muted);
-        border-radius: 14px;
-        font-size: 13px;
-        line-height: 1.65;
-    }
-
-    .register-rules strong {
-        color: var(--register-blue);
-    }
-
-    .premium-register-btn {
-        width: 100%;
-        height: 48px;
-        border: 0;
-        border-radius: 12px;
-        background: var(--register-green);
-        color: #ffffff;
-        font-weight: 700;
-        font-size: 15px;
-        cursor: pointer;
-        transition: 0.2s ease;
-        margin-top: 2px;
-    }
-
-    .premium-register-btn:hover {
-        background: var(--register-green-hover);
-        transform: translateY(-1px);
-    }
-
-    .premium-register-btn:active {
-        transform: translateY(0);
-    }
-
-    .register-divider {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        color: var(--register-muted);
-        font-size: 13px;
-        margin: 8px 0;
-    }
-
-    .register-divider::before,
-    .register-divider::after {
-        content: "";
-        height: 1px;
-        flex: 1;
-        background: var(--register-border);
-    }
-
-    .login-link-btn {
-        width: 100%;
-        min-height: 46px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid var(--register-border);
-        border-radius: 12px;
-        background: var(--register-soft);
-        color: var(--register-text);
-        font-weight: 650;
-        font-size: 15px;
-        text-decoration: none;
-        transition: 0.2s ease;
-        box-sizing: border-box;
-    }
-
-    .login-link-btn:hover {
-        border-color: var(--register-muted);
-        background: color-mix(in srgb, var(--register-soft) 86%, var(--register-blue));
-        color: var(--register-text);
-        text-decoration: none;
-    }
-
-    .register-bottom-note {
-        margin-top: 18px;
-        padding: 13px 14px;
-        border: 1px solid rgba(46, 160, 67, 0.22);
-        background: rgba(46, 160, 67, 0.08);
-        color: var(--register-muted);
-        border-radius: 13px;
-        font-size: 13px;
-        line-height: 1.6;
-    }
-
-    .register-bottom-note strong {
-        color: var(--register-success-text);
-    }
-
-    @media (max-width: 980px) {
-        .premium-register-shell {
-            grid-template-columns: 1fr;
-            max-width: 640px;
-        }
-
-        .register-info-panel {
-            padding: 28px;
-        }
-
-        .register-card-panel {
-            padding: 26px;
-        }
-    }
-
-    @media (max-width: 560px) {
-        .premium-register-wrapper {
-            padding: 36px 12px;
-        }
-
-        .register-info-panel,
-        .register-card-panel {
-            border-radius: 18px;
-        }
-
-        .register-info-panel,
-        .register-card-panel {
-            padding: 22px;
-        }
-
-        .field-grid,
-        .register-stat-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/user/assets/css/user-register.css">
 
 <div class="premium-register-wrapper">
     <div class="premium-register-shell">
@@ -819,7 +313,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <div class="field-grid">
                     <div class="premium-field">
                         <label for="user_type">Account Type <span>*</span></label>
-                        <select id="user_type" name="user_type" required onchange="handleAccountType()">
+                        <select id="user_type" name="user_type" required>
                             <option value="">Select Account Type</option>
                             <option value="doctor" <?= (($_POST['user_type'] ?? '') === 'doctor') ? 'selected' : '' ?>>
                                 Doctor
@@ -836,12 +330,13 @@ require_once __DIR__ . '/../includes/header.php';
 
                     <div class="premium-field">
                         <label for="name" id="nameLabel">Full Name <span>*</span></label>
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             id="name"
-                            name="name" 
+                            name="name"
                             placeholder="Enter your full name or hospital name"
                             value="<?= e($_POST['name'] ?? '') ?>"
+                            autocomplete="name"
                             required
                         >
                     </div>
@@ -850,24 +345,26 @@ require_once __DIR__ . '/../includes/header.php';
                 <div class="field-grid">
                     <div class="premium-field">
                         <label for="email">Email Address <span>*</span></label>
-                        <input 
-                            type="email" 
+                        <input
+                            type="email"
                             id="email"
-                            name="email" 
+                            name="email"
                             placeholder="you@example.com"
                             value="<?= e($_POST['email'] ?? '') ?>"
+                            autocomplete="email"
                             required
                         >
                     </div>
 
                     <div class="premium-field">
                         <label for="phone">Phone Number <span>*</span></label>
-                        <input 
-                            type="text" 
+                        <input
+                            type="tel"
                             id="phone"
-                            name="phone" 
+                            name="phone"
                             placeholder="Enter your phone number"
                             value="<?= e($_POST['phone'] ?? '') ?>"
+                            autocomplete="tel"
                             required
                         >
                     </div>
@@ -969,15 +466,16 @@ require_once __DIR__ . '/../includes/header.php';
                         <label for="password">Password <span>*</span></label>
 
                         <div class="password-wrap">
-                            <input 
-                                type="password" 
+                            <input
+                                type="password"
                                 id="password"
-                                name="password" 
+                                name="password"
                                 placeholder="Minimum 6 characters"
+                                autocomplete="new-password"
                                 required
                             >
 
-                            <button type="button" class="toggle-password" onclick="togglePassword('password', this)">
+                            <button type="button" class="toggle-password" data-toggle-target="password">
                                 Show
                             </button>
                         </div>
@@ -987,15 +485,16 @@ require_once __DIR__ . '/../includes/header.php';
                         <label for="confirm_password">Confirm Password <span>*</span></label>
 
                         <div class="password-wrap">
-                            <input 
-                                type="password" 
+                            <input
+                                type="password"
                                 id="confirm_password"
-                                name="confirm_password" 
+                                name="confirm_password"
                                 placeholder="Re-enter your password"
+                                autocomplete="new-password"
                                 required
                             >
 
-                            <button type="button" class="toggle-password" onclick="togglePassword('confirm_password', this)">
+                            <button type="button" class="toggle-password" data-toggle-target="confirm_password">
                                 Show
                             </button>
                         </div>
@@ -1029,61 +528,6 @@ require_once __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<script>
-    function togglePassword(inputId, button) {
-        const passwordInput = document.getElementById(inputId);
-
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            button.textContent = 'Hide';
-        } else {
-            passwordInput.type = 'password';
-            button.textContent = 'Show';
-        }
-    }
-
-    function setRequiredState(containerId, isRequired) {
-        const fields = document.querySelectorAll('#' + containerId + ' input, #' + containerId + ' select, #' + containerId + ' textarea');
-
-        fields.forEach(function(field) {
-            if (isRequired) {
-                field.setAttribute('required', 'required');
-            } else {
-                field.removeAttribute('required');
-            }
-        });
-    }
-
-    function handleAccountType() {
-        const accountType = document.getElementById('user_type').value;
-        const doctorFields = document.getElementById('doctorFields');
-        const hospitalFields = document.getElementById('hospitalFields');
-        const nameLabel = document.getElementById('nameLabel');
-        const nameInput = document.getElementById('name');
-
-        doctorFields.classList.remove('active');
-        hospitalFields.classList.remove('active');
-
-        setRequiredState('doctorFields', false);
-        setRequiredState('hospitalFields', false);
-
-        if (accountType === 'doctor') {
-            doctorFields.classList.add('active');
-            setRequiredState('doctorFields', true);
-            nameLabel.innerHTML = 'Doctor Full Name <span>*</span>';
-            nameInput.placeholder = 'Enter doctor full name';
-        } else if (accountType === 'hospital_owner') {
-            hospitalFields.classList.add('active');
-            setRequiredState('hospitalFields', true);
-            nameLabel.innerHTML = 'Hospital / Clinic Name <span>*</span>';
-            nameInput.placeholder = 'Enter hospital or clinic name';
-        } else {
-            nameLabel.innerHTML = 'Full Name <span>*</span>';
-            nameInput.placeholder = 'Enter your full name or hospital name';
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', handleAccountType);
-</script>
+<script src="<?php echo BASE_URL; ?>/user/assets/js/register.js" defer></script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

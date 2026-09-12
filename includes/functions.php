@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/address-functions.php';
+require_once __DIR__ . '/html-normalizer.php';
 
 $functions_file_version = 'routing-security-php7-compat-20260629';
 
@@ -475,21 +476,219 @@ function table_exists(string $table): bool
         return $cache[$table];
     }
 
-    try {
-        $stmt = $pdo->prepare("
-            SELECT COUNT(*)
-            FROM INFORMATION_SCHEMA.TABLES
-            WHERE TABLE_SCHEMA = DATABASE()
-            AND TABLE_NAME = :table
-        ");
+    $resolver = static function () use ($pdo, $table): bool {
+        try {
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.TABLES
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = :table
+            ");
 
-        $stmt->execute([':table' => $table]);
-        $cache[$table] = (int)$stmt->fetchColumn() > 0;
-    } catch (Throwable $e) {
-        $cache[$table] = false;
-    }
+            $stmt->execute([':table' => $table]);
+
+            return (int)$stmt->fetchColumn() > 0;
+        } catch (Throwable $e) {
+            return false;
+        }
+    };
+
+    $cache[$table] = function_exists('medic_schema_exists_cached')
+        ? medic_schema_exists_cached('table:' . $table, $resolver)
+        : $resolver();
 
     return $cache[$table];
+}
+
+/*
+|--------------------------------------------------------------------------
+| Shared Schema (table/column exists) Cache
+|--------------------------------------------------------------------------
+| table_exists()/column_exists() above, plus the near-identical dp_* copies
+| in doctor-directory/data-fetchers.php and hp_* copies in
+| hospital-directory/data-fetchers.php, each run an
+| INFORMATION_SCHEMA.TABLES/COLUMNS query the first time a given table or
+| column is checked. Their own "static" caches only survive for the one
+| PHP process handling a request, so a single doctor/hospital listing page
+| view - which checks 15-30 different columns while building its filter
+| query - repeated those INFORMATION_SCHEMA lookups on every single
+| request. This file cache makes a learned "does X exist" answer available
+| to every future request too, since a table/column only changes when the
+| project is migrated - not something that happens between two page views.
+| Clear cache/schema-exists.json (or just wait out the TTL) after a schema
+| migration if a stale "doesn't exist" answer would otherwise linger.
+|--------------------------------------------------------------------------
+*/
+if (!defined('MEDIC_SCHEMA_CACHE_TTL')) {
+    define('MEDIC_SCHEMA_CACHE_TTL', 3600);
+}
+
+if (!function_exists('medic_schema_exists_cached')) {
+    function medic_schema_exists_cached(string $key, callable $resolver): bool
+    {
+        static $cache = null;
+        static $cache_file = null;
+
+        if ($cache === null) {
+            $cache_file = __DIR__ . '/../cache/schema-exists.json';
+            $cache = [];
+
+            if (is_file($cache_file) && (time() - filemtime($cache_file)) < MEDIC_SCHEMA_CACHE_TTL) {
+                $decoded = json_decode((string)file_get_contents($cache_file), true);
+
+                if (is_array($decoded)) {
+                    $cache = $decoded;
+                }
+            }
+        }
+
+        if (array_key_exists($key, $cache)) {
+            return $cache[$key];
+        }
+
+        $value = (bool)$resolver();
+        $cache[$key] = $value;
+
+        $cache_dir = dirname($cache_file);
+
+        if (!is_dir($cache_dir)) {
+            @mkdir($cache_dir, 0775, true);
+        }
+
+        if (is_dir($cache_dir) && is_writable($cache_dir)) {
+            @file_put_contents($cache_file, json_encode($cache));
+        }
+
+        return $value;
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Generic Short-Lived Keyed Cache
+|--------------------------------------------------------------------------
+| For results that are expensive to compute (e.g. the doctor-directory
+| pagination COUNT query, which re-runs the same chambers/hospitals joins
+| as the main listing query) but don't need to be exactly up to the second.
+| Each distinct $key gets its own small file under cache/kv/, so this
+| scales to many filter combinations without one growing JSON blob.
+|--------------------------------------------------------------------------
+*/
+if (!function_exists('medic_cache_remember')) {
+    function medic_cache_remember(string $key, int $ttl, callable $resolver)
+    {
+        $cache_file = __DIR__ . '/../cache/kv/' . md5($key) . '.json';
+
+        if (is_file($cache_file) && (time() - filemtime($cache_file)) < $ttl) {
+            $decoded = json_decode((string)file_get_contents($cache_file), true);
+
+            if (is_array($decoded) && array_key_exists('v', $decoded)) {
+                return $decoded['v'];
+            }
+        }
+
+        $value = $resolver();
+
+        $cache_dir = dirname($cache_file);
+
+        if (!is_dir($cache_dir)) {
+            @mkdir($cache_dir, 0775, true);
+        }
+
+        if (is_dir($cache_dir) && is_writable($cache_dir)) {
+            @file_put_contents($cache_file, json_encode(['v' => $value]));
+        }
+
+        return $value;
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Shared Site Settings Cache
+|--------------------------------------------------------------------------
+| includes/header.php, includes/footer.php and assets/css/theme-vars.php
+| each used to run their own "SELECT * FROM site_settings" with their own
+| static cache, so a single page view queried this tiny table 2-3 times.
+| This single cached lookup is shared by all of them: one static cache per
+| request, plus a short-lived file cache (when writable) so the query also
+| doesn't repeat on every request across visitors. Admin edits in
+| admin/site-settings.php can take up to FRONT_SETTINGS_CACHE_TTL seconds to
+| show on the public site - an acceptable trade for cutting DB load on
+| every single page view.
+|--------------------------------------------------------------------------
+*/
+if (!defined('FRONT_SETTINGS_CACHE_TTL')) {
+    define('FRONT_SETTINGS_CACHE_TTL', 120);
+}
+
+if (!function_exists('medic_site_settings_all')) {
+    function medic_site_settings_all(): array
+    {
+        global $pdo;
+
+        static $settings = null;
+
+        if ($settings !== null) {
+            return $settings;
+        }
+
+        $cache_file = __DIR__ . '/../cache/site-settings.json';
+
+        if (is_file($cache_file) && (time() - filemtime($cache_file)) < FRONT_SETTINGS_CACHE_TTL) {
+            $cached = json_decode((string)file_get_contents($cache_file), true);
+
+            if (is_array($cached)) {
+                $settings = $cached;
+
+                return $settings;
+            }
+        }
+
+        $settings = [];
+
+        try {
+            if (isset($pdo) && $pdo instanceof PDO && table_exists('site_settings')) {
+                $stmt = $pdo->query('SELECT setting_key, setting_value FROM site_settings');
+
+                foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                    $settings[(string)$row['setting_key']] = (string)$row['setting_value'];
+                }
+            }
+        } catch (Throwable $e) {
+            $settings = [];
+        }
+
+        $cache_dir = dirname($cache_file);
+
+        if (!is_dir($cache_dir)) {
+            @mkdir($cache_dir, 0775, true);
+        }
+
+        if (is_dir($cache_dir) && is_writable($cache_dir)) {
+            @file_put_contents($cache_file, json_encode($settings));
+        }
+
+        return $settings;
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Shared Static Asset Version
+|--------------------------------------------------------------------------
+| One version string used to cache-bust CSS/JS across every public page,
+| instead of each page/include hand-rolling its own version string (or, on
+| most pages, no version param at all - meaning the 1-year immutable cache
+| in .htaccess could keep serving a stale file after an edit). Bump this
+| single value whenever CSS/JS changes should reach visitors immediately.
+|--------------------------------------------------------------------------
+*/
+if (!function_exists('front_asset_version')) {
+    function front_asset_version(): string
+    {
+        return '20260912b';
+    }
 }
 
 function column_exists(string $table, string $column): bool
@@ -510,24 +709,30 @@ function column_exists(string $table, string $column): bool
         return $cache[$cache_key];
     }
 
-    try {
-        $stmt = $pdo->prepare("
-            SELECT COUNT(*)
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = DATABASE()
-            AND TABLE_NAME = :table
-            AND COLUMN_NAME = :column
-        ");
+    $resolver = static function () use ($pdo, $table, $column): bool {
+        try {
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = :table
+                AND COLUMN_NAME = :column
+            ");
 
-        $stmt->execute([
-            ':table' => $table,
-            ':column' => $column,
-        ]);
+            $stmt->execute([
+                ':table' => $table,
+                ':column' => $column,
+            ]);
 
-        $cache[$cache_key] = (int)$stmt->fetchColumn() > 0;
-    } catch (Throwable $e) {
-        $cache[$cache_key] = false;
-    }
+            return (int)$stmt->fetchColumn() > 0;
+        } catch (Throwable $e) {
+            return false;
+        }
+    };
+
+    $cache[$cache_key] = function_exists('medic_schema_exists_cached')
+        ? medic_schema_exists_cached('column:' . $cache_key, $resolver)
+        : $resolver();
 
     return $cache[$cache_key];
 }
@@ -850,6 +1055,72 @@ function get_specialty_by_slug(string $slug): ?array
 | Doctors
 |--------------------------------------------------------------------------
 */
+/*
+|--------------------------------------------------------------------------
+| Chamber Preloading (avoids one chamber query per card in a list)
+|--------------------------------------------------------------------------
+| includes/doctor-card.php renders once per doctor in a listing loop.
+| Left alone, its medic_dc_chamber_list() runs its own chamber query on
+| every single call - a classic N+1 pattern (e.g. 30 extra queries for a
+| 30-doctor page). Call this ONCE before the loop with every doctor id on
+| the page (before doctor-card.php has been included even once, which is
+| why this lives here rather than in that file) and each card's call to
+| medic_dc_chamber_list() will use this preloaded data instead of
+| querying again. Contexts that render a single card (a doctor's own
+| profile, related doctors, etc.) don't need to call this - the
+| per-doctor query still runs as a fallback exactly as before.
+|--------------------------------------------------------------------------
+*/
+if (!function_exists('medic_dc_preload_chambers')) {
+    function medic_dc_preload_chambers(array $doctor_ids): void
+    {
+        global $pdo;
+
+        $doctor_ids = array_values(array_unique(array_filter(array_map('intval', $doctor_ids))));
+
+        if (!isset($pdo) || !$pdo instanceof PDO || !$doctor_ids) {
+            $GLOBALS['medic_dc_preloaded_chambers'] = [];
+
+            return;
+        }
+
+        $preloaded = array_fill_keys($doctor_ids, []);
+
+        try {
+            $hospital_name_bn_select = (function_exists('column_exists') && column_exists('hospitals', 'name_bn'))
+                ? "h.name_bn AS hospital_name_bn"
+                : "'' AS hospital_name_bn";
+
+            $placeholders = implode(',', array_fill(0, count($doctor_ids), '?'));
+
+            $stmt = $pdo->prepare("
+                SELECT
+                    c.doctor_id,
+                    c.id AS chamber_id,
+                    c.sort_order,
+                    c.status,
+                    h.name AS hospital_name,
+                    {$hospital_name_bn_select}
+                FROM chambers c
+                LEFT JOIN hospitals h ON h.id = c.hospital_id
+                WHERE c.doctor_id IN ({$placeholders})
+                  AND c.status = 'active'
+                ORDER BY c.doctor_id ASC, c.sort_order ASC, c.id ASC
+            ");
+
+            $stmt->execute($doctor_ids);
+
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $preloaded[(int)$row['doctor_id']][] = $row;
+            }
+        } catch (Throwable $e) {
+            $preloaded = array_fill_keys($doctor_ids, []);
+        }
+
+        $GLOBALS['medic_dc_preloaded_chambers'] = $preloaded;
+    }
+}
+
 function get_featured_doctors(int $limit = 3): array
 {
     global $pdo;
@@ -1030,6 +1301,121 @@ function get_featured_hospitals(int $limit = 3): array
     $stmt->execute();
 
     return $stmt->fetchAll();
+}
+
+/*
+|--------------------------------------------------------------------------
+| On-demand Icon Thumbnails
+|--------------------------------------------------------------------------
+| Uploaded images (e.g. specialty icons) are often full-resolution photos
+| shown at a tiny display size. This generates a small square WebP copy the
+| first time an image is requested and caches it next to the original, so
+| every later page load serves the cached file instead of the full photo.
+| Falls back to the original URL untouched on any failure.
+|--------------------------------------------------------------------------
+*/
+if (!function_exists('front_icon_thumb_url')) {
+    function front_icon_thumb_url(string $rawPath, int $size = 200, int $quality = 78): string
+    {
+        $rawPath = trim($rawPath);
+
+        if ($rawPath === '' || preg_match('#^https?://#i', $rawPath)) {
+            return $rawPath;
+        }
+
+        $projectRoot = realpath(dirname(__DIR__));
+
+        if ($projectRoot === false) {
+            return $rawPath;
+        }
+
+        $sourcePath = realpath($projectRoot . '/' . ltrim($rawPath, '/'));
+
+        if ($sourcePath === false || strpos($sourcePath, $projectRoot . DIRECTORY_SEPARATOR) !== 0) {
+            return $rawPath;
+        }
+
+        $thumbDir = dirname($sourcePath) . '/thumbs';
+        $thumbFile = $thumbDir . '/' . basename($sourcePath) . '-' . $size . '.webp';
+
+        $isFresh = is_file($thumbFile) && filemtime($thumbFile) >= filemtime($sourcePath);
+
+        if (!$isFresh && !front_generate_square_thumbnail($sourcePath, $thumbFile, $size, $quality)) {
+            return $rawPath;
+        }
+
+        $thumbRelative = str_replace('\\', '/', ltrim(substr($thumbFile, strlen($projectRoot)), '/'));
+
+        return function_exists('site_url') ? site_url($thumbRelative) : '/' . $thumbRelative;
+    }
+}
+
+if (!function_exists('front_generate_square_thumbnail')) {
+    function front_generate_square_thumbnail(string $sourcePath, string $destPath, int $size, int $quality): bool
+    {
+        if (!function_exists('imagewebp') || !function_exists('getimagesize')) {
+            return false;
+        }
+
+        try {
+            $info = @getimagesize($sourcePath);
+
+            if ($info === false) {
+                return false;
+            }
+
+            [$width, $height, $type] = $info;
+
+            switch ($type) {
+                case IMAGETYPE_JPEG:
+                    $source = @imagecreatefromjpeg($sourcePath);
+                    break;
+                case IMAGETYPE_PNG:
+                    $source = @imagecreatefrompng($sourcePath);
+                    break;
+                case IMAGETYPE_WEBP:
+                    $source = @imagecreatefromwebp($sourcePath);
+                    break;
+                case IMAGETYPE_GIF:
+                    $source = @imagecreatefromgif($sourcePath);
+                    break;
+                default:
+                    return false;
+            }
+
+            if (!$source) {
+                return false;
+            }
+
+            $cropSize = min($width, $height);
+            $cropX = (int)(($width - $cropSize) / 2);
+            $cropY = (int)(($height - $cropSize) / 2);
+
+            $square = imagecreatetruecolor($size, $size);
+
+            if (function_exists('imagealphablending')) {
+                imagealphablending($square, false);
+                imagesavealpha($square, true);
+            }
+
+            imagecopyresampled($square, $source, 0, 0, $cropX, $cropY, $size, $size, $cropSize, $cropSize);
+            imagedestroy($source);
+
+            $dir = dirname($destPath);
+
+            if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+                imagedestroy($square);
+                return false;
+            }
+
+            $saved = imagewebp($square, $destPath, $quality);
+            imagedestroy($square);
+
+            return $saved;
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
 }
 
 function get_hospitals(array $filters = [], int $limit = 20): array
@@ -1584,24 +1970,35 @@ function get_site_setting(string $key, string $default = ''): string
 {
     global $pdo;
 
-    try {
-        if (!table_exists('site_settings')) {
-            return default_site_settings()[$key] ?? $default;
+    // This is the main settings accessor, called repeatedly all over a
+    // single page render (header, footer, home page, every card in a
+    // list, ...). Without caching, each call was its own fresh query -
+    // e.g. 31 separate single-row SELECTs on one doctors.php load. The
+    // whole table is a handful of rows, so fetch it once per request and
+    // serve every later call from this static array instead.
+    static $settings_cache = null;
+
+    if ($settings_cache === null) {
+        $settings_cache = [];
+
+        try {
+            if (table_exists('site_settings')) {
+                $stmt = $pdo->query("SELECT setting_key, setting_value FROM site_settings");
+
+                foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                    $settings_cache[(string)$row['setting_key']] = (string)$row['setting_value'];
+                }
+            }
+        } catch (Throwable $e) {
+            $settings_cache = [];
         }
-
-        $stmt = $pdo->prepare("SELECT setting_value FROM site_settings WHERE setting_key = :setting_key LIMIT 1");
-        $stmt->execute([':setting_key' => $key]);
-
-        $value = $stmt->fetchColumn();
-
-        if ($value === false || $value === null) {
-            return default_site_settings()[$key] ?? $default;
-        }
-
-        return (string)$value;
-    } catch (Throwable $e) {
-        return default_site_settings()[$key] ?? $default;
     }
+
+    if (array_key_exists($key, $settings_cache)) {
+        return $settings_cache[$key];
+    }
+
+    return default_site_settings()[$key] ?? $default;
 }
 
 function update_site_setting(string $key, string $value): bool
@@ -1725,7 +2122,7 @@ function show_maintenance_page_if_enabled(): void
 
     echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">';
     echo '<title>' . e(get_site_setting('maintenance_title', 'Website Under Maintenance')) . '</title>';
-    echo '<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;background:#f6f8fa;color:#24292f}.box{max-width:560px;background:#fff;border:1px solid #d0d7de;border-radius:14px;padding:28px;text-align:center;box-shadow:0 12px 32px rgba(27,31,36,.08)}h1{margin:0 0 10px;font-size:28px}p{margin:0;color:#57606a;line-height:1.7}</style>';
+    echo '<link rel="stylesheet" href="' . e(site_url('assets/css/maintenance.css')) . '">';
     echo '</head><body><div class="box">';
     echo '<h1>' . e(get_site_setting('maintenance_title', 'Website Under Maintenance')) . '</h1>';
     echo '<p>' . e(get_site_setting('maintenance_message', 'We are currently updating our website. Please check back soon.')) . '</p>';
@@ -1745,16 +2142,16 @@ function render_tracking_codes(string $position = 'head'): void
         $custom_head_code = get_site_setting('custom_head_code');
 
         if ($gtm_id !== '') {
-            echo "<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','" . e($gtm_id) . "');</script>";
+            echo '<script src="' . e(site_url('assets/js/gtm-loader.js')) . '" data-gtm-id="' . e($gtm_id) . '"></script>';
         }
 
         if ($ga_id !== '') {
             echo "<script async src=\"https://www.googletagmanager.com/gtag/js?id=" . e($ga_id) . "\"></script>";
-            echo "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','" . e($ga_id) . "');</script>";
+            echo '<script src="' . e(site_url('assets/js/ga4-loader.js')) . '" data-ga-id="' . e($ga_id) . '"></script>';
         }
 
         if ($facebook_pixel_id !== '') {
-            echo "<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','" . e($facebook_pixel_id) . "');fbq('track','PageView');</script>";
+            echo '<script src="' . e(site_url('assets/js/fb-pixel-loader.js')) . '" data-pixel-id="' . e($facebook_pixel_id) . '"></script>';
         }
 
         if ($custom_head_code !== '') {

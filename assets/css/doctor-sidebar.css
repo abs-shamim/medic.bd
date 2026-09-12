@@ -1,0 +1,210 @@
+/*
+|--------------------------------------------------------------------------
+| Simple Light Sidebar Design
+|--------------------------------------------------------------------------
+*/
+
+.medic-sidebar-light {
+    display: grid;
+    gap: 16px;
+    margin: 0 0 20px;
+    color: #3d5065;
+}
+
+.medic-sidebar-light,
+.medic-sidebar-light * {
+    box-sizing: border-box;
+    font-weight: 500;
+}
+
+.medic-sidebar-light-card {
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #e4eaf1;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(15, 51, 89, 0.035);
+}
+
+.medic-sidebar-light-head {
+    padding: 13px 16px;
+    border-bottom: 1px solid #edf1f5;
+    background: #fbfdff;
+}
+
+.medic-sidebar-light-head h3 {
+    margin: 0;
+    color: #236bd1;
+    font-size: 17px;
+    line-height: 1.4;
+}
+
+.medic-sidebar-light-body {
+    padding: 16px;
+}
+
+.medic-sidebar-light-name {
+    margin: 0 0 13px;
+    color: #2d4055;
+    font-size: 18px;
+    line-height: 1.4;
+}
+
+.medic-sidebar-light-list {
+    margin: 0;
+    border-top: 1px solid #edf1f5;
+}
+
+.medic-sidebar-light-row {
+    display: grid;
+    grid-template-columns: minmax(92px, 38%) minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #edf1f5;
+}
+
+.medic-sidebar-light-row:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+.medic-sidebar-light-label {
+    color: #77899b;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.medic-sidebar-light-value {
+    color: #40546a;
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.medic-sidebar-light-value a {
+    color: #286fda;
+    text-decoration: none;
+}
+
+.medic-sidebar-light-value a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.medic-sidebar-light-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border: 1px solid #e1eaf5;
+    border-radius: 999px;
+    background: #f8fbff;
+    color: #4c657f;
+    font-size: 13px;
+    line-height: 1;
+}
+
+.medic-sidebar-light-badge.claimed {
+    border-color: #d5ecdf;
+    background: #f2fbf6;
+    color: #2d7e50;
+}
+
+.medic-sidebar-light-badge.pending {
+    border-color: #e7ddfb;
+    background: #fbf9ff;
+    color: #7855c4;
+}
+
+.medic-sidebar-light-badge.unclaimed {
+    border-color: #f5eac0;
+    background: #fffdf5;
+    color: #87671b;
+}
+
+.medic-sidebar-light-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 13px;
+}
+
+.medic-sidebar-light-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 13px;
+    border: 1px solid #d8e7fb;
+    border-radius: 8px;
+    background: #eef6ff;
+    color: #246fd9;
+    font-size: 13px;
+    line-height: 1;
+    text-decoration: none;
+}
+
+.medic-sidebar-light-btn:hover,
+.medic-sidebar-light-btn:focus-visible {
+    border-color: #c2daf9;
+    background: #e4f0ff;
+    color: #175ec0;
+    text-decoration: none;
+}
+
+.medic-sidebar-light-btn:focus-visible {
+    outline: 3px solid rgba(36, 111, 217, 0.16);
+    outline-offset: 2px;
+}
+
+.medic-sidebar-light-chamber {
+    padding: 0 0 15px;
+    margin: 0 0 15px;
+    border-bottom: 1px solid #edf1f5;
+}
+
+.medic-sidebar-light-chamber:last-child {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: 0;
+}
+
+.medic-sidebar-light-chamber-title {
+    margin: 0 0 10px;
+    color: #34495f;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+@media (max-width: 992px) {
+    .medic-sidebar-light {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: start;
+    }
+}
+
+@media (max-width: 760px) {
+    .medic-sidebar-light {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 575px) {
+    .medic-sidebar-light-head,
+    .medic-sidebar-light-body {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .medic-sidebar-light-row {
+        grid-template-columns: 1fr;
+        gap: 3px;
+    }
+
+    .medic-sidebar-light-label {
+        font-size: 12px;
+    }
+
+    .medic-sidebar-light-value {
+        font-size: 14px;
+    }
+}

@@ -869,375 +869,7 @@ $image_url = $account_image !== '' ? settings_url($account_image) : '';
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<style>
-    :root {
-        --settings-bg: #ffffff;
-        --settings-soft: #f7f6f3;
-        --settings-border: #d6d1c8;
-        --settings-text: #191919;
-        --settings-muted: #565656;
-        --settings-blue: #3157d6;
-        --settings-green: #00b67a;
-        --settings-green-dark: #009e6a;
-        --settings-red: #cf222e;
-        --settings-red-soft: #ffebe9;
-    }
-
-    body {
-        background: var(--settings-bg) !important;
-        color: var(--settings-text);
-    }
-
-    .settings-page,
-    .settings-page * {
-        box-sizing: border-box;
-    }
-
-    .settings-page {
-        max-width: 560px;
-        margin: 0 auto;
-        padding: 26px 18px 60px;
-        color: var(--settings-text);
-    }
-
-    .settings-user-card {
-        display: grid;
-        gap: 18px;
-        margin: 10px auto 34px;
-        padding: 16px 18px;
-        border-radius: 16px;
-        background: var(--settings-soft);
-        max-width: 520px;
-    }
-
-    .settings-user-main {
-        display: grid;
-        grid-template-columns: 56px minmax(0, 1fr);
-        gap: 16px;
-        align-items: center;
-    }
-
-    .settings-avatar {
-        width: 56px;
-        height: 56px;
-        border-radius: 7px;
-        overflow: hidden;
-        border: 1px solid #e4e1da;
-        background: #ffffff;
-        color: var(--settings-text);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        font-weight: 800;
-    }
-
-    .settings-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-    }
-
-    .settings-user-main h1 {
-        margin: 0;
-        color: var(--settings-text);
-        font-size: 18px;
-        line-height: 1.25;
-        font-weight: 700;
-    }
-
-    .settings-user-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 7px;
-        margin-top: 5px;
-    }
-
-    .settings-user-tags span {
-        display: inline-flex;
-        align-items: center;
-        min-height: 24px;
-        padding: 3px 9px;
-        border-radius: 999px;
-        background: #ffffff;
-        border: 1px solid #e4e1da;
-        color: var(--settings-muted);
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .settings-user-tags span.status {
-        background: rgba(0,182,122,.10);
-        border-color: rgba(0,182,122,.22);
-        color: var(--settings-green-dark);
-    }
-
-    .settings-user-info-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 0;
-        margin-top: 4px;
-        border-top: 1px solid #e4e1da;
-    }
-
-    .settings-info-item {
-        display: grid;
-        grid-template-columns: 155px minmax(0, 1fr);
-        gap: 10px;
-        padding: 9px 0;
-        border-bottom: 1px solid #e4e1da;
-        background: transparent;
-    }
-
-    .settings-info-item:last-child {
-        border-bottom: 0;
-    }
-
-    .settings-info-item span {
-        color: var(--settings-muted);
-        font-size: 13px;
-        font-weight: 500;
-    }
-
-    .settings-info-item strong {
-        color: var(--settings-text);
-        font-size: 13px;
-        line-height: 1.55;
-        font-weight: 600;
-        word-break: break-word;
-    }
-
-    .settings-home-actions {
-        display: grid;
-        gap: 12px;
-        margin-bottom: 18px;
-    }
-
-    .settings-action-btn,
-    .settings-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 46px;
-        padding: 0 18px;
-        border-radius: 5px;
-        border: 1px solid var(--settings-green);
-        background: var(--settings-green);
-        color: #ffffff;
-        text-decoration: none;
-        font-size: 15px;
-        font-weight: 700;
-        cursor: pointer;
-        font-family: inherit;
-    }
-
-    .settings-action-btn.secondary {
-        background: #ffffff;
-        border-color: var(--settings-border);
-        color: var(--settings-text);
-    }
-
-    .settings-action-btn:hover,
-    .settings-btn:hover {
-        background: var(--settings-green-dark);
-        border-color: var(--settings-green-dark);
-        color: #ffffff;
-        text-decoration: none;
-    }
-
-    .settings-action-btn.secondary:hover {
-        background: var(--settings-soft);
-        color: var(--settings-text);
-        border-color: var(--settings-border);
-    }
-
-    .settings-alert {
-        margin: 0 0 18px;
-        padding: 12px 14px;
-        border-radius: 8px;
-        border: 1px solid #d8dee4;
-        background: #f6f8fa;
-        color: var(--settings-muted);
-        font-size: 14px;
-        line-height: 1.6;
-    }
-
-    .settings-alert.success {
-        color: #116329;
-        background: #dafbe1;
-        border-color: rgba(26,127,55,.25);
-    }
-
-    .settings-alert.error {
-        color: var(--settings-red);
-        background: var(--settings-red-soft);
-        border-color: rgba(207,34,46,.25);
-    }
-
-    .settings-form-head {
-        margin-bottom: 26px;
-    }
-
-    .settings-form-head h2 {
-        margin: 0 0 10px;
-        color: #1f2328;
-        font-size: 32px;
-        line-height: 1.2;
-        font-weight: 700;
-        letter-spacing: -0.03em;
-    }
-
-    .settings-form-head p {
-        margin: 0;
-        color: var(--settings-muted);
-        font-size: 15px;
-        line-height: 1.65;
-    }
-
-    .settings-form {
-        display: grid;
-        gap: 22px;
-    }
-
-    .settings-field {
-        display: grid;
-        gap: 8px;
-    }
-
-    .settings-field label {
-        color: var(--settings-text);
-        font-size: 16px;
-        line-height: 1.45;
-        font-weight: 500;
-    }
-
-    .settings-field label span {
-        color: var(--settings-red);
-    }
-
-    .settings-field input,
-    .settings-field select,
-    .settings-field textarea {
-        width: 100%;
-        min-height: 47px;
-        padding: 0 16px;
-        border: 1px solid #555555;
-        border-radius: 4px;
-        background: #ffffff;
-        color: var(--settings-text);
-        font-family: inherit;
-        font-size: 15px;
-        outline: none;
-        box-shadow: none;
-    }
-
-    .settings-field textarea {
-        min-height: 145px;
-        padding: 12px 16px;
-        resize: vertical;
-        line-height: 1.6;
-    }
-
-    .settings-field input:focus,
-    .settings-field select:focus,
-    .settings-field textarea:focus {
-        border-color: var(--settings-blue);
-        box-shadow: 0 0 0 3px rgba(49,87,214,.12);
-    }
-
-    .settings-help {
-        color: var(--settings-muted);
-        font-size: 13px;
-        line-height: 1.55;
-    }
-
-    .settings-note-box {
-        padding: 14px 16px;
-        border: 1px solid #e4e1da;
-        border-radius: 12px;
-        background: var(--settings-soft);
-        color: var(--settings-muted);
-        line-height: 1.6;
-        font-size: 14px;
-    }
-
-    .settings-note-box strong {
-        color: var(--settings-text);
-    }
-
-    .settings-location-preview {
-        padding: 12px 16px;
-        border: 1px solid #e4e1da;
-        border-radius: 8px;
-        background: var(--settings-soft);
-        color: var(--settings-muted);
-        font-size: 14px;
-        line-height: 1.6;
-    }
-
-    .password-wrap {
-        position: relative;
-    }
-
-    .password-wrap input {
-        padding-right: 78px;
-    }
-
-    .password-toggle {
-        position: absolute;
-        right: 7px;
-        top: 50%;
-        transform: translateY(-50%);
-        border: 0;
-        background: transparent;
-        color: var(--settings-blue);
-        font-size: 13px;
-        cursor: pointer;
-        padding: 7px 9px;
-        border-radius: 8px;
-    }
-
-    .password-toggle:hover {
-        background: rgba(49,87,214,.10);
-    }
-
-    .settings-back {
-        margin-top: 16px;
-        text-align: center;
-    }
-
-    .settings-back a {
-        color: var(--settings-blue);
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 14px;
-    }
-
-    .settings-back a:hover {
-        text-decoration: underline;
-    }
-
-    @media (max-width: 640px) {
-        .settings-page {
-            padding-top: 18px;
-        }
-
-        .settings-info-item {
-            grid-template-columns: 1fr;
-            gap: 4px;
-        }
-
-        .settings-form-head h2 {
-            font-size: 28px;
-        }
-
-        .settings-action-btn,
-        .settings-btn {
-            width: 100%;
-        }
-    }
-</style>
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/user/assets/css/user-settings.css">
 
 <div class="settings-page">
 
@@ -1364,7 +996,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <p>Update your profile image, phone, verification information, and address.</p>
             </div>
 
-            <form method="post" enctype="multipart/form-data" class="settings-form">
+            <form method="post" enctype="multipart/form-data" class="settings-form" id="profileUpdateForm" data-saved-division-id="<?= settings_e((string) $saved_division_id) ?>" data-saved-district-id="<?= settings_e((string) $saved_district_id) ?>" data-saved-thana-id="<?= settings_e((string) $saved_thana_id) ?>" data-lang="<?= settings_e($lang) ?>">
                 <input type="hidden" name="csrf_token" value="<?= settings_e($csrf_token) ?>">
                 <input type="hidden" name="action" value="update_profile">
 
@@ -1375,7 +1007,7 @@ require_once __DIR__ . '/../includes/header.php';
 
                 <div class="settings-field">
                     <label for="phone">Phone <span>*</span></label>
-                    <input type="text" id="phone" name="phone" value="<?= settings_e($account_phone) ?>" required>
+                    <input type="tel" id="phone" name="phone" value="<?= settings_e($account_phone) ?>" autocomplete="tel" required>
                 </div>
 
                 <div class="settings-field">
@@ -1553,7 +1185,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <div class="settings-field">
                     <label for="current_password">Current Password</label>
                     <div class="password-wrap">
-                        <input type="password" id="current_password" name="current_password" required>
+                        <input type="password" id="current_password" name="current_password" autocomplete="current-password" required>
                         <button type="button" class="password-toggle" data-target="current_password">Show</button>
                     </div>
                 </div>
@@ -1561,7 +1193,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <div class="settings-field">
                     <label for="new_password">New Password</label>
                     <div class="password-wrap">
-                        <input type="password" id="new_password" name="new_password" required>
+                        <input type="password" id="new_password" name="new_password" autocomplete="new-password" required>
                         <button type="button" class="password-toggle" data-target="new_password">Show</button>
                     </div>
                 </div>
@@ -1569,7 +1201,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <div class="settings-field">
                     <label for="confirm_password">Confirm Password</label>
                     <div class="password-wrap">
-                        <input type="password" id="confirm_password" name="confirm_password" required>
+                        <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required>
                         <button type="button" class="password-toggle" data-target="confirm_password">Show</button>
                     </div>
                 </div>
@@ -1595,8 +1227,8 @@ require_once __DIR__ . '/../includes/header.php';
                 <input type="hidden" name="action" value="update_email">
 
                 <div class="settings-field">
-                    <label>Current Email</label>
-                    <input type="email" value="<?= settings_e($account_email) ?>" disabled>
+                    <label for="current_email_display">Current Email</label>
+                    <input type="email" id="current_email_display" value="<?= settings_e($account_email) ?>" disabled>
                 </div>
 
                 <div class="settings-field">
@@ -1607,7 +1239,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <div class="settings-field">
                     <label for="email_current_password">Current Password <span>*</span></label>
                     <div class="password-wrap">
-                        <input type="password" id="email_current_password" name="current_password" required>
+                        <input type="password" id="email_current_password" name="current_password" autocomplete="current-password" required>
                         <button type="button" class="password-toggle" data-target="email_current_password">Show</button>
                     </div>
                 </div>
@@ -1623,154 +1255,6 @@ require_once __DIR__ . '/../includes/header.php';
 
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const divisionSelect = document.getElementById('division_id');
-    const districtSelect = document.getElementById('district_id');
-    const thanaSelect = document.getElementById('thana_id');
-
-    const areaInput = document.getElementById('area');
-    const roadInput = document.getElementById('road_no');
-    const houseInput = document.getElementById('house_no');
-    const postCodeInput = document.getElementById('post_code');
-    const locationPreview = document.getElementById('locationPreview');
-
-    const savedDivisionId = <?= json_encode($saved_division_id) ?>;
-    const savedDistrictId = <?= json_encode($saved_district_id) ?>;
-    const savedThanaId = <?= json_encode($saved_thana_id) ?>;
-    const lang = <?= json_encode($lang) ?>;
-
-    function resetSelect(select, placeholder) {
-        if (!select) return;
-        select.innerHTML = '<option value="">' + placeholder + '</option>';
-    }
-
-    function addOptions(select, items, selectedId) {
-        if (!select) return;
-
-        items.forEach(function (item) {
-            const option = document.createElement('option');
-            option.value = item.id;
-            option.textContent = item.name;
-
-            if (parseInt(item.id, 10) === parseInt(selectedId || 0, 10)) {
-                option.selected = true;
-            }
-
-            select.appendChild(option);
-        });
-    }
-
-    function updatePreview() {
-        if (!locationPreview) return;
-
-        const divisionText = divisionSelect && divisionSelect.value
-            ? divisionSelect.options[divisionSelect.selectedIndex].text
-            : '';
-
-        const districtText = districtSelect && districtSelect.value
-            ? districtSelect.options[districtSelect.selectedIndex].text
-            : '';
-
-        const thanaText = thanaSelect && thanaSelect.value
-            ? thanaSelect.options[thanaSelect.selectedIndex].text
-            : '';
-
-        const area = areaInput ? areaInput.value.trim() : '';
-        const road = roadInput ? roadInput.value.trim() : '';
-        const house = houseInput ? houseInput.value.trim() : '';
-        const postCode = postCodeInput ? postCodeInput.value.trim() : '';
-
-        let thanaWithPostCode = thanaText;
-
-        if (postCode) {
-            thanaWithPostCode = thanaText ? thanaText + '-' + postCode : postCode;
-        }
-
-        const parts = [];
-
-        if (house) parts.push(house);
-        if (road) parts.push(road);
-        if (area) parts.push(area);
-        if (thanaWithPostCode) parts.push(thanaWithPostCode);
-        if (districtText) parts.push(districtText);
-        if (divisionText) parts.push(divisionText);
-
-        locationPreview.textContent = parts.length ? parts.join(', ') : 'Selected address will appear here.';
-    }
-
-    async function loadDistricts(divisionId, selectedDistrictId) {
-        resetSelect(districtSelect, 'Select District');
-        resetSelect(thanaSelect, 'Select Thana');
-        updatePreview();
-
-        if (!divisionId) return;
-
-        const response = await fetch('settings.php?ajax=districts&division_id=' + encodeURIComponent(divisionId) + '&lang=' + encodeURIComponent(lang));
-        const districts = await response.json();
-
-        addOptions(districtSelect, districts, selectedDistrictId);
-        updatePreview();
-
-        if (selectedDistrictId) {
-            await loadThanas(selectedDistrictId, savedThanaId);
-        }
-    }
-
-    async function loadThanas(districtId, selectedThanaId) {
-        resetSelect(thanaSelect, 'Select Thana');
-        updatePreview();
-
-        if (!districtId) return;
-
-        const response = await fetch('settings.php?ajax=thanas&district_id=' + encodeURIComponent(districtId) + '&lang=' + encodeURIComponent(lang));
-        const thanas = await response.json();
-
-        addOptions(thanaSelect, thanas, selectedThanaId);
-        updatePreview();
-    }
-
-    if (divisionSelect) {
-        divisionSelect.addEventListener('change', function () {
-            loadDistricts(this.value, 0);
-        });
-    }
-
-    if (districtSelect) {
-        districtSelect.addEventListener('change', function () {
-            loadThanas(this.value, 0);
-        });
-    }
-
-    [thanaSelect, areaInput, roadInput, houseInput, postCodeInput].forEach(function (input) {
-        if (input) {
-            input.addEventListener('change', updatePreview);
-            input.addEventListener('input', updatePreview);
-        }
-    });
-
-    if (savedDivisionId) {
-        loadDistricts(savedDivisionId, savedDistrictId);
-    } else {
-        updatePreview();
-    }
-
-    document.querySelectorAll('.password-toggle').forEach(function (button) {
-        button.addEventListener('click', function () {
-            const input = document.getElementById(button.dataset.target);
-
-            if (!input) return;
-
-            if (input.type === 'password') {
-                input.type = 'text';
-                button.textContent = 'Hide';
-            } else {
-                input.type = 'password';
-                button.textContent = 'Show';
-            }
-        });
-    });
-});
-</script>
+<script src="<?php echo BASE_URL; ?>/user/assets/js/settings.js" defer></script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

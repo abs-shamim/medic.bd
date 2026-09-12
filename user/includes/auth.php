@@ -94,7 +94,7 @@ if (!function_exists('redirect')) {
             exit;
         }
 
-        echo '<script>window.location.href="' . e($url) . '";</script>';
+        echo '<script src="' . e(BASE_URL) . '/user/assets/js/auth-redirect.js" data-redirect-url="' . e($url) . '"></script>';
         echo '<noscript><meta http-equiv="refresh" content="0;url=' . e($url) . '"></noscript>';
         exit;
     }

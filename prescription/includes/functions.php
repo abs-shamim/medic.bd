@@ -48,7 +48,8 @@ function prescription_redirect(string $path = ''): void
         exit;
     }
 
-    echo '<script>window.location.href=' . json_encode($url) . ';</script>';
+    echo '<script src="' . prescription_e(prescription_url('assets/js/redirect.js'))
+        . '" data-url="' . prescription_e($url) . '"></script>';
     exit;
 }
 

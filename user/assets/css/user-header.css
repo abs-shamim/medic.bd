@@ -1,0 +1,515 @@
+        html[data-theme="dark"] {
+            --user-header-dark: #f0f6fc;
+            --user-header-muted: #8b949e;
+            --user-header-border: #30363d;
+            --user-header-soft: #0d1117;
+            --user-header-card: #161b22;
+            --user-header-blue: #58a6ff;
+            --user-header-green: #3fb950;
+            --user-header-green-dark: #2ea043;
+            --user-header-shadow: 0 1px 0 rgba(240, 246, 252, 0.04);
+            --user-header-bg: rgba(13, 17, 23, 0.96);
+            --user-header-dropdown: #161b22;
+            --user-header-input: #0d1117;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            color: var(--user-header-dark);
+            background:
+                radial-gradient(circle at top left, rgba(88, 166, 255, 0.10), transparent 30%),
+                radial-gradient(circle at bottom right, rgba(63, 185, 80, 0.08), transparent 28%),
+                var(--user-header-soft);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .container {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        .user-topbar {
+            background: var(--user-header-soft);
+            border-bottom: 1px solid var(--user-header-border);
+            font-size: 13px;
+            color: var(--user-header-muted);
+        }
+
+        .user-topbar-inner {
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .user-topbar-left,
+        .user-topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .user-topbar a {
+            color: var(--user-header-blue);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .user-topbar a:hover {
+            text-decoration: underline;
+        }
+
+        .user-header {
+            position: sticky;
+            top: 0;
+            z-index: 9999;
+            background: var(--user-header-bg);
+            border-bottom: 1px solid var(--user-header-border);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: var(--user-header-shadow);
+        }
+
+        .user-header input[type="checkbox"] {
+            display: none;
+        }
+
+        .user-header-inner {
+            min-height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .user-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--user-header-dark);
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            white-space: nowrap;
+            min-width: 0;
+        }
+
+        .user-logo:hover {
+            color: var(--user-header-dark);
+            text-decoration: none;
+        }
+
+        .user-logo-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: var(--user-header-green);
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1;
+            box-shadow: inset 0 -1px 0 rgba(27, 31, 36, 0.15);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .user-logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #ffffff;
+        }
+
+        /*
+         * These need to be at least as specific as ".user-logo-icon img"
+         * above (class + element) -- a plain ".logo-light"/".logo-dark"
+         * class selector loses to it, so both the light and dark logo
+         * images rendered at once instead of only the one matching the
+         * active theme.
+         */
+        .user-logo-icon .logo-light {
+            display: block;
+        }
+
+        .user-logo-icon .logo-dark {
+            display: none;
+        }
+
+        html[data-theme="dark"] .user-logo-icon .logo-light {
+            display: none;
+        }
+
+        html[data-theme="dark"] .user-logo-icon .logo-dark {
+            display: block;
+        }
+
+        .user-logo-text {
+            display: inline-flex;
+            flex-direction: column;
+            min-width: 0;
+            line-height: 1.08;
+        }
+
+        .user-logo-title {
+            color: var(--user-header-dark);
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            max-width: 210px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-logo-subtitle {
+            display: none;
+            margin-top: 3px;
+            color: var(--user-header-muted);
+            font-size: 11px;
+            font-weight: 600;
+            max-width: 230px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .user-menu a {
+            display: inline-flex;
+            align-items: center;
+            min-height: 36px;
+            padding: 0 10px;
+            border-radius: 6px;
+            color: var(--user-header-dark);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.18s ease;
+            white-space: nowrap;
+        }
+
+        .user-menu a:hover {
+            background: var(--user-header-soft);
+            color: var(--user-header-blue);
+        }
+
+        .user-menu a.active,
+        .user-menu .active {
+            background: rgba(88, 166, 255, 0.16);
+            color: var(--user-header-blue);
+        }
+
+        html[data-theme="light"] .user-menu a.active,
+        html[data-theme="light"] .user-menu .active {
+            background: #ddf4ff;
+            color: var(--user-header-blue);
+        }
+
+        .user-menu .user-add-link {
+            margin-left: 8px;
+            background: var(--user-header-green);
+            color: #ffffff;
+            border: 1px solid rgba(27, 31, 36, 0.15);
+            font-weight: 700;
+        }
+
+        .user-menu .user-add-link:hover {
+            background: var(--user-header-green-dark);
+            color: #ffffff;
+        }
+
+        .theme-toggle-btn {
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0 10px;
+            border-radius: 999px;
+            border: 1px solid var(--user-header-border);
+            background: var(--user-header-card);
+            color: var(--user-header-dark);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.18s ease;
+            margin-left: 8px;
+        }
+
+        .theme-toggle-btn:hover {
+            background: var(--user-header-soft);
+            color: var(--user-header-blue);
+        }
+
+        .user-account-menu {
+            position: relative;
+            margin-left: 8px;
+        }
+
+        .user-account-btn {
+            display: inline-flex;
+            align-items: center;
+            min-height: 36px;
+            gap: 8px;
+            padding: 0 10px 0 6px;
+            border-radius: 999px;
+            border: 1px solid var(--user-header-border);
+            color: var(--user-header-dark);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            background: var(--user-header-card);
+            cursor: pointer;
+        }
+
+        .user-account-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--user-header-green);
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .user-account-name {
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-account-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 10px);
+            width: 240px;
+            padding: 8px;
+            border: 1px solid var(--user-header-border);
+            border-radius: 10px;
+            background: var(--user-header-dropdown);
+            box-shadow: 0 12px 30px rgba(27, 31, 36, 0.14);
+        }
+
+        .user-account-menu:hover .user-account-dropdown {
+            display: block;
+        }
+
+        .user-account-card {
+            padding: 10px;
+            border-radius: 8px;
+            background: var(--user-header-soft);
+            margin-bottom: 6px;
+        }
+
+        .user-account-card strong {
+            display: block;
+            color: var(--user-header-dark);
+            font-size: 14px;
+            margin-bottom: 3px;
+        }
+
+        .user-account-card small {
+            color: var(--user-header-muted);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .user-account-dropdown a {
+            display: flex;
+            min-height: 38px;
+            align-items: center;
+            padding: 0 10px;
+            border-radius: 8px;
+            color: var(--user-header-dark);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .user-account-dropdown a:hover {
+            background: var(--user-header-soft);
+            color: var(--user-header-blue);
+        }
+
+        .user-account-dropdown a.logout-link {
+            color: #cf222e;
+        }
+
+        html[data-theme="dark"] .user-account-dropdown a.logout-link {
+            color: #ff7b72;
+        }
+
+        .user-mobile-btn {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--user-header-border);
+            border-radius: 8px;
+            background: var(--user-header-card);
+            color: var(--user-header-dark);
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .user-mobile-menu {
+            display: none;
+            padding: 10px 0 14px;
+            border-top: 1px solid var(--user-header-border);
+        }
+
+        .user-mobile-menu a,
+        .user-mobile-menu span,
+        .user-mobile-theme-btn {
+            display: flex;
+            align-items: center;
+            min-height: 42px;
+            padding: 0 12px;
+            border-radius: 8px;
+            color: var(--user-header-dark);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .user-mobile-menu a:hover,
+        .user-mobile-theme-btn:hover {
+            background: var(--user-header-soft);
+            color: var(--user-header-blue);
+        }
+
+        .user-mobile-menu a.active,
+        .user-mobile-menu .active {
+            background: rgba(88, 166, 255, 0.16);
+            color: var(--user-header-blue);
+        }
+
+        html[data-theme="light"] .user-mobile-menu a.active,
+        html[data-theme="light"] .user-mobile-menu .active {
+            background: #ddf4ff;
+            color: var(--user-header-blue);
+        }
+
+        .user-mobile-menu .mobile-account-info {
+            background: var(--user-header-soft);
+            color: var(--user-header-muted);
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .user-mobile-theme-btn {
+            width: 100%;
+            border: 0;
+            background: transparent;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .user-panel-wrapper {
+            background: transparent;
+            min-height: calc(100vh - 74px);
+        }
+
+        .user-card,
+        .card,
+        .dashboard-card,
+        .panel-card {
+            background: var(--user-header-card) !important;
+            color: var(--user-header-dark) !important;
+            border: 1px solid var(--user-header-border) !important;
+            box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
+            border-radius: 10px;
+        }
+
+        .text-muted {
+            color: var(--user-header-muted) !important;
+        }
+
+        .form-control,
+        .form-select,
+        input,
+        select,
+        textarea {
+            background-color: var(--user-header-input) !important;
+            color: var(--user-header-dark) !important;
+            border-color: var(--user-header-border) !important;
+        }
+
+        .form-control:focus,
+        .form-select:focus,
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--user-header-blue) !important;
+            box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.15) !important;
+        }
+
+        @media (max-width: 980px) {
+            .user-topbar {
+                display: none;
+            }
+
+            .user-header-inner {
+                min-height: 60px;
+            }
+
+            .user-menu {
+                display: none;
+            }
+
+            .user-mobile-btn {
+                display: inline-flex;
+            }
+
+            #user-menu-toggle:checked ~ .user-header-inner .user-mobile-btn {
+                background: var(--user-header-soft);
+            }
+
+            #user-menu-toggle:checked ~ .user-mobile-menu {
+                display: grid;
+                gap: 4px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .user-logo-title {
+                font-size: 18px;
+                max-width: 170px;
+            }
+
+            .user-logo-icon {
+                width: 32px;
+                height: 32px;
+            }
+        }

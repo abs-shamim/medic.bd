@@ -14,25 +14,9 @@
 
 <!-- User Panel JS -->
 <script src="<?php echo BASE_URL; ?>/user/assets/js/user-panel.js"></script>
+<script src="<?php echo BASE_URL; ?>/assets/js/image-fallback.js" defer></script>
 
-<style>
-    .user-footer {
-        background: var(--up-card, #ffffff);
-        border-top: 1px solid var(--up-border, #d0d7de);
-        color: var(--up-muted, #57606a);
-        transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
-    }
-
-    html[data-theme="dark"] .user-footer {
-        background: var(--up-card, #161b22);
-        border-top-color: var(--up-border, #30363d);
-        color: var(--up-muted, #8b949e);
-    }
-
-    .user-footer p {
-        color: inherit !important;
-    }
-</style>
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/user/assets/css/user-footer.css">
 
 </body>
 </html>

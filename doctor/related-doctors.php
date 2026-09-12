@@ -638,47 +638,7 @@ $original_doctor = $doctor;
 
 ?>
 
-<style>
-.medic-card {
-    background: #ffffff;
-    border: 1px solid #d0d7de;
-    border-radius: 14px;
-    padding: 22px;
-    margin-bottom: 20px;
-    box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
-}
-
-.medic-card h2 {
-    margin: 0 0 10px;
-    color: #24292f;
-    font-size: 24px;
-    line-height: 1.25;
-    font-weight: 800;
-}
-
-.medic-card p {
-    margin: 0 0 18px;
-    color: #57606a;
-    font-size: 15px;
-    line-height: 1.7;
-}
-
-.medic-related-doctors {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 14px;
-}
-
-.medic-related-doctors > * {
-    width: 100%;
-}
-
-.medic-related-doctors .doctor-card,
-.medic-related-doctors .medic-doctor-card {
-    width: 100%;
-    max-width: 100%;
-}
-</style>
+<link rel="stylesheet" href="<?= e(site_url('assets/css/doctor-related-doctors.css')) ?>">
 
 <section class="medic-card">
     <h2><?= e(__t('related_doctors', 'Related Doctors')) ?></h2>
@@ -687,6 +647,7 @@ $original_doctor = $doctor;
     <div class="medic-related-doctors">
         <?php foreach ($related_doctors as $related_doctor): ?>
             <?php
+            front_line_break();
             $doctor = $related_doctor;
             include $doctor_card_file;
             ?>

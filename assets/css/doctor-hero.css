@@ -1,0 +1,570 @@
+:root {
+    --medic-blue: #126ff1;
+    --medic-green: #20be00;
+    --medic-hero-bg: #f6f6f6;
+    --medic-hero-text: #121212;
+    --medic-hero-muted: #4e5660;
+    --medic-hero-divider: #d1d1d1;
+}
+
+.medic-profile-hero {
+    position: relative;
+    margin: 0 0 26px;
+    padding: 25px 28px 22px;
+    background: var(--medic-hero-bg);
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.medic-profile-main {
+    display: grid;
+    grid-template-columns: 206px minmax(0, 1fr) minmax(220px, 238px);
+    gap: 22px;
+    align-items: start;
+}
+
+.medic-doctor-photo-wrap {
+    position: relative;
+    width: 206px;
+    height: 274px;
+    padding: 6px;
+    border-radius: 23px;
+    background: #ffffff;
+    box-sizing: border-box;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
+}
+
+.medic-doctor-photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 17px;
+    object-fit: cover;
+    object-position: center;
+    background: #e2e2e2;
+}
+
+
+
+.medic-profile-content {
+    min-width: 0;
+    padding-top: 7px;
+}
+
+.medic-name-line {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.medic-name-line h1 {
+    margin: 0;
+    color: var(--medic-hero-text);
+    font-size: clamp(24px, 2.05vw, 27px);
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    overflow-wrap: anywhere;
+}
+
+.medic-verified-badge {
+    display: none;
+}
+
+.medic-doctor-info-list {
+    margin-top: 9px;
+}
+
+.medic-info-line {
+    margin: 0 0 4px;
+    color: #333b45;
+    font-size: 17px;
+    line-height: 1.4;
+}
+
+.medic-degree-line {
+    color: #343d48;
+    font-weight: 500;
+}
+
+.medic-training-line {
+    color: #4c5662;
+}
+
+.medic-training-line strong {
+    color: #303944;
+    font-weight: 500;
+}
+
+.medic-specialty-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: 9px 0 8px;
+}
+
+.medic-specialty-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 25px;
+    padding: 0 13px 0 8px;
+    background: var(--medic-blue);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%, 3px 50%);
+}
+
+
+.medic-designation-line {
+    margin-bottom: 17px;
+    color: #065dff;
+    font-size: 17px;
+    font-weight: 500;
+}
+
+.medic-hero-meta {
+    display: flex;
+    align-items: stretch;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+
+.medic-meta-item {
+    min-width: 132px;
+    padding: 0 17px;
+    border-right: 1px solid var(--medic-hero-divider);
+}
+
+.medic-meta-item:first-child {
+    padding-left: 0;
+}
+
+.medic-meta-item:last-child {
+    border-right: 0;
+}
+
+.medic-meta-label {
+    display: block;
+    margin-bottom: 2px;
+    color: #424b56;
+    font-size: 15px;
+    line-height: 1.35;
+    font-weight: 400;
+}
+
+.medic-meta-value {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #090909;
+    font-size: 16px;
+    line-height: 1.35;
+    font-weight: 800;
+}
+
+.medic-rating-star {
+    color: #ff9f10;
+    font-size: 18px;
+    line-height: 1;
+}
+
+
+.medic-profile-actions {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 274px;
+    padding-top: 57px;
+}
+
+.medic-share-button {
+    position: absolute;
+    top: 5px;
+    right: -10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #585858;
+    cursor: pointer;
+}
+
+.medic-share-button:hover {
+    color: var(--medic-blue);
+}
+
+.medic-share-button svg {
+    width: 25px;
+    height: 25px;
+}
+
+/* Compact vertical social menu, matching the supplied reference style. */
+.medic-social-share-menu {
+    position: absolute;
+    top: 42px;
+    right: -10px;
+    z-index: 30;
+    width: 178px;
+    padding: 6px 0;
+    border: 1px solid #ececec;
+    border-radius: 0;
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.13);
+}
+
+.medic-social-share-menu[hidden] {
+    display: none;
+}
+
+.medic-social-share-grid {
+    display: block;
+}
+
+.medic-social-share-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 18px;
+    width: 100%;
+    min-height: 42px;
+    margin: 0;
+    padding: 0 17px;
+    border: 0;
+    border-radius: 0;
+    background: #ffffff;
+    color: #4a4a4a !important;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background-color .16s ease, color .16s ease;
+}
+
+.medic-social-share-item:hover,
+.medic-social-share-item:focus-visible {
+    background: #f5f5f5;
+    color: #202020 !important;
+    text-decoration: none;
+    transform: none;
+}
+
+.medic-social-share-item:focus-visible {
+    outline: 2px solid #8ab4f8;
+    outline-offset: -2px;
+}
+
+.medic-social-share-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    flex: 0 0 20px;
+    color: #777777;
+}
+
+.medic-social-share-icon svg {
+    width: 19px;
+    height: 19px;
+    fill: currentColor;
+}
+
+@media (max-width: 570px) {
+    .medic-social-share-menu {
+        top: 47px;
+        right: 10px;
+        width: 178px;
+    }
+}
+
+.medic-fee-box {
+    text-align: center;
+}
+
+.medic-fee-label {
+    display: block;
+    color: #000000;
+    font-size: 20px;
+    line-height: 1.25;
+    font-weight: 800;
+}
+
+.medic-fee-value-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.medic-fee-value {
+    color: #4c88f5;
+    font-size: 37px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: -0.045em;
+}
+
+
+
+@media (max-width: 1040px) {
+    .medic-profile-hero {
+        padding: 22px 20px;
+    }
+
+    .medic-profile-main {
+        grid-template-columns: 176px minmax(0, 1fr) 215px;
+        gap: 18px;
+    }
+
+    .medic-doctor-photo-wrap {
+        width: 176px;
+        height: 238px;
+    }
+
+    .medic-profile-actions {
+        min-height: 238px;
+        padding-top: 50px;
+    }
+
+    .medic-name-line h1 {
+        font-size: 24px;
+    }
+
+    .medic-info-line,
+    .medic-designation-line {
+        font-size: 15px;
+    }
+
+    .medic-meta-item {
+        min-width: 112px;
+        padding: 0 12px;
+    }
+}
+
+@media (max-width: 800px) {
+    .medic-profile-main {
+        grid-template-columns: 154px minmax(0, 1fr);
+    }
+
+    .medic-doctor-photo-wrap {
+        width: 154px;
+        height: 210px;
+    }
+
+    .medic-profile-actions {
+        grid-column: 1 / -1;
+        min-height: 0;
+        padding: 12px 0 0;
+        border-top: 1px solid #dddddd;
+    }
+
+    .medic-share-button {
+        top: 6px;
+        right: 0;
+    }
+
+    .medic-fee-box {
+        padding-right: 36px;
+    }
+}
+
+@media (max-width: 570px) {
+    .medic-profile-hero {
+        padding: 15px 14px 14px;
+        margin-bottom: 18px;
+    }
+
+    .medic-profile-main {
+        grid-template-columns: 84px minmax(0, 1fr);
+        column-gap: 13px;
+        row-gap: 0;
+        align-items: start;
+    }
+
+    /* Let the information, stats and working-place rows span the mobile grid. */
+    .medic-profile-content,
+    .medic-profile-actions {
+        display: contents;
+    }
+
+    .medic-doctor-photo-wrap {
+        grid-column: 1;
+        grid-row: 1 / 3;
+        width: 84px;
+        height: 104px;
+        margin: 0;
+        padding: 4px;
+        border-radius: 14px;
+    }
+
+    .medic-doctor-photo {
+        border-radius: 10px;
+    }
+
+    .medic-name-line {
+        grid-column: 2;
+        grid-row: 1;
+        justify-content: flex-start;
+        align-self: end;
+        min-width: 0;
+    }
+
+    .medic-name-line h1 {
+        font-size: 16px;
+        line-height: 1.26;
+        letter-spacing: -0.018em;
+    }
+
+    .medic-doctor-info-list {
+        grid-column: 2;
+        grid-row: 2;
+        min-width: 0;
+        margin-top: 5px;
+        padding-right: 26px;
+    }
+
+    .medic-info-line {
+        margin-bottom: 3px;
+        font-size: 12px;
+        line-height: 1.3;
+    }
+
+    .medic-specialty-tags {
+        justify-content: flex-start;
+        gap: 6px;
+        margin: 6px 0 6px;
+    }
+
+    .medic-specialty-tag {
+        min-height: 21px;
+        padding: 0 10px 0 7px;
+        font-size: 10.5px;
+    }
+
+    .medic-designation-line {
+        margin-bottom: 0;
+        font-size: 12px;
+    }
+
+    .medic-hero-meta {
+        grid-column: 1 / -1;
+        grid-row: 3;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: stretch;
+        margin-top: 15px;
+        padding: 14px 0 0;
+        border-top: 1px solid #e6e6e6;
+    }
+
+    .medic-meta-item {
+        min-width: 0;
+        padding: 0 13px;
+    }
+
+    .medic-meta-item:first-child {
+        padding-left: 0;
+    }
+
+    .medic-meta-label {
+        margin-bottom: 3px;
+        font-size: 11px;
+        line-height: 1.28;
+    }
+
+    .medic-meta-value {
+        justify-content: flex-start;
+        gap: 4px;
+        font-size: 14px;
+        line-height: 1.25;
+        flex-wrap: wrap;
+    }
+
+    .medic-rating-star {
+        font-size: 16px;
+    }
+
+    .medic-share-button {
+        position: absolute;
+        top: 12px;
+        right: 10px;
+        z-index: 2;
+        width: 30px;
+        height: 30px;
+    }
+
+    .medic-share-button svg {
+        width: 23px;
+        height: 23px;
+    }
+
+    .medic-fee-box {
+        display: none;
+    }
+
+    .medic-fee-label {
+        font-size: 16px;
+    }
+
+    .medic-fee-value-row {
+        justify-content: flex-start;
+        margin-top: 5px;
+    }
+
+    .medic-fee-value {
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 370px) {
+    .medic-profile-hero {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .medic-profile-main {
+        grid-template-columns: 76px minmax(0, 1fr);
+        column-gap: 10px;
+    }
+
+    .medic-doctor-photo-wrap {
+        width: 76px;
+        height: 96px;
+    }
+
+    .medic-name-line h1 {
+        font-size: 14px;
+    }
+
+    .medic-info-line {
+        font-size: 11px;
+    }
+
+    .medic-meta-item {
+        padding: 0 8px;
+    }
+
+    .medic-meta-label {
+        font-size: 10px;
+    }
+
+    .medic-meta-value {
+        font-size: 12px;
+    }
+}
+</style>

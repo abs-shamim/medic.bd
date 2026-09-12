@@ -36,25 +36,7 @@ if (!file_exists($reviews_file)) {
 
 ?>
 
-<style>
-.medic-reviews-section {
-    background: #ffffff;
-    border: 1px solid #d0d7de;
-    border-radius: 14px;
-    padding: 22px;
-    margin-bottom: 20px;
-    box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
-}
-
-.medic-reviews-section h2,
-.medic-reviews-section h3 {
-    color: #24292f;
-}
-
-.medic-reviews-section p {
-    color: #57606a;
-}
-</style>
+<link rel="stylesheet" href="<?= e(site_url('assets/css/doctor-reviews-wrapper.css')) ?>">
 
 <section class="medic-reviews-section">
     <?php include $reviews_file; ?>

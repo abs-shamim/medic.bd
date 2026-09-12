@@ -1,0 +1,502 @@
+  /*
+   * Keep all typography inside the hospital profile at a consistent medium weight.
+   * The !important flag protects this page from stronger global theme rules.
+   */
+  .medic-hospital-page,
+  .medic-hospital-page * {
+    font-weight: 500 !important;
+  }
+
+  .hospital-hidden-tag {
+    display: none !important;
+  }
+
+  .hospital-more-tag {
+    font: inherit;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .hospital-more-tag:focus {
+    outline: none;
+  }
+
+  .medic-hospital-page {
+    background:
+      radial-gradient(circle at top left, rgba(9, 105, 218, 0.10), transparent 32%),
+      radial-gradient(circle at top right, rgba(45, 164, 78, 0.10), transparent 34%),
+      var(--hospital-bg);
+    padding: 28px 0 56px;
+  }
+
+  .medic-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    align-items: center;
+    margin: 0 0 18px;
+    color: #57606a;
+    font-size: 14px;
+  }
+
+  .medic-breadcrumb a {
+    color: var(--hospital-primary);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .medic-breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  .medic-breadcrumb span {
+    color: #8c959f;
+  }
+
+  .medic-hospital-hero {
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
+  }
+
+  .medic-hospital-cover {
+    position: relative;
+    min-height: 270px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 22px;
+  }
+
+  .medic-cover-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    color: #24292f;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 8px 24px rgba(27, 31, 36, 0.20);
+  }
+
+  .medic-single-hospital-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    padding: 64px 24px 24px;
+  }
+
+  /*
+   * align-items: center on the column above makes children hug their own
+   * content width by default (not stretch to the card's full width) - so
+   * the long title's box was sized by its own unwrapped text instead of
+   * by the actual space available, and never got a reason to wrap.
+   * width: 100% (with min-width: 0 so it's still allowed to shrink) gives
+   * it the real available width to wrap within.
+   */
+  .medic-single-hospital-main > * {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /*
+   * Centered profile-photo layout (cover photo behind, a square logo
+   * centered on the cover's bottom edge, name centered underneath),
+   * positioned relative to .medic-hospital-cover so it stays anchored to
+   * the cover's bottom-center regardless of cover width/height.
+   * .medic-single-hospital-main's extra top padding above makes room for
+   * the half that overlaps below the cover.
+   */
+  .medic-hospital-logo {
+    position: absolute;
+    left: 50%;
+    bottom: -44px;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 120px;
+    border-radius: 20px;
+    border: 4px solid #ffffff;
+    background: #ffffff;
+    object-fit: contain;
+    box-shadow: 0 8px 24px rgba(27, 31, 36, 0.20);
+  }
+
+  .medic-title-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /*
+   * A flex item's default min-width is auto, which for text content means
+   * "as wide as the longest unbreakable run of text" - inside the flex
+   * rows above (.medic-single-hospital-main and .medic-title-line), that
+   * silently stopped a long hospital name from wrapping and pushed it
+   * past the viewport edge on narrow screens instead. min-width: 0 lets
+   * it shrink and wrap normally.
+   */
+  .medic-title-line h1 {
+    min-width: 0;
+    margin: 0;
+    color: #24292f;
+    font-size: clamp(20px, 2.4vw, 28px);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+
+  .medic-hospital-description {
+    max-width: 640px;
+    margin: 12px auto 0;
+    color: #57606a;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  .medic-tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .medic-tag,
+  .hospital-more-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: #ddf4ff;
+    border: 1px solid rgba(9, 105, 218, 0.20);
+    color: var(--hospital-primary);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .hospital-more-tag {
+    min-height: 30px;
+  }
+
+  .medic-tag:hover,
+  .hospital-more-tag:hover {
+    background: #b6e3ff;
+    color: var(--hospital-primary);
+  }
+
+  .medic-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .medic-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 18px;
+    border-radius: 6px;
+    border: 1px solid rgba(27, 31, 36, 0.15);
+    background: var(--hospital-accent);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .medic-btn:hover {
+    background: var(--hospital-accent);
+    color: #ffffff;
+  }
+
+  .medic-btn-outline {
+    background: #ffffff;
+    color: var(--hospital-primary);
+    border-color: #d0d7de;
+  }
+
+  .medic-btn-outline:hover {
+    background: var(--hospital-bg);
+    color: var(--hospital-primary);
+  }
+
+  .medic-hospital-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid #d0d7de;
+    background: var(--hospital-bg);
+  }
+
+  .medic-stat-item {
+    padding: 18px;
+    border-right: 1px solid #d0d7de;
+  }
+
+  .medic-stat-item:last-child {
+    border-right: 0;
+  }
+
+  .medic-stat-item h3 {
+    margin: 0 0 5px;
+    color: #24292f;
+    font-size: 24px;
+    letter-spacing: -0.03em;
+  }
+
+  .medic-stat-item p {
+    margin: 0;
+    color: #57606a;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .medic-content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .medic-main-column {
+    display: grid;
+    gap: 18px;
+    min-width: 0;
+  }
+
+  .medic-sidebar {
+    position: sticky;
+    top: 88px;
+    display: grid;
+    gap: 16px;
+  }
+
+  .medic-card {
+    background: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
+  }
+
+  .medic-card h2 {
+    margin: 0 0 12px;
+    color: #24292f;
+    font-size: 22px;
+    letter-spacing: -0.03em;
+    font-weight: 500;
+  }
+
+  .medic-card h3 {
+    margin: 18px 0 10px;
+    color: #24292f;
+    font-size: 17px;
+    letter-spacing: -0.02em;
+    font-weight: 500;
+  }
+
+  .medic-card p {
+    color: #57606a;
+    line-height: 1.7;
+  }
+
+  .medic-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  .medic-info-box {
+    padding: 14px;
+    background: var(--hospital-bg);
+    border: 1px solid #d0d7de;
+    border-radius: 10px;
+  }
+
+  .medic-info-box span {
+    display: block;
+    color: #57606a;
+    font-size: 12px;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+
+  .medic-info-box strong {
+    display: block;
+    color: #24292f;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .medic-hospital-doctor-list {
+    display: grid;
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+  .medic-appointment-card,
+  .medic-contact-card {
+    background: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
+  }
+
+  .medic-appointment-card h2,
+  .medic-contact-card h2 {
+    margin: 0 0 14px;
+    color: #24292f;
+    font-size: 20px;
+    letter-spacing: -0.03em;
+    font-weight: 500;
+  }
+
+  .medic-emergency-box {
+    background: var(--hospital-bg);
+    border: 1px solid #d0d7de;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+
+  .medic-emergency-box span {
+    display: block;
+    color: #57606a;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  .medic-emergency-box h3 {
+    margin: 0;
+    color: #24292f;
+    font-size: 24px;
+    line-height: 1.25;
+  }
+
+  .medic-emergency-box a {
+    color: #24292f;
+    text-decoration: none;
+  }
+
+  .medic-contact-card p {
+    margin: 0 0 10px;
+    color: #57606a;
+    line-height: 1.55;
+  }
+
+  .medic-contact-card a {
+    color: var(--hospital-primary);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .medic-contact-card a:hover {
+    text-decoration: underline;
+  }
+
+  .medic-map-box {
+    margin-top: 14px;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed #d0d7de;
+    border-radius: 10px;
+    background: var(--hospital-bg);
+    color: #57606a;
+    font-weight: 500;
+  }
+
+  @media (max-width: 980px) {
+    .medic-content-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .medic-sidebar {
+      position: static;
+    }
+
+    .medic-hospital-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .medic-stat-item:nth-child(2) {
+      border-right: 0;
+    }
+
+    .medic-stat-item:nth-child(1),
+    .medic-stat-item:nth-child(2) {
+      border-bottom: 1px solid #d0d7de;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .medic-hospital-page {
+      padding-top: 18px;
+    }
+
+    .medic-hospital-cover {
+      min-height: 190px;
+      padding: 16px;
+    }
+
+    .medic-hospital-logo {
+      bottom: -30px;
+      width: 88px;
+      height: 88px;
+      border-width: 3px;
+    }
+
+    .medic-single-hospital-main {
+      padding: 46px 16px 16px;
+    }
+
+    .medic-hospital-stats,
+    .medic-info-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .medic-stat-item {
+      border-right: 0;
+      border-bottom: 1px solid #d0d7de;
+    }
+
+    .medic-stat-item:last-child {
+      border-bottom: 0;
+    }
+
+    .medic-hero-actions .medic-btn,
+    .medic-appointment-card .medic-btn,
+    .medic-contact-card .medic-btn {
+      width: 100%;
+    }
+  }
+
+.medic-btn-full {
+  width: 100%;
+}

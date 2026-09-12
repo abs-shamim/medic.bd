@@ -83,10 +83,10 @@ require_once __DIR__ . '/includes/header.php';
         </div>
     </div>
     <div class="rx-card-body">
-        <form method="GET" class="rx-filter-bar" style="grid-template-columns:minmax(240px,1fr) auto;">
+        <form method="GET" class="rx-filter-bar rx-filter-bar--compact">
             <div class="rx-field">
-                <label>Search Patient</label>
-                <input type="search" name="q" value="<?= prescription_e($q) ?>" placeholder="Name, phone or patient code">
+                <label for="patientSearchQ">Search Patient</label>
+                <input type="search" id="patientSearchQ" name="q" value="<?= prescription_e($q) ?>" placeholder="Name, phone or patient code">
             </div>
             <div class="rx-actions">
                 <button class="rx-btn rx-btn-primary" type="submit">Search</button>

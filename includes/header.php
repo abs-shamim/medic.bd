@@ -1,6 +1,10 @@
 <?php
 require_once __DIR__ . '/functions.php';
 
+if (function_exists('front_normalize_html_output')) {
+    ob_start('front_normalize_html_output');
+}
+
 if (!function_exists('e')) {
     function e($value): string
     {
@@ -15,7 +19,7 @@ if (!function_exists('str_starts_with')) {
     }
 }
 
-$header_version = 'home-mobile-search-stack-20260909d';
+$header_version = function_exists('front_asset_version') ? front_asset_version() : 'home-mobile-search-stack-20260909d';
 
 /*
 |--------------------------------------------------------------------------
@@ -25,58 +29,11 @@ $header_version = 'home-mobile-search-stack-20260909d';
 |--------------------------------------------------------------------------
 */
 
-if (!function_exists('medic_header_table_exists')) {
-    function medic_header_table_exists(string $table): bool
-    {
-        global $pdo;
-
-        try {
-            if (!isset($pdo)) {
-                return false;
-            }
-
-            $stmt = $pdo->prepare("
-                SELECT COUNT(*)
-                FROM INFORMATION_SCHEMA.TABLES
-                WHERE TABLE_SCHEMA = DATABASE()
-                AND TABLE_NAME = :table
-            ");
-            $stmt->execute([':table' => $table]);
-
-            return (int)$stmt->fetchColumn() > 0;
-        } catch (Throwable $e) {
-            return false;
-        }
-    }
-}
-
 if (!function_exists('medic_header_setting')) {
     function medic_header_setting(string $key, string $default = ''): string
     {
-        global $pdo;
-
-        static $settings_cache = null;
-
-        if ($settings_cache === null) {
-            $settings_cache = [];
-
-            try {
-                if (!isset($pdo) || !medic_header_table_exists('site_settings')) {
-                    return $default;
-                }
-
-                $stmt = $pdo->query("SELECT setting_key, setting_value FROM site_settings");
-                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                foreach ($rows as $row) {
-                    $settings_cache[(string)$row['setting_key']] = (string)$row['setting_value'];
-                }
-            } catch (Throwable $e) {
-                $settings_cache = [];
-            }
-        }
-
-        $value = trim((string)($settings_cache[$key] ?? ''));
+        $settings = function_exists('medic_site_settings_all') ? medic_site_settings_all() : [];
+        $value = trim((string)($settings[$key] ?? ''));
 
         return $value !== '' ? $value : $default;
     }
@@ -552,29 +509,37 @@ $language_bn_url = medic_header_language_url('bn');
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <?php
+    /*
+     * Loaded non-blocking (preload + swap-on-load) instead of a plain
+     * <link rel="stylesheet">. A synchronous Google Fonts stylesheet holds
+     * up the browser's first paint of ALL text until it (and the two
+     * preconnect round-trips before it) finish - on a text-heavy page like
+     * a doctor/hospital listing, that stylesheet was sitting directly in
+     * front of the largest visible element's paint (its LCP). style.css
+     * already lists Arial/sans-serif as a fallback, so text still paints
+     * immediately in that fallback and swaps to the web font once it
+     * loads - no invisible-text flash, just an earlier first paint.
+     */
+    $google_fonts_href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap';
+  ?>
+  <link rel="preload" as="style" href="<?= e($google_fonts_href) ?>">
+  <link rel="stylesheet" href="<?= e($google_fonts_href) ?>" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="<?= e($google_fonts_href) ?>"></noscript>
 
 <link rel="stylesheet" href="<?= e(site_url('assets/css/style.css')) ?>?v=<?= e($header_version) ?>">
 <link rel="stylesheet" href="<?= e(site_url('assets/css/header.css')) ?>?v=<?= e($header_version) ?>">
 <link rel="stylesheet" href="<?= e(site_url('assets/css/footer.css')) ?>?v=<?= e($header_version) ?>">
+<?php if (!empty($medic_load_home_css)): ?>
 <link rel="stylesheet" href="<?= e(site_url('assets/css/home.css')) ?>?v=<?= e($header_version) ?>">
+<?php endif; ?>
+<?php if (!empty($medic_load_doctor_card_css)): ?>
 <link rel="stylesheet" href="<?= e(site_url('assets/css/doctor-card.css')) ?>?v=<?= e($header_version) ?>">
+<?php endif; ?>
+<?php if (!empty($medic_load_hospital_card_css)): ?>
 <link rel="stylesheet" href="<?= e(site_url('assets/css/hospital-card.css')) ?>?v=<?= e($header_version) ?>">
-
-  <style>
-    :root {
-      --medic-header-dark: #24292f;
-      --medic-header-muted: #57606a;
-      --medic-header-border: #d0d7de;
-      --medic-header-soft: <?= e($body_background_color) ?>;
-      --medic-header-card: #ffffff;
-      --medic-header-blue: <?= e($primary_color) ?>;
-      --medic-header-green: <?= e($accent_color) ?>;
-      --medic-header-green-dark: <?= e($accent_color) ?>;
-      --medic-header-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
-    }
-
-  </style>
+<?php endif; ?>
+<link rel="stylesheet" href="<?= e(site_url('assets/css/theme-vars.php')) ?>?v=<?= e($header_version) ?>">
 
   <?php if (!empty($extra_head_html)): ?>
     <?= $extra_head_html . "\n" ?>
@@ -648,7 +613,7 @@ $language_bn_url = medic_header_language_url('bn');
         </a>
 
         <a href="<?= e(front_url('blog')) ?>" class="<?= medic_header_active('blog') ?>">
-          <?= e(__t('blog', CURRENT_LANG === 'bn' ? 'ব্লগ' : 'Blog')) ?>
+          <?= e(__t('blog', $current_lang === 'bn' ? 'ব্লগ' : 'Blog')) ?>
         </a>
 
         <a href="<?= e(front_url('contact')) ?>" class="<?= medic_header_active('contact') ?>">
@@ -686,7 +651,7 @@ $language_bn_url = medic_header_language_url('bn');
       </a>
 
       <a href="<?= e(front_url('blog')) ?>" class="<?= medic_header_active('blog') ?>">
-        <?= e(__t('blog', CURRENT_LANG === 'bn' ? 'ব্লগ' : 'Blog')) ?>
+        <?= e(__t('blog', $current_lang === 'bn' ? 'ব্লগ' : 'Blog')) ?>
       </a>
 
       <a href="<?= e(front_url('contact')) ?>" class="<?= medic_header_active('contact') ?>">

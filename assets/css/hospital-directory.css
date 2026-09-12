@@ -1,0 +1,547 @@
+  :root {
+    --hp-surface: #ffffff;
+    --hp-surface-soft: #f6f8fa;
+    --hp-border: #d8dee4;
+    --hp-border-strong: #c9d1d9;
+    --hp-text: #1f2328;
+    --hp-muted: #656d76;
+    --hp-radius: 12px;
+    --hp-radius-card: 16px;
+    --hp-shadow: 0 1px 2px rgba(15, 23, 32, .04);
+    --hp-shadow-hover: 0 16px 32px -14px rgba(15, 23, 32, .22);
+    --hp-gradient: linear-gradient(135deg, var(--hp-primary), var(--hp-accent));
+  }
+
+  * { box-sizing: border-box; }
+
+  /* Keep Hospital Directory typography consistently medium-weight. */
+  .medic-hospitals-page,
+  .medic-hospitals-page * {
+    font-weight: 500 !important;
+  }
+
+  .medic-hospitals-page {
+    min-height: 100vh;
+    padding: 22px 0 44px;
+    background: var(--hp-bg);
+    color: var(--hp-text);
+  }
+
+  .medic-hospitals-page .container {
+    width: min(100% - 32px, 1220px);
+    margin: 0 auto;
+  }
+
+  .medic-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 13px;
+    color: var(--hp-muted);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .medic-breadcrumb span { color: #8c959f; }
+  .medic-breadcrumb a {
+    color: var(--hp-primary);
+    text-decoration: none;
+  }
+  .medic-breadcrumb a:hover { text-decoration: underline; }
+
+  /* Plain premium heading: intentionally no box, border, shadow or accent. */
+  .medic-page-head {
+    margin: 2px 0 18px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  [lang="bn"] .medic-hospitals-page,
+  .medic-hospitals-page.is-bn { letter-spacing: 0; }
+
+  .medic-page-head h1 {
+    max-width: 900px;
+    margin: 0 0 8px;
+    color: var(--hp-text);
+    font-size: clamp(18px, 4vw, 20px);
+    font-weight: 500;
+    line-height: 1.17;
+    letter-spacing: -.028em;
+  }
+
+  .medic-page-head p {
+    max-width: 790px;
+    margin: 0;
+    color: var(--hp-muted);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  /* Light premium search panel. */
+  .medic-search-box {
+    margin-bottom: 22px;
+    padding: 10px;
+    border: 1px solid var(--hp-border);
+    border-radius: var(--hp-radius-card);
+    background: var(--hp-surface);
+    box-shadow: var(--hp-shadow-hover);
+  }
+
+  .medic-search-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .medic-search-input-wrap {
+    position: relative;
+    min-width: 0;
+  }
+
+  .medic-search-input-wrap svg {
+    position: absolute;
+    top: 50%;
+    left: 13px;
+    width: 16px;
+    height: 16px;
+    color: var(--hp-muted);
+    pointer-events: none;
+    transform: translateY(-50%);
+  }
+
+  .medic-search-row input[type="search"],
+  .medic-search-row input:not([type="hidden"]) {
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 12px 9px 39px;
+    border: 1px solid var(--hp-border-strong);
+    border-radius: 9px;
+    outline: none;
+    background: #ffffff;
+    color: var(--hp-text);
+    font: inherit;
+    font-size: 14px;
+    line-height: 20px;
+    transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
+  }
+
+  .medic-search-row input::placeholder { color: #8c959f; }
+  .medic-search-row input:hover { border-color: #8c959f; }
+  .medic-search-row input:focus {
+    border-color: var(--hp-primary);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(9, 105, 218, .13);
+  }
+
+  .medic-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 42px;
+    padding: 9px 19px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: var(--hp-gradient);
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 20px;
+    text-decoration: none;
+    transition: filter .16s ease, transform .16s ease, box-shadow .16s ease;
+  }
+
+  .medic-btn svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
+  .medic-btn:hover {
+    color: #ffffff;
+    filter: brightness(.97);
+    box-shadow: 0 3px 8px rgba(31, 35, 40, .12);
+    transform: translateY(-1px);
+  }
+
+  /* Same directory card language as Doctors: image above on desktop, overlay on mobile. */
+  .medic-step-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+    gap: 12px;
+    margin: 16px 0 26px;
+  }
+
+  /* Thana filter stays collapsed behind a toggle until opened. */
+  .medic-filters {
+    margin: 0 0 20px;
+  }
+
+  .medic-filters-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    border: 1px solid var(--hp-border-strong);
+    border-radius: 999px;
+    background: var(--hp-surface);
+    color: var(--hp-primary);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 20px;
+    list-style: none;
+    user-select: none;
+  }
+
+  .medic-filters-toggle::-webkit-details-marker { display: none; }
+  .medic-filters-toggle::marker { content: ''; }
+
+  .medic-filters-toggle svg {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+  }
+
+  .medic-filters-toggle:hover { border-color: var(--hp-primary); }
+
+  .medic-filters-chevron { transition: transform .16s ease; }
+  .medic-filters[open] .medic-filters-chevron { transform: rotate(180deg); }
+
+  .medic-filters-badge {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #f5faff;
+    color: var(--hp-primary);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .medic-filters .medic-step-grid { margin: 14px 0 0; }
+
+  .medic-step-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 68px;
+    overflow: hidden;
+    padding: 3px;
+    border: 1px solid var(--hp-border);
+    border-radius: var(--hp-radius-card);
+    background: var(--hp-surface);
+    box-shadow: var(--hp-shadow);
+    color: var(--hp-text);
+    font-size: 15px;
+    line-height: 1.35;
+    text-decoration: none;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+  }
+
+  .medic-step-card::after { display: none; }
+
+  .medic-step-card-media {
+    display: block;
+    width: 100%;
+    height: 112px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: var(--hp-surface-soft);
+  }
+
+  .medic-step-card-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .22s ease;
+  }
+
+  .medic-step-card-label {
+    display: block;
+    min-width: 0;
+    padding: 9px 6px 8px;
+    overflow-wrap: anywhere;
+    color: var(--hp-text);
+    text-align: center;
+  }
+
+  .medic-step-card:not(.has-image) {
+    align-items: center;
+    justify-content: center;
+    min-height: 68px;
+    padding: 12px;
+    color: var(--hp-primary);
+    text-align: center;
+  }
+  .medic-step-card:not(.has-image) .medic-step-card-label { padding: 0; color: inherit; }
+
+  .medic-step-card:hover,
+  .medic-step-card:focus-visible {
+    border-color: var(--hp-primary);
+    box-shadow: var(--hp-shadow-hover);
+    outline: none;
+    transform: translateY(-2px);
+  }
+
+  .medic-step-card:hover .medic-step-card-media img,
+  .medic-step-card:focus-visible .medic-step-card-media img { transform: scale(1.035); }
+
+  .medic-hospital-category-section { margin: 2px 0 22px; }
+
+  .medic-category-title {
+    position: relative;
+    margin: 0 0 12px;
+    padding: 0 0 10px;
+    border-bottom: 1px solid var(--hp-border);
+    color: var(--hp-text);
+    font-size: clamp(19px, 3vw, 22px);
+    line-height: 1.3;
+    letter-spacing: -.015em;
+  }
+
+  .medic-category-title::after {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 42px;
+    height: 3px;
+    border-radius: 99px;
+    background: var(--hp-primary);
+    content: '';
+  }
+
+  .medic-type-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+  }
+
+  .medic-type-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 7px 14px;
+    border: 1px solid var(--hp-border);
+    border-radius: 999px;
+    background: var(--hp-surface);
+    box-shadow: var(--hp-shadow);
+    color: var(--hp-primary);
+    font-size: 13px;
+    line-height: 1.35;
+    text-decoration: none;
+    transition: border-color .16s ease, background-color .16s ease, box-shadow .16s ease, transform .16s ease;
+  }
+
+  .medic-type-tag:hover,
+  .medic-type-tag.active {
+    border-color: var(--hp-primary);
+    background: #f5faff;
+    color: var(--hp-primary);
+    box-shadow: 0 4px 12px rgba(31, 35, 40, .10);
+    transform: translateY(-1px);
+  }
+
+  .medic-hospital-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 22px;
+  }
+
+  .medic-list-title {
+    position: relative;
+    margin: 0;
+    padding: 0 0 12px;
+    border-bottom: 1px solid var(--hp-border);
+    color: var(--hp-text);
+    font-size: clamp(18px, 3vw, 20px);
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -.02em;
+  }
+
+  .medic-list-title::after {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 54px;
+    height: 3px;
+    border-radius: 99px;
+    background: var(--hp-primary);
+    content: '';
+  }
+
+  /*
+   * hospital-card.php now owns its own border, radius, shadow and hover
+   * animation, so the shell stays a plain pass-through and no longer
+   * duplicates a second border/shadow behind the card on hover.
+   */
+  .medic-hospital-card-shell {
+    border-radius: var(--hp-radius-card);
+  }
+
+  .medic-empty-card {
+    margin-top: 16px;
+    padding: 28px;
+    border: 1px solid var(--hp-border);
+    border-radius: var(--hp-radius-card);
+    background: var(--hp-surface);
+    box-shadow: var(--hp-shadow);
+    color: var(--hp-muted);
+    text-align: center;
+  }
+  .medic-empty-card h2 { margin: 0 0 8px; color: var(--hp-text); font-size: 21px; }
+  .medic-empty-card p { max-width: 560px; margin: 0 auto 16px; line-height: 1.65; }
+
+  .medic-pagination {
+    display: flex;
+    justify-content: center;
+    margin: 24px 0 8px;
+  }
+
+  .medic-pagination-inner {
+    display: inline-flex;
+    gap: 3px;
+    overflow-x: auto;
+    max-width: 100%;
+    padding: 4px;
+    border: 1px solid var(--hp-border);
+    border-radius: 999px;
+    background: var(--hp-surface);
+    scrollbar-width: none;
+  }
+
+  .medic-pagination-inner::-webkit-scrollbar { display: none; }
+
+  .medic-pagination.mobile-pagination { display: none; }
+  .medic-pagination a,
+  .medic-pagination span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--hp-text);
+    font-size: 14px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color .16s ease, color .16s ease;
+  }
+  .medic-pagination a:hover { background: var(--hp-surface-soft); }
+  .medic-pagination .active { background: var(--hp-gradient); color: #ffffff; }
+  .medic-pagination .disabled { color: #8c959f; }
+  .medic-pagination .dots { color: #8c959f; pointer-events: none; }
+  .medic-pagination .nav-link { min-width: 78px; }
+  .medic-pagination .nav-link-icon { min-width: 34px; padding: 0; flex-shrink: 0; }
+  .medic-pagination .nav-link-icon svg { width: 16px; height: 16px; }
+
+  .medic-pagination-summary {
+    margin: 9px 0 0;
+    color: var(--hp-muted);
+    font-size: 13px;
+    text-align: center;
+  }
+
+  @media (min-width: 1000px) {
+    .medic-step-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
+  }
+
+  @media (max-width: 840px) {
+    .medic-hospitals-page { padding-top: 18px; }
+    .medic-hospitals-page .container { width: min(100% - 24px, 1220px); }
+    .medic-step-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .medic-step-card-media { height: 98px; }
+  }
+
+  /* Mobile screenshot layout: 2 photo tiles per row with names over the image. */
+  @media (max-width: 620px) {
+    .medic-hospitals-page { padding: 14px 0 36px; }
+    .medic-hospitals-page .container { width: min(100% - 20px, 1220px); }
+    .medic-breadcrumb { margin-bottom: 10px; font-size: 12px; }
+    .medic-page-head { margin-bottom: 16px; padding: 0; }
+    .medic-page-head h1 { font-size: 20px; }
+    .medic-page-head p { font-size: 14px; line-height: 1.58; }
+    .medic-search-box { padding: 8px; border-radius: 11px; }
+    .medic-search-row { grid-template-columns: 1fr; }
+    .medic-search-row input { min-height: 44px; }
+    .medic-btn { width: 100%; min-height: 43px; }
+
+    .medic-step-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .medic-step-grid { margin-top: 14px; margin-bottom: 22px; }
+
+    .medic-step-card {
+      min-height: 0;
+      padding: 0;
+      border-radius: 12px;
+    }
+
+    .medic-step-card.has-image { aspect-ratio: 1.26 / 1; }
+
+    .medic-step-card.has-image .medic-step-card-media {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: #eaeef2;
+    }
+
+    .medic-step-card.has-image .medic-step-card-label {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 1;
+      min-height: 43%;
+      display: flex;
+      align-items: flex-end;
+      padding: 25px 9px 8px;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .78) 100%);
+      color: #ffffff;
+      font-size: 14px;
+      line-height: 1.25;
+      text-align: left;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, .55);
+    }
+
+    .medic-step-card:not(.has-image) {
+      min-height: 74px;
+      padding: 10px;
+      border-radius: 12px;
+    }
+
+    .medic-hospital-category-section { margin-bottom: 20px; }
+    .medic-category-title { font-size: 19px; }
+    .medic-type-tags { gap: 7px; }
+    .medic-type-tag { min-height: 34px; padding: 6px 10px; font-size: 12px; }
+    .medic-hospital-card-shell { border-radius: 10px; }
+    .medic-pagination { justify-content: flex-start; overflow-x: auto; padding-bottom: 6px; }
+    .medic-pagination.desktop-pagination { display: none; }
+    .medic-pagination.mobile-pagination { display: flex; justify-content: center; }
+  }
+
+  @media (max-width: 370px) {
+    .medic-step-card.has-image { aspect-ratio: 1.17 / 1; }
+    .medic-step-card.has-image .medic-step-card-label { font-size: 13px; padding: 23px 8px 7px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      scroll-behavior: auto !important;
+      transition-duration: .01ms !important;
+      animation-duration: .01ms !important;
+    }
+  }

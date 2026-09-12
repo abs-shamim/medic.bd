@@ -55,7 +55,10 @@ if (!function_exists('prescription_auth_redirect')) {
             exit;
         }
 
-        echo '<script>window.location.href=' . json_encode($url) . ';</script>';
+        $redirect_script_url = prescription_auth_url('prescription/assets/js/redirect.js');
+
+        echo '<script src="' . htmlspecialchars($redirect_script_url, ENT_QUOTES, 'UTF-8')
+            . '" data-url="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '"></script>';
         exit;
     }
 }

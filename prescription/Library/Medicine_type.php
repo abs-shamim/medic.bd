@@ -218,9 +218,9 @@ require __DIR__ . '/librarys.php';
 
                                     <form
                                         method="POST"
-                                        onsubmit="return confirm('<?= $is_demo
+                                        data-confirm-message="<?= prescription_e($is_demo
                                             ? 'Hide this shared demo from your account?'
-                                            : 'Delete this personal library item permanently?' ?>');"
+                                            : 'Delete this personal library item permanently?') ?>"
                                     >
                                         <input
                                             type="hidden"

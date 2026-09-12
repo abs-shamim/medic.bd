@@ -672,14 +672,14 @@ if (!function_exists('ucs_upload_proof_file')) {
 
 if (!ucs_table_exists('users')) {
     require_once __DIR__ . '/../includes/header.php';
-    echo '<div style="padding:20px;"><div class="cp-alert error">Users table not found.</div></div>';
+    echo '<div class="card-padded"><div class="cp-alert error">Users table not found.</div></div>';
     require_once __DIR__ . '/../includes/footer.php';
     exit;
 }
 
 if (!ucs_table_exists('profile_claims')) {
     require_once __DIR__ . '/../includes/header.php';
-    echo '<div style="padding:20px;"><div class="cp-alert error">Profile claim system is not ready. Please create the profile_claims table first.</div></div>';
+    echo '<div class="card-padded"><div class="cp-alert error">Profile claim system is not ready. Please create the profile_claims table first.</div></div>';
     require_once __DIR__ . '/../includes/footer.php';
     exit;
 }
@@ -691,14 +691,14 @@ $profile = ucs_get_profile($type, $profile_id);
 
 if (!$user) {
     require_once __DIR__ . '/../includes/header.php';
-    echo '<div style="padding:20px;"><div class="cp-alert error">User not found.</div></div>';
+    echo '<div class="card-padded"><div class="cp-alert error">User not found.</div></div>';
     require_once __DIR__ . '/../includes/footer.php';
     exit;
 }
 
 if (!$profile) {
     require_once __DIR__ . '/../includes/header.php';
-    echo '<div style="padding:20px;"><div class="cp-alert error">Profile not found.</div><a href="claim.php" class="cp-btn cp-btn-outline">Back to Claim Page</a></div>';
+    echo '<div class="card-padded"><div class="cp-alert error">Profile not found.</div><a href="claim.php" class="cp-btn cp-btn-outline">Back to Claim Page</a></div>';
     require_once __DIR__ . '/../includes/footer.php';
     exit;
 }
@@ -1130,226 +1130,7 @@ $meta_description = 'Claim this ' . $current_claim_config['subtitle_type'] . ' a
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<style>
-  .cp-page {
-    background: #ffffff;
-    padding: 26px 0 60px;
-    color: #252525;
-  }
-
-  .cp-shell {
-    max-width: 560px;
-    margin: 0 auto;
-    padding: 0 18px;
-  }
-
-  .cp-profile-box {
-    display: grid;
-    grid-template-columns: 56px minmax(0, 1fr);
-    gap: 16px;
-    align-items: center;
-    margin: 10px auto 42px;
-    padding: 16px 18px;
-    border-radius: 16px;
-    background: #f7f6f3;
-    max-width: 520px;
-  }
-
-  .cp-profile-box img {
-    width: 56px;
-    height: 56px;
-    border-radius: 7px;
-    object-fit: cover;
-    border: 1px solid #e4e1da;
-    background: #ffffff;
-    display: block;
-  }
-
-  .cp-profile-box strong {
-    display: block;
-    color: #191919;
-    font-size: 18px;
-    line-height: 1.25;
-    font-weight: 700;
-  }
-
-  .cp-profile-box span {
-    display: block;
-    margin-top: 3px;
-    color: #191919;
-    font-size: 16px;
-    line-height: 1.35;
-    font-weight: 400;
-  }
-
-  .cp-profile-box a {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .cp-card {
-    background: transparent;
-    border: 0;
-    box-shadow: none;
-  }
-
-  .cp-title {
-    margin: 0 0 10px;
-    color: #1f2328;
-    font-size: 32px;
-    line-height: 1.2;
-    font-weight: 700;
-    letter-spacing: -.03em;
-  }
-
-  .cp-subtitle {
-    margin: 0 0 26px;
-    color: #565656;
-    font-size: 15px;
-    line-height: 1.65;
-  }
-
-  .cp-alert {
-    margin: 0 0 18px;
-    padding: 12px 14px;
-    border-radius: 8px;
-    border: 1px solid #d8dee4;
-    background: #f6f8fa;
-    color: #57606a;
-    line-height: 1.6;
-    font-size: 14px;
-  }
-
-  .cp-alert.success {
-    background: #dafbe1;
-    border-color: rgba(26,127,55,.25);
-    color: #116329;
-  }
-
-  .cp-alert.error {
-    background: #ffebe9;
-    border-color: rgba(207,34,46,.25);
-    color: #cf222e;
-  }
-
-  .cp-form {
-    display: grid;
-    gap: 22px;
-  }
-
-  .cp-field {
-    display: grid;
-    gap: 8px;
-  }
-
-  .cp-field label {
-    color: #252525;
-    font-size: 16px;
-    line-height: 1.45;
-    font-weight: 500;
-  }
-
-  .cp-field small {
-    color: #565656;
-    font-size: 13px;
-    line-height: 1.55;
-  }
-
-  .cp-input,
-  .cp-textarea {
-    width: 100%;
-    min-height: 47px;
-    padding: 0 16px;
-    border: 1px solid #555555;
-    border-radius: 4px;
-    background: #ffffff;
-    color: #252525;
-    font-family: inherit;
-    font-size: 15px;
-    outline: none;
-    box-shadow: none;
-    box-sizing: border-box;
-  }
-
-  .cp-textarea {
-    min-height: 145px;
-    padding: 12px 16px;
-    resize: vertical;
-    line-height: 1.6;
-  }
-
-  .cp-input:focus,
-  .cp-textarea:focus {
-    border-color: #3157d6;
-    box-shadow: 0 0 0 3px rgba(49,87,214,.12);
-  }
-
-  .cp-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  .cp-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 46px;
-    padding: 0 18px;
-    border-radius: 5px;
-    border: 1px solid #00b67a;
-    background: #00b67a;
-    color: #ffffff;
-    text-decoration: none;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-  }
-
-  .cp-btn:hover {
-    background: #009e6a;
-    border-color: #009e6a;
-    color: #ffffff;
-    text-decoration: none;
-  }
-
-  .cp-btn-outline {
-    background: #ffffff;
-    border-color: #d6d1c8;
-    color: #191919;
-  }
-
-  .cp-btn-outline:hover {
-    background: #f6f6f3;
-    border-color: #d6d1c8;
-    color: #191919;
-  }
-
-  @media (max-width: 640px) {
-    .cp-page {
-      padding-top: 18px;
-    }
-
-    .cp-profile-box {
-      margin-bottom: 28px;
-    }
-
-    .cp-title {
-      font-size: 28px;
-    }
-
-    .cp-actions {
-      display: grid;
-      grid-template-columns: 1fr;
-    }
-
-    .cp-btn {
-      width: 100%;
-    }
-  }
-</style>
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/user/assets/css/user-claim-submit.css">
 
 <main class="cp-page">
   <div class="cp-shell">
@@ -1360,7 +1141,7 @@ require_once __DIR__ . '/../includes/header.php';
           src="<?= ucs_e($profile_image) ?>"
           alt="<?= ucs_e($profile_name) ?>"
           loading="lazy"
-          onerror="this.onerror=null;this.src='<?= ucs_e($profile_svg_fallback) ?>';"
+          data-fallback-src="<?= ucs_e($profile_svg_fallback) ?>"
         >
       </a>
 

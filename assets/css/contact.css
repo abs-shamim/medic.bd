@@ -1,0 +1,496 @@
+  .medic-contact-page {
+    background: #f6f8fa;
+    padding: 24px 0 56px;
+    color: #24292f;
+  }
+
+  .medic-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px;
+    margin: 0 0 16px;
+    color: #57606a;
+    font-size: 14px;
+  }
+
+  .medic-breadcrumb a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .medic-breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  .medic-breadcrumb span {
+    color: #8c959f;
+  }
+
+  .medic-contact-head {
+    overflow: hidden;
+    margin-bottom: 16px;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    background: #ffffff;
+  }
+
+  .medic-contact-head-top {
+    padding: 20px;
+    border-bottom: 1px solid #d8dee4;
+    background: linear-gradient(180deg, #ffffff, #f6f8fa);
+  }
+
+  .medic-contact-head-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+  }
+
+  .medic-contact-head h1 {
+    margin: 0 0 6px;
+    color: #24292f;
+    font-size: 28px;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+  }
+
+  .medic-contact-head p {
+    margin: 0;
+    color: #57606a;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .medic-support-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #dafbe1;
+    color: #1a7f37;
+    border: 1px solid rgba(26, 127, 55, 0.20);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .medic-contact-head-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    padding: 12px 20px;
+    background: #ffffff;
+    color: #57606a;
+    font-size: 13px;
+  }
+
+  .medic-contact-head-bottom strong {
+    color: #24292f;
+    font-weight: 700;
+  }
+
+  .medic-contact-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 16px;
+    align-items: start;
+  }
+
+  .medic-panel {
+    overflow: hidden;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    background: #ffffff;
+  }
+
+  .medic-panel-head {
+    padding: 14px 16px;
+    border-bottom: 1px solid #d8dee4;
+    background: #f6f8fa;
+  }
+
+  .medic-panel-head h2 {
+    margin: 0;
+    color: #24292f;
+    font-size: 16px;
+    line-height: 1.35;
+    font-weight: 800;
+  }
+
+  .medic-panel-head p {
+    margin: 4px 0 0;
+    color: #57606a;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /*
+   * Scoped, Bootstrap-flavored form styles. We reuse Bootstrap's exact
+   * class names (form-control, form-select, form-label, btn, form-check,
+   * spinner-border, invalid-feedback, alert) so the markup is a drop-in
+   * match for real Bootstrap, but the rules are scoped under
+   * .cf-bootstrap so nothing here can leak into the shared site header
+   * or footer -- loading Bootstrap's global CSS on this page would have
+   * reset those (typography, link colors, etc.) since they share the
+   * same document.
+   */
+  .cf-bootstrap {
+    padding: 18px;
+  }
+
+  .cf-bootstrap * {
+    box-sizing: border-box;
+  }
+
+  .cf-bootstrap .form-label {
+    display: inline-block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #212529;
+  }
+
+  .cf-bootstrap .text-danger {
+    color: #dc3545;
+  }
+
+  .cf-bootstrap .form-control,
+  .cf-bootstrap .form-select {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+  }
+
+  .cf-bootstrap textarea.form-control {
+    min-height: 110px;
+    resize: vertical;
+  }
+
+  .cf-bootstrap .form-select {
+    cursor: pointer;
+  }
+
+  .cf-bootstrap .form-control:focus,
+  .cf-bootstrap .form-select:focus {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .18);
+  }
+
+  .cf-bootstrap .form-control.is-invalid,
+  .cf-bootstrap .form-select.is-invalid {
+    border-color: #dc3545;
+  }
+
+  .cf-bootstrap .invalid-feedback {
+    display: none;
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: #dc3545;
+  }
+
+  .cf-bootstrap .is-invalid ~ .invalid-feedback,
+  .cf-bootstrap .invalid-feedback.d-show {
+    display: block;
+  }
+
+  .cf-bootstrap .form-text {
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: #6c757d;
+  }
+
+  .cf-bootstrap .mb-3 {
+    margin-bottom: 16px;
+  }
+
+  .cf-bootstrap .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -8px;
+  }
+
+  .cf-bootstrap .row > [class*="col-"] {
+    padding: 0 8px;
+    margin-bottom: 16px;
+  }
+
+  .cf-bootstrap .col-12 {
+    width: 100%;
+  }
+
+  .cf-bootstrap .col-md-6 {
+    width: 100%;
+  }
+
+  @media (min-width: 640px) {
+    .cf-bootstrap .col-md-6 {
+      width: 50%;
+    }
+  }
+
+  .cf-bootstrap .form-check {
+    display: block;
+    min-height: 1.4rem;
+    padding-left: 1.6em;
+    margin-bottom: 6px;
+  }
+
+  .cf-bootstrap .form-check-input {
+    width: 1em;
+    height: 1em;
+    margin-top: 0.28em;
+    margin-left: -1.6em;
+    vertical-align: top;
+    cursor: pointer;
+  }
+
+  .cf-bootstrap .form-check-label {
+    font-size: 13.5px;
+    color: #212529;
+    cursor: pointer;
+  }
+
+  .cf-bootstrap .form-check-group {
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    background: #f8f9fa;
+  }
+
+  .cf-bootstrap .form-check-group.is-invalid {
+    border-color: #dc3545;
+  }
+
+  .cf-bootstrap .cf-section-heading {
+    margin: 6px 0 4px;
+    padding-top: 10px;
+    border-top: 1px solid #e9ecef;
+    font-size: 13px;
+    font-weight: 700;
+    color: #495057;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .cf-bootstrap .cf-section-heading:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .cf-bootstrap .cf-highlight {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ffe69c;
+    background: #fff8e6;
+    transition: background-color .2s ease, border-color .2s ease;
+  }
+
+  .cf-bootstrap .cf-highlight .form-text {
+    color: #8a6d1f;
+  }
+
+  .cf-bootstrap .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 20px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .cf-bootstrap .btn-primary {
+    background: #2da44e;
+    border-color: #2da44e;
+    color: #ffffff;
+  }
+
+  .cf-bootstrap .btn-primary:hover:not(:disabled) {
+    background: #1f883d;
+  }
+
+  .cf-bootstrap .btn:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+  }
+
+  .cf-bootstrap .spinner-border {
+    display: none;
+    width: 1rem;
+    height: 1rem;
+    border: 0.18em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: cf-spin 0.75s linear infinite;
+  }
+
+  .cf-bootstrap .btn.cf-loading .spinner-border {
+    display: inline-block;
+  }
+
+  @keyframes cf-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .cf-bootstrap .alert {
+    padding: 12px 14px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 13.5px;
+    border: 1px solid transparent;
+  }
+
+  .cf-bootstrap .alert-danger {
+    background: #f8d7da;
+    border-color: #f5c2c7;
+    color: #842029;
+  }
+
+  .cf-bootstrap .alert-danger ul {
+    margin: 4px 0 0;
+    padding-left: 18px;
+  }
+
+  .cf-section {
+    display: none;
+    animation: cf-fade-in .18s ease;
+  }
+
+  .cf-section.active {
+    display: block;
+  }
+
+  @keyframes cf-fade-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .medic-info-list {
+    display: grid;
+    gap: 0;
+  }
+
+  .medic-info-item {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid #d8dee4;
+  }
+
+  .medic-info-item:last-child {
+    border-bottom: 0;
+  }
+
+  .medic-info-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ddf4ff;
+    color: #0969da;
+    border: 1px solid rgba(9, 105, 218, 0.14);
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .medic-info-item h3 {
+    margin: 0 0 4px;
+    color: #24292f;
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 800;
+  }
+
+  .medic-info-item p,
+  .medic-info-item a {
+    margin: 0;
+    color: #57606a;
+    font-size: 13px;
+    line-height: 1.5;
+    text-decoration: none;
+  }
+
+  .medic-info-item a:hover {
+    color: #0969da;
+    text-decoration: underline;
+  }
+
+  .medic-map-box {
+    margin: 16px;
+    min-height: 170px;
+    border-radius: 6px;
+    border: 1px dashed #d0d7de;
+    background:
+      linear-gradient(135deg, rgba(9, 105, 218, 0.08), rgba(45, 164, 78, 0.08)),
+      #f6f8fa;
+    display: grid;
+    place-items: center;
+    color: #57606a;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  @media (max-width: 900px) {
+    .medic-contact-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .medic-contact-page {
+      padding-top: 18px;
+    }
+
+    .medic-contact-head-row {
+      flex-direction: column;
+    }
+
+    .medic-contact-head-top {
+      padding: 16px;
+    }
+
+    .medic-contact-head-bottom {
+      padding: 12px 16px;
+    }
+
+    .medic-contact-head h1 {
+      font-size: 26px;
+    }
+
+    .medic-support-badge {
+      width: 100%;
+    }
+
+    .cf-bootstrap {
+      padding: 14px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .medic-info-item {
+      grid-template-columns: 1fr;
+    }
+  }

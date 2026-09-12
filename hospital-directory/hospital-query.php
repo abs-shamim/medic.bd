@@ -283,7 +283,36 @@ function hp_get_hospitals_count(array $filters): int
 
 function hp_has_hospitals(array $filters): bool
 {
-    return !empty(hp_get_hospitals($filters, 1));
+    /*
+     * Same pattern as doctor-directory/availability.php's dp_has_doctors():
+     * the division/district/thana/type pickers call this once per candidate
+     * item, so a request-level cache avoids repeating an identical lookup,
+     * and a short cross-request cache means the (division/district/thana/
+     * type) => "any hospital?" answer doesn't need re-querying on every
+     * single page view either.
+     */
+    static $request_cache = [];
+
+    $cache_key = md5(json_encode($filters));
+
+    if (array_key_exists($cache_key, $request_cache)) {
+        return $request_cache[$cache_key];
+    }
+
+    $resolver = static function () use ($filters): bool {
+        return !empty(hp_get_hospitals($filters, 1));
+    };
+
+    if (!function_exists('medic_cache_remember')) {
+        $request_cache[$cache_key] = $resolver();
+
+        return $request_cache[$cache_key];
+    }
+
+    $lang = defined('CURRENT_LANG') ? CURRENT_LANG : '';
+    $request_cache[$cache_key] = (bool)medic_cache_remember('hp_has_hospitals:' . $lang . ':' . $cache_key, 300, $resolver);
+
+    return $request_cache[$cache_key];
 }
 
 function hp_filter_divisions_with_hospitals(array $divisions): array

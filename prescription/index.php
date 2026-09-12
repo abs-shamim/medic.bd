@@ -124,12 +124,12 @@ require_once __DIR__ . '/includes/header.php';
     <div class="rx-card-body">
         <form method="GET" class="rx-filter-bar">
             <div class="rx-field">
-                <label>Search</label>
-                <input type="search" name="q" value="<?= prescription_e($q) ?>" placeholder="Prescription no, patient, phone or diagnosis">
+                <label for="rxSearchQ">Search</label>
+                <input type="search" id="rxSearchQ" name="q" value="<?= prescription_e($q) ?>" placeholder="Prescription no, patient, phone or diagnosis">
             </div>
             <div class="rx-field">
-                <label>Status</label>
-                <select name="status">
+                <label for="rxSearchStatus">Status</label>
+                <select id="rxSearchStatus" name="status">
                     <option value="">All Statuses</option>
                     <option value="active" <?= $status === 'active' ? 'selected' : '' ?>>Completed</option>
                     <option value="draft" <?= $status === 'draft' ? 'selected' : '' ?>>Draft</option>

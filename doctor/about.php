@@ -1140,68 +1140,7 @@ if (defined('CURRENT_LANG') && CURRENT_LANG === 'bn') {
 ?>
 
 
-<style>
-/*
-|--------------------------------------------------------------------------
-| Simple Light Article-Only Design
-|--------------------------------------------------------------------------
-| The About Doctor section intentionally displays only the manual or
-| auto-generated article. No information boxes, chips or secondary fields
-| are rendered below the article.
-*/
-.medic-about-card {
-    margin: 0 0 20px;
-    padding: 20px 22px;
-    background: #ffffff;
-    border: 1px solid #e8eef5;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(31, 68, 108, 0.035);
-}
-
-.medic-about-card,
-.medic-about-card * {
-    font-weight: 500;
-}
-
-.medic-about-card-title {
-    margin: 0 0 12px;
-    color: #1f6fe5;
-    font-size: 22px;
-    line-height: 1.35;
-}
-
-.medic-about-article {
-    color: #4b6075;
-    font-size: 15px;
-    line-height: 1.8;
-}
-
-.medic-about-article p {
-    margin: 0 0 13px;
-}
-
-.medic-about-article p:last-child {
-    margin-bottom: 0;
-}
-
-@media (max-width: 576px) {
-    .medic-about-card {
-        margin-bottom: 16px;
-        padding: 16px;
-        border-radius: 10px;
-    }
-
-    .medic-about-card-title {
-        margin-bottom: 10px;
-        font-size: 20px;
-    }
-
-    .medic-about-article {
-        font-size: 14px;
-        line-height: 1.75;
-    }
-}
-</style>
+<link rel="stylesheet" href="<?= e(site_url('assets/css/doctor-about.css')) ?>">
 
 <?php if ($doctor_bio !== ''): ?>
     <section class="medic-about-card" aria-labelledby="about-doctor-heading">

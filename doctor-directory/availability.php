@@ -13,8 +13,9 @@ function dp_has_doctors(array $filters): bool
     /*
      * Fast request-level cache.
      * Availability checks are used while building division/district/specialty/thana lists.
-     * Use the lightweight count query instead of loading full doctor cards, hospital names,
-     * GROUP_CONCAT, rating sorting and pagination data.
+     * Use the lightweight existence query (LIMIT 1, stops at the first match) instead of
+     * loading full doctor cards, hospital names, GROUP_CONCAT, rating sorting, pagination
+     * data, or even a full COUNT(*) - this only ever needs to know "any match at all?".
      */
     static $availability_cache = [];
 
@@ -24,7 +25,28 @@ function dp_has_doctors(array $filters): bool
         return $availability_cache[$cache_key];
     }
 
-    $availability_cache[$cache_key] = dp_get_doctors_count($filters) > 0;
+    /*
+     * Cross-request cache.
+     * The "choose a specialty" step calls this once per specialty (dozens of
+     * calls, each running the same chambers/hospitals-joined query as the
+     * main doctor search, just with LIMIT 1) to decide which specialties are
+     * clickable for the current district/thana - measured at ~2.5 seconds
+     * total for one page view before this cache. Whether a district has any
+     * doctor of a given specialty changes only when a doctor is added or
+     * edited, not between two page views, so a short TTL is safe here.
+     */
+    if (!function_exists('medic_cache_remember')) {
+        $availability_cache[$cache_key] = dp_doctors_exist($filters);
+
+        return $availability_cache[$cache_key];
+    }
+
+    $lang = defined('CURRENT_LANG') ? CURRENT_LANG : '';
+    $resolver = static function () use ($filters): bool {
+        return dp_doctors_exist($filters);
+    };
+
+    $availability_cache[$cache_key] = (bool)medic_cache_remember('dp_has_doctors:' . $lang . ':' . $cache_key, 300, $resolver);
 
     return $availability_cache[$cache_key];
 }

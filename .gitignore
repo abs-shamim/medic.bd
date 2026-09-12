@@ -1,5 +1,10 @@
 node_modules/
 
+# Generated runtime cache files (see includes/functions.php, assets/css/theme-vars.php)
+/cache/*.json
+/cache/*.css
+/cache/kv/
+
 # Local environment and editor files
 .env
 .env.*
