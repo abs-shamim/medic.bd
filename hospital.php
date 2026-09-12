@@ -1060,27 +1060,9 @@ include __DIR__ . '/includes/header.php';
             <?= verified_badge((int)($hospital['is_verified'] ?? 0)) ?>
           </div>
 
-          <?php if ($hospital_description !== ''): ?>
-            <p class="medic-hospital-description"><?= e(hospital_page_localize_digits($hospital_description)) ?></p>
+          <?php if ($hospital_address !== ''): ?>
+            <p class="medic-hospital-description"><?= e(hospital_page_localize_digits($hospital_address)) ?></p>
           <?php endif; ?>
-
-          <div class="medic-tag-row">
-            <span class="medic-tag"><?= e(hospital_page_localize_digits($hospital_type ?: __t('hospital_profile_default_type', 'Hospital'))) ?></span>
-
-            <?php if ((int)hospital_value($hospital, 'emergency_available', 0)): ?>
-              <span class="medic-tag"><?= e(hospital_page_localize_digits(__t('hospital_profile_emergency_24_7', 'Emergency 24/7'))) ?></span>
-            <?php endif; ?>
-
-            <?php if ((int)hospital_value($hospital, 'ambulance_available', 0)): ?>
-              <span class="medic-tag"><?= e(__t('hospital_profile_facility_ambulance', 'Ambulance')) ?></span>
-            <?php endif; ?>
-
-            <?php if (!empty($hospital_departments)): ?>
-              <?php foreach (array_slice($hospital_departments, 0, 3) as $department): ?>
-                <span class="medic-tag"><?= e(hospital_page_localize_digits(lang_text((string)($department['name'] ?? ''), (string)($department['name_bn'] ?? '')))) ?></span>
-              <?php endforeach; ?>
-            <?php endif; ?>
-          </div>
         </div>
 
         <div class="medic-hero-actions">
@@ -1208,32 +1190,40 @@ include __DIR__ . '/includes/header.php';
         <?php endif; ?>
 
         <section class="medic-card">
-          <h2><?= e(__t('hospital_profile_departments', 'Departments')) ?></h2>
-          <p><?= e(__t('hospital_profile_departments_note', 'Departments are generated from doctors who have active chambers in this hospital.')) ?></p>
-
-          <?php if (!empty($hospital_departments)): ?>
-            <div class="medic-tag-row">
-              <?php foreach ($hospital_departments as $department): ?>
-                <a class="medic-tag" href="<?= e(front_url('doctors?specialty=' . ($department['slug'] ?? ''))) ?>">
-                  <?= e(hospital_page_localize_digits(lang_text((string)($department['name'] ?? ''), (string)($department['name_bn'] ?? '')))) ?>
-                </a>
-              <?php endforeach; ?>
+          <div class="medic-doctor-section-head">
+            <div class="medic-doctor-section-title">
+              <h2><?= e(__t('hospital_profile_hospital_doctors', 'Hospital Doctors')) ?></h2>
+              <span class="medic-doctor-result-count" data-hospital-doctor-count data-label-one="<?= e(__t('doctor', 'Doctor')) ?>" data-label-many="<?= e(__t('doctors', 'Doctors')) ?>">
+                <?= e(hospital_page_localize_digits((string)count($hospital_doctors))) ?> <?= e(__t('doctors', 'Doctors')) ?>
+              </span>
             </div>
-          <?php else: ?>
-            <p><?= e(__t('hospital_profile_no_departments', 'No department found yet. Add doctors with chambers under this hospital.')) ?></p>
-          <?php endif; ?>
-        </section>
 
-        <section class="medic-card">
-          <h2><?= e(__t('hospital_profile_hospital_doctors', 'Hospital Doctors')) ?></h2>
-          <p><?= e(__t('hospital_profile_doctors_note', 'Doctors are automatically listed from active chamber records for this hospital.')) ?></p>
+            <?php if (!empty($hospital_departments)): ?>
+              <div class="medic-department-filter">
+                <label for="hospital-department-filter"><?= e(__t('hospital_profile_department', 'Department')) ?></label>
+                <select id="hospital-department-filter" data-hospital-doctor-filter>
+                  <option value="all"><?= e(__t('hospital_profile_all_departments', 'All Departments')) ?></option>
+                  <?php foreach ($hospital_departments as $department): ?>
+                    <option value="<?= e((string)($department['slug'] ?? '')) ?>">
+                      <?= e(hospital_page_localize_digits(lang_text((string)($department['name'] ?? ''), (string)($department['name_bn'] ?? '')))) ?>
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+            <?php endif; ?>
+          </div>
 
           <div class="medic-hospital-doctor-list">
             <?php if (!empty($hospital_doctors)): ?>
               <?php foreach ($hospital_doctors as $doctor): ?>
-                <?php front_line_break(); ?>
-                <?php include __DIR__ . '/includes/doctor-card.php'; ?>
+                <div class="hospital-doctor-filter-item" data-doctor-specialty="<?= e((string)($doctor['specialty_slug'] ?? '')) ?>">
+                  <?php front_line_break(); ?>
+                  <?php include __DIR__ . '/includes/doctor-card.php'; ?>
+                </div>
               <?php endforeach; ?>
+              <p class="hospital-doctor-filter-empty" data-hospital-filter-empty hidden>
+                <?= e(__t('hospital_profile_no_filtered_doctors', 'No doctor found in this department.')) ?>
+              </p>
             <?php else: ?>
               <p><?= e(__t('hospital_profile_no_doctors', 'No doctor listed for this hospital yet.')) ?></p>
             <?php endif; ?>
@@ -1347,6 +1337,6 @@ include __DIR__ . '/includes/header.php';
   </div>
 </main>
 
-<script src="<?= e(site_url('assets/js/hospital.js')) ?>" defer></script>
+<script src="<?= e(site_url('assets/js/hospital.js')) ?>?v=<?= e((string)filemtime(__DIR__ . '/assets/js/hospital.js')) ?>" defer></script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
