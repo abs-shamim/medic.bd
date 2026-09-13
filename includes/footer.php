@@ -113,17 +113,35 @@ $footer_site_logo = medic_footer_asset_url(
 $footer_about = medic_footer_setting(
     'footer_about_text',
     medic_footer_setting(
-        'site_description',
-        __t(
-            'footer_about_text',
-            'A lightweight doctor and hospital directory platform for finding trusted healthcare information, specialties and appointment details.'
+        'footer_text',
+        medic_footer_setting(
+            'site_description',
+            __t(
+                'footer_about_text',
+                'A lightweight doctor and hospital directory platform for finding trusted healthcare information, specialties and appointment details.'
+            )
         )
     )
 );
 
-$footer_address = medic_footer_setting('contact_address', medic_footer_setting('address', ''));
+$footer_address = medic_footer_setting('office_address', medic_footer_setting('contact_address', medic_footer_setting('address', '')));
 $footer_email = medic_footer_setting('contact_email', medic_footer_setting('support_email', ''));
 $footer_phone = medic_footer_setting('contact_phone', medic_footer_setting('emergency_phone', ''));
+$footer_business_hours = medic_footer_setting('business_hours', '');
+
+$show_footer_social_links = medic_footer_setting('show_footer_social_links', '1') !== '0';
+$show_footer_contact_info = medic_footer_setting('show_footer_contact_info', '1') !== '0';
+
+$footer_social_links = array_filter([
+    'facebook' => medic_footer_setting('facebook_url', ''),
+    'twitter' => medic_footer_setting('twitter_url', ''),
+    'linkedin' => medic_footer_setting('linkedin_url', ''),
+    'instagram' => medic_footer_setting('instagram_url', ''),
+    'youtube' => medic_footer_setting('youtube_url', ''),
+    'tiktok' => medic_footer_setting('tiktok_url', ''),
+    'telegram' => medic_footer_setting('telegram_url', ''),
+    'whatsapp' => medic_footer_setting('whatsapp_channel_url', ''),
+]);
 
 $footer_newsletter_status = medic_footer_setting('newsletter_status', 'active');
 
@@ -140,8 +158,11 @@ $footer_newsletter_text = medic_footer_setting(
 $footer_newsletter_action = medic_footer_setting('newsletter_action_url', '#');
 
 $footer_copyright = medic_footer_setting(
-    'footer_copyright',
-    '© ' . date('Y') . ' ' . $footer_site_name . '. ' . __t('all_rights_reserved', 'All rights reserved.')
+    'footer_copyright_text',
+    medic_footer_setting(
+        'footer_copyright',
+        '© ' . date('Y') . ' ' . $footer_site_name . '. ' . __t('all_rights_reserved', 'All rights reserved.')
+    )
 );
 
 $footer_privacy_url = medic_footer_setting('privacy_policy_url', 'privacy-policy');
@@ -190,6 +211,16 @@ $footer_support_url = medic_footer_setting('support_url', 'support');
       <p class="medic-footer-about">
         <?= e($footer_about) ?>
       </p>
+
+      <?php if ($show_footer_social_links && !empty($footer_social_links)): ?>
+        <div class="medic-footer-social">
+          <?php foreach ($footer_social_links as $footer_social_key => $footer_social_url): ?>
+            <a href="<?= e($footer_social_url) ?>" target="_blank" rel="noopener" aria-label="<?= e(ucfirst($footer_social_key)) ?>">
+              <?= e(ucfirst($footer_social_key)) ?>
+            </a>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
     </div>
 
     <div>
@@ -213,38 +244,47 @@ $footer_support_url = medic_footer_setting('support_url', 'support');
       </div>
     </div>
 
-    <div>
-      <h3><?= e(__t('contact', 'Contact')) ?></h3>
+    <?php if ($show_footer_contact_info): ?>
+      <div>
+        <h3><?= e(__t('contact', 'Contact')) ?></h3>
 
-      <div class="medic-footer-contact-box">
-        <?php if ($footer_address !== ''): ?>
-          <p><?= e($footer_address) ?></p>
-        <?php endif; ?>
+        <div class="medic-footer-contact-box">
+          <?php if ($footer_address !== ''): ?>
+            <p><?= e($footer_address) ?></p>
+          <?php endif; ?>
 
-        <?php if ($footer_email !== ''): ?>
-          <p>
-            <?= e(__t('email', 'Email')) ?>:
-            <a href="mailto:<?= e($footer_email) ?>"><?= e($footer_email) ?></a>
-          </p>
-        <?php endif; ?>
+          <?php if ($footer_email !== ''): ?>
+            <p>
+              <?= e(__t('email', 'Email')) ?>:
+              <a href="mailto:<?= e($footer_email) ?>"><?= e($footer_email) ?></a>
+            </p>
+          <?php endif; ?>
 
-        <?php if ($footer_phone !== ''): ?>
-          <?php $footer_phone_href = medic_footer_phone_href($footer_phone); ?>
-          <p>
-            <?= e(__t('phone', 'Phone')) ?>:
-            <?php if ($footer_phone_href !== ''): ?>
-              <a href="tel:<?= e($footer_phone_href) ?>"><?= e($footer_phone) ?></a>
-            <?php else: ?>
-              <?= e($footer_phone) ?>
-            <?php endif; ?>
-          </p>
-        <?php endif; ?>
+          <?php if ($footer_phone !== ''): ?>
+            <?php $footer_phone_href = medic_footer_phone_href($footer_phone); ?>
+            <p>
+              <?= e(__t('phone', 'Phone')) ?>:
+              <?php if ($footer_phone_href !== ''): ?>
+                <a href="tel:<?= e($footer_phone_href) ?>"><?= e($footer_phone) ?></a>
+              <?php else: ?>
+                <?= e($footer_phone) ?>
+              <?php endif; ?>
+            </p>
+          <?php endif; ?>
 
-        <?php if ($footer_address === '' && $footer_email === '' && $footer_phone === ''): ?>
-          <p><?= e(__t('contact_information_empty', 'Contact information will appear here after setup.')) ?></p>
-        <?php endif; ?>
+          <?php if ($footer_business_hours !== ''): ?>
+            <p>
+              <?= e(__t('business_hours', 'Hours')) ?>:
+              <?= e($footer_business_hours) ?>
+            </p>
+          <?php endif; ?>
+
+          <?php if ($footer_address === '' && $footer_email === '' && $footer_phone === '' && $footer_business_hours === ''): ?>
+            <p><?= e(__t('contact_information_empty', 'Contact information will appear here after setup.')) ?></p>
+          <?php endif; ?>
+        </div>
       </div>
-    </div>
+    <?php endif; ?>
   </div>
 
   <div class="medic-copyright">

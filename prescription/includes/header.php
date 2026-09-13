@@ -92,6 +92,10 @@ function prescription_nav_icon(string $icon): string
     <meta name="color-scheme" content="light">
     <title><?= prescription_e($page_title) ?> | Prescription</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="<?= prescription_e(prescription_url('assets/css/prescription.css')) ?>">
     <link rel="stylesheet" href="<?= prescription_e(prescription_url('assets/css/dashboard-shell.css')) ?>">
 

@@ -22,7 +22,7 @@
   margin:0;
   padding:0;
   box-sizing:border-box;
-  font-family:"Inter","Noto Sans Bengali",Arial,sans-serif;
+  font-family:"Inter","Noto Serif Bengali",Arial,sans-serif;
   font-weight:500;
 }
 
@@ -50,7 +50,7 @@ img {
 }
 
 input,select,textarea,button {
-  font-family:"Inter","Noto Sans Bengali",Arial,sans-serif;
+  font-family:"Inter","Noto Serif Bengali",Arial,sans-serif;
   font-weight:500;
 }
 

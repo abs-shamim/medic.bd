@@ -28,7 +28,7 @@
     margin: 0 auto;
     padding: 18px 14px 34px;
     color: var(--hpu-text);
-    font-family: Inter, "Noto Sans Bengali", system-ui, sans-serif;
+    font-family: Inter, "Noto Serif Bengali", system-ui, sans-serif;
   }
 
   .hpu-alert {

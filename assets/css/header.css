@@ -4,7 +4,7 @@
 
 body {
   margin: 0;
-  font-family: "Inter", "Noto Sans Bengali", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Inter", "Noto Serif Bengali", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--medic-header-dark);
   background: var(--medic-header-soft);
 }

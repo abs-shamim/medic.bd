@@ -1,4 +1,192 @@
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;background:#f6f8fa;color:#24292f}
-.box{max-width:560px;background:#fff;border:1px solid #d0d7de;border-radius:14px;padding:28px;text-align:center;box-shadow:0 12px 32px rgba(27,31,36,.08)}
-h1{margin:0 0 10px;font-size:28px}
-p{margin:0;color:#57606a;line-height:1.7}
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  font-family: "Inter", "Noto Serif Bengali", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f1f3f5;
+  color: #1e293b;
+}
+
+.mnt-box {
+  max-width: 640px;
+  width: 100%;
+  text-align: center;
+}
+
+.mnt-gears {
+  position: relative;
+  width: 130px;
+  height: 90px;
+  margin: 0 auto 24px;
+}
+
+.mnt-gear {
+  position: absolute;
+  top: 0;
+}
+
+.mnt-gear-back {
+  left: 0;
+  bottom: 4px;
+  top: auto;
+  width: 74px;
+  height: 74px;
+  fill: #cbd2d9;
+  animation: mnt-spin-cw 9s linear infinite;
+}
+
+.mnt-gear-front {
+  right: 0;
+  top: 0;
+  width: 58px;
+  height: 58px;
+  fill: #f5a623;
+  animation: mnt-spin-ccw 7s linear infinite;
+}
+
+@keyframes mnt-spin-cw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes mnt-spin-ccw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: #1e293b;
+}
+
+.mnt-box > p {
+  margin: 0 0 28px;
+  color: #64748b;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.mnt-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.mnt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 24px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.mnt-btn-primary {
+  background: #1e293b;
+  color: #ffffff;
+  border: 1px solid #1e293b;
+}
+
+.mnt-btn-primary:hover {
+  background: #334155;
+  border-color: #334155;
+}
+
+.mnt-btn-outline {
+  background: transparent;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+}
+
+.mnt-btn-outline:hover {
+  background: #e2e8f0;
+}
+
+.mnt-countdown {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 4px 0 14px;
+  flex-wrap: wrap;
+}
+
+.mnt-countdown-unit {
+  min-width: 68px;
+  padding: 12px 8px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+.mnt-countdown-unit strong {
+  display: block;
+  font-size: 24px;
+  font-weight: 800;
+  color: #f5a623;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.mnt-countdown-unit span {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.mnt-eta {
+  margin-top: 0;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.mnt-eta strong {
+  color: #64748b;
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 30px;
+  }
+
+  .mnt-box > p {
+    font-size: 15px;
+  }
+
+  .mnt-btn {
+    min-height: 42px;
+    padding: 0 18px;
+    font-size: 14px;
+  }
+
+  .mnt-countdown-unit {
+    min-width: 58px;
+    padding: 10px 6px;
+  }
+
+  .mnt-countdown-unit strong {
+    font-size: 20px;
+  }
+}

@@ -325,6 +325,31 @@
       }
   }
 
+  if (!function_exists('medic_dc_default_doctor_image_setting')) {
+      function medic_dc_default_doctor_image_setting(array $doctor): string
+      {
+          $gender = strtolower(trim((string)($doctor['gender'] ?? '')));
+
+          if (in_array($gender, ['male', 'm'], true)) {
+              $value = medic_dc_site_setting('default_doctor_male_image', '');
+
+              if ($value !== '') {
+                  return $value;
+              }
+          }
+
+          if (in_array($gender, ['female', 'f'], true)) {
+              $value = medic_dc_site_setting('default_doctor_female_image', '');
+
+              if ($value !== '') {
+                  return $value;
+              }
+          }
+
+          return medic_dc_site_setting('default_doctor_image', 'assets/images/default-doctor.webp');
+      }
+  }
+
   if (!function_exists('medic_dc_location_name_by_id')) {
       function medic_dc_location_name_by_id(string $table, int $id): array
       {
@@ -559,7 +584,7 @@
 
   $profile_link = medic_dc_doctor_profile_url($doctor);
 
-  $doctor_default_image_setting = medic_dc_site_setting('default_doctor_image', 'assets/images/default-doctor.webp');
+  $doctor_default_image_setting = medic_dc_default_doctor_image_setting($doctor);
 
   $doctor_image_url = medic_dc_asset_url(
       (string)($doctor['image'] ?? ''),

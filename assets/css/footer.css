@@ -135,6 +135,32 @@
   max-width: 360px;
 }
 
+.medic-footer-social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.medic-footer-social a {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--footer-border, rgba(0, 0, 0, 0.12));
+  color: var(--footer-dark);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  transition: 0.18s ease;
+}
+
+.medic-footer-social a:hover {
+  background: var(--footer-accent);
+  border-color: var(--footer-accent);
+  color: #ffffff;
+}
+
 .medic-footer h3 {
   margin: 0 0 14px;
   color: var(--footer-dark);

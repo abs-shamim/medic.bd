@@ -268,7 +268,7 @@ if (!function_exists('grapesjs_blog_editor_script')) {
                           { value: 'Arial, Helvetica, sans-serif', name: 'Arial' },
                           { value: 'Georgia, serif', name: 'Georgia' },
                           { value: 'Tahoma, sans-serif', name: 'Tahoma' },
-                          { value: '"Noto Sans Bengali", sans-serif', name: 'Noto Sans Bengali' }
+                          { value: '"Noto Serif Bengali", serif', name: 'Noto Serif Bengali' }
                         ] }
                       ]
                     },

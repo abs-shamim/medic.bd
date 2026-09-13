@@ -2109,24 +2109,194 @@ function is_maintenance_mode(): bool
         return false;
     }
 
+    // Never gate anything under /admin/ (including the login page itself),
+    // otherwise an admin could never log back in to turn maintenance mode off.
+    $script = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ($_SERVER['PHP_SELF'] ?? '')));
+
+    if (strpos($script, '/admin/') !== false) {
+        return false;
+    }
+
     return site_setting_bool('maintenance_mode', false);
+}
+
+/*
+|--------------------------------------------------------------------------
+| Maintenance "Back Online At" Timestamp
+|--------------------------------------------------------------------------
+| The datetime-local input has no timezone of its own - it is whatever
+| local time the admin's browser showed them. strtotime() would instead
+| interpret it using PHP's ambient default timezone, which is not
+| guaranteed to match: on this box, Apache's PHP defaults to UTC while the
+| CLI's PHP defaults to Asia/Dhaka, a 6-hour gap that silently shifted this
+| feature's timing. Parsing it explicitly against the site's own configured
+| timezone keeps it correct no matter which php.ini serves the request.
+*/
+function maintenance_until_timestamp(): ?int
+{
+    $until_raw = trim(get_site_setting('maintenance_until', ''));
+
+    if ($until_raw === '') {
+        return null;
+    }
+
+    $timezone_name = trim(get_site_setting('site_timezone', 'Asia/Dhaka'));
+
+    try {
+        $timezone = new DateTimeZone($timezone_name !== '' ? $timezone_name : 'Asia/Dhaka');
+    } catch (Throwable $e) {
+        $timezone = new DateTimeZone('Asia/Dhaka');
+    }
+
+    try {
+        $date = new DateTime($until_raw, $timezone);
+    } catch (Throwable $e) {
+        return null;
+    }
+
+    return $date->getTimestamp();
+}
+
+/*
+|--------------------------------------------------------------------------
+| Maintenance Auto-Disable
+|--------------------------------------------------------------------------
+| When "Auto Disable When Time Ends" is on and the "Back Online At" time
+| has passed, this turns maintenance_mode itself off (not just a runtime
+| bypass), so the admin's Site Settings toggle reflects reality too and the
+| site does not need a manual switch-off once the countdown reaches zero.
+*/
+function maintenance_auto_disable_if_due(): bool
+{
+    if (!site_setting_bool('maintenance_mode', false)) {
+        return false;
+    }
+
+    if (!site_setting_bool('maintenance_auto_disable', true)) {
+        return false;
+    }
+
+    $until_timestamp = maintenance_until_timestamp();
+
+    if ($until_timestamp === null || $until_timestamp > time()) {
+        return false;
+    }
+
+    update_site_setting('maintenance_mode', '0');
+    update_site_setting('maintenance_until', '');
+
+    return true;
 }
 
 function show_maintenance_page_if_enabled(): void
 {
+    // get_site_setting() caches its results for the rest of this request, so
+    // a fresh is_maintenance_mode() call right after the update above would
+    // still read the pre-update value. Trust this return value instead of
+    // re-querying through the stale cache.
+    if (maintenance_auto_disable_if_due()) {
+        return;
+    }
+
     if (!is_maintenance_mode()) {
         return;
     }
 
+    $title = trim(get_site_setting('maintenance_title', ''));
+    $title = $title !== '' ? $title : 'Website Under Maintenance';
+
+    $message = trim(get_site_setting('maintenance_message', ''));
+    $message = $message !== '' ? $message : "We're working hard to improve the user experience. Stay tuned!";
+
+    $until_timestamp = maintenance_until_timestamp();
+    $has_countdown = $until_timestamp !== null && $until_timestamp > time();
+
+    $contact_url = site_url('contact');
+
     http_response_code(503);
+    header('Retry-After: ' . ($has_countdown ? (string)max(60, $until_timestamp - time()) : '3600'));
 
     echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">';
-    echo '<title>' . e(get_site_setting('maintenance_title', 'Website Under Maintenance')) . '</title>';
+    echo '<title>' . e($title) . '</title>';
     echo '<link rel="stylesheet" href="' . e(site_url('assets/css/maintenance.css')) . '">';
-    echo '</head><body><div class="box">';
-    echo '<h1>' . e(get_site_setting('maintenance_title', 'Website Under Maintenance')) . '</h1>';
-    echo '<p>' . e(get_site_setting('maintenance_message', 'We are currently updating our website. Please check back soon.')) . '</p>';
-    echo '</div></body></html>';
+    echo '</head><body>';
+    echo '<div class="mnt-box">';
+
+    echo '<div class="mnt-gears" aria-hidden="true">';
+    echo '<svg class="mnt-gear mnt-gear-back" viewBox="0 0 100 100"><path fill-rule="evenodd" d="M98,50 L84,61 L89,78 L71,79 L65,96 L50,86 L35,96 L29,79 L11,78 L16,61 L2,50 L16,39 L11,22 L29,21 L35,4 L50,14 L65,4 L71,21 L89,22 L84,39 Z M68,50 A18,18 0 1,0 32,50 A18,18 0 1,0 68,50 Z"/></svg>';
+    echo '<svg class="mnt-gear mnt-gear-front" viewBox="0 0 100 100"><path fill-rule="evenodd" d="M98,50 L84,61 L89,78 L71,79 L65,96 L50,86 L35,96 L29,79 L11,78 L16,61 L2,50 L16,39 L11,22 L29,21 L35,4 L50,14 L65,4 L71,21 L89,22 L84,39 Z M68,50 A18,18 0 1,0 32,50 A18,18 0 1,0 68,50 Z"/></svg>';
+    echo '</div>';
+
+    echo '<h1>' . e($title) . '</h1>';
+    echo '<p>' . nl2br(e($message)) . '</p>';
+
+    echo '<div class="mnt-actions">';
+    echo '<a href="' . e($contact_url) . '" class="mnt-btn mnt-btn-primary">Contact Us</a>';
+    echo '<a href="' . e((string)($_SERVER['REQUEST_URI'] ?? '/')) . '" class="mnt-btn mnt-btn-outline" onclick="window.location.reload();return false;">Reload</a>';
+    echo '</div>';
+
+    if ($has_countdown) {
+        echo '<div class="mnt-countdown" id="mntCountdown" data-until="' . e((string)$until_timestamp) . '">';
+        echo '<div class="mnt-countdown-unit"><strong id="mntDays">00</strong><span>Days</span></div>';
+        echo '<div class="mnt-countdown-unit"><strong id="mntHours">00</strong><span>Hours</span></div>';
+        echo '<div class="mnt-countdown-unit"><strong id="mntMinutes">00</strong><span>Min</span></div>';
+        echo '<div class="mnt-countdown-unit"><strong id="mntSeconds">00</strong><span>Sec</span></div>';
+        echo '</div>';
+        try {
+            $timezone_name = trim(get_site_setting('site_timezone', 'Asia/Dhaka'));
+            $timezone = new DateTimeZone($timezone_name !== '' ? $timezone_name : 'Asia/Dhaka');
+            $until_display = (new DateTime('@' . $until_timestamp))->setTimezone($timezone)->format('M j, Y g:i A');
+        } catch (Throwable $e) {
+            $until_display = date('M j, Y g:i A', $until_timestamp);
+        }
+
+        echo '<p class="mnt-eta">We expect to be back by <strong>' . e($until_display) . '</strong>.</p>';
+    }
+
+    echo '</div>';
+
+    if ($has_countdown) {
+        echo '<script>
+(function () {
+    var el = document.getElementById("mntCountdown");
+    if (!el) { return; }
+    var until = parseInt(el.getAttribute("data-until"), 10) * 1000;
+    var daysEl = document.getElementById("mntDays");
+    var hoursEl = document.getElementById("mntHours");
+    var minutesEl = document.getElementById("mntMinutes");
+    var secondsEl = document.getElementById("mntSeconds");
+
+    function pad(n) { return String(n).padStart(2, "0"); }
+
+    function tick() {
+        var diff = until - Date.now();
+
+        if (diff <= 0) {
+            window.location.reload();
+            return;
+        }
+
+        var seconds = Math.floor(diff / 1000);
+        var days = Math.floor(seconds / 86400);
+        seconds -= days * 86400;
+        var hours = Math.floor(seconds / 3600);
+        seconds -= hours * 3600;
+        var minutes = Math.floor(seconds / 60);
+        seconds -= minutes * 60;
+
+        daysEl.textContent = pad(days);
+        hoursEl.textContent = pad(hours);
+        minutesEl.textContent = pad(minutes);
+        secondsEl.textContent = pad(seconds);
+    }
+
+    tick();
+    setInterval(tick, 1000);
+})();
+</script>';
+    }
+
+    echo '</body></html>';
 
     exit;
 }
@@ -2368,3 +2538,14 @@ if (!function_exists('admin_log_activity')) {
         }
     }
 }
+
+/*
+|--------------------------------------------------------------------------
+| Maintenance Mode Gate
+|--------------------------------------------------------------------------
+| Every public entry file requires this file first, so checking here (once
+| all helpers above are defined) covers every route the same way - including
+| a visitor hitting a page's raw .php filename directly, which bypasses
+| route.php entirely because .htaccess serves existing files as-is.
+*/
+show_maintenance_page_if_enabled();

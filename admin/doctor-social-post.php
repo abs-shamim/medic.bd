@@ -3147,7 +3147,7 @@ body {
         context.fill();
 
         context.fillStyle = '#ffffff';
-        context.font = '700 86px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif';
+        context.font = '700 86px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif';
         context.textAlign = 'center';
         context.textBaseline = 'middle';
         context.fillText(initials, x + (width / 2), y + (height / 2));
@@ -3264,11 +3264,11 @@ body {
             context.fill();
 
             context.fillStyle = '#1f5f9d';
-            context.font = '700 24px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif';
+            context.font = '700 24px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif';
             context.fillText('MedicBD', 74, 88);
 
             context.fillStyle = '#6387aa';
-            context.font = '500 15px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif';
+            context.font = '500 15px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif';
             context.fillText(copy.doctorProfile || 'Doctor Profile', 75, 116);
 
             drawMedicalMark(context, 323, 92, 54);
@@ -3299,18 +3299,18 @@ body {
             }
 
             context.fillStyle = '#6387aa';
-            context.font = '500 15px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif';
+            context.font = '500 15px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif';
             context.fillText('MEDICBD', 75, 530);
 
             context.fillStyle = '#234566';
-            context.font = '700 19px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif';
+            context.font = '700 19px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif';
             drawWrappedText(context, card.name, 75, 560, 260, 25, 2);
 
             var mainX = 431;
             var mainWidth = 674;
 
             context.fillStyle = '#2f8ff0';
-            context.font = '600 16px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif';
+            context.font = '600 16px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif';
             context.fillText(copy.doctorProfile || 'Doctor Profile', mainX, 92);
 
             /*
@@ -3325,7 +3325,7 @@ body {
              * visually matches the requested <br> structure.
              */
             context.fillStyle = '#1b3855';
-            context.font = '700 36px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif';
+            context.font = '700 36px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif';
             var nameEndY = drawWrappedText(context, card.name || card.title, mainX, 148, mainWidth, 45, 2);
 
             context.fillStyle = '#2f8ff0';
@@ -3340,7 +3340,7 @@ body {
                 mainX,
                 contentY,
                 mainWidth,
-                '500 21px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif',
+                '500 21px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif',
                 '#294862',
                 28,
                 2
@@ -3354,7 +3354,7 @@ body {
                 mainX,
                 contentY,
                 mainWidth,
-                '700 23px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif',
+                '700 23px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif',
                 '#2f8ff0',
                 30,
                 2
@@ -3368,7 +3368,7 @@ body {
                 mainX,
                 contentY,
                 mainWidth,
-                '500 21px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif',
+                '500 21px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif',
                 '#294862',
                 28,
                 2
@@ -3382,7 +3382,7 @@ body {
                 mainX,
                 contentY,
                 mainWidth,
-                '500 21px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif',
+                '500 21px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif',
                 '#294862',
                 28,
                 2

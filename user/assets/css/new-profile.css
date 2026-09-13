@@ -25,7 +25,7 @@
     margin:0 auto;
     padding:18px 14px 40px;
     color:var(--np-text);
-    font-family:Inter,"Noto Sans Bengali",system-ui,sans-serif;
+    font-family:Inter,"Noto Serif Bengali",system-ui,sans-serif;
   }
 
   .np-alert {

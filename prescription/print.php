@@ -134,6 +134,7 @@ $clinical_blocks = [
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= prescription_e($record['prescription_no'] ?? 'Prescription') ?></title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= prescription_e(prescription_url('assets/css/prescription-print.css')) ?>">
     <script src="<?= prescription_e(prescription_url('assets/js/prescription-print.js')) ?>" defer></script>
 </head>

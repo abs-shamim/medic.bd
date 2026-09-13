@@ -718,6 +718,14 @@ $cf_divisions = function_exists('get_divisions') ? get_divisions() : [];
         </div>
       </div>
 
+      <?php
+      $cf_office_address = trim((string)get_site_setting('office_address', ''));
+      $cf_contact_phone = trim((string)get_site_setting('contact_phone', get_site_setting('hotline_number', '')));
+      $cf_contact_email = trim((string)get_site_setting('contact_email', get_site_setting('support_email', '')));
+      $cf_business_hours = trim((string)get_site_setting('business_hours', ''));
+      $cf_map_embed_code = trim((string)get_site_setting('map_embed_code', ''));
+      ?>
+
       <aside class="medic-panel">
         <div class="medic-panel-head">
           <h2>Contact Info</h2>
@@ -725,34 +733,60 @@ $cf_divisions = function_exists('get_divisions') ? get_divisions() : [];
         </div>
 
         <div class="medic-info-list">
-          <div class="medic-info-item">
-            <div class="medic-info-icon">⌂</div>
-            <div>
-              <h3>Location</h3>
-              <p>Dhaka, Bangladesh</p>
+          <?php if ($cf_office_address !== ''): ?>
+            <div class="medic-info-item">
+              <div class="medic-info-icon">⌂</div>
+              <div>
+                <h3>Location</h3>
+                <p><?= e($cf_office_address) ?></p>
+              </div>
             </div>
-          </div>
+          <?php endif; ?>
 
-          <div class="medic-info-item">
-            <div class="medic-info-icon">☎</div>
-            <div>
-              <h3>Phone</h3>
-              <a href="tel:+8801234567890">+880 1234 567 890</a>
+          <?php if ($cf_contact_phone !== ''): ?>
+            <div class="medic-info-item">
+              <div class="medic-info-icon">☎</div>
+              <div>
+                <h3>Phone</h3>
+                <a href="tel:<?= e(preg_replace('/[^\d+]/', '', $cf_contact_phone)) ?>"><?= e($cf_contact_phone) ?></a>
+              </div>
             </div>
-          </div>
+          <?php endif; ?>
 
-          <div class="medic-info-item">
-            <div class="medic-info-icon">@</div>
-            <div>
-              <h3>Email</h3>
-              <a href="mailto:info@example.com">info@example.com</a>
+          <?php if ($cf_contact_email !== ''): ?>
+            <div class="medic-info-item">
+              <div class="medic-info-icon">@</div>
+              <div>
+                <h3>Email</h3>
+                <a href="mailto:<?= e($cf_contact_email) ?>"><?= e($cf_contact_email) ?></a>
+              </div>
             </div>
-          </div>
+          <?php endif; ?>
+
+          <?php if ($cf_business_hours !== ''): ?>
+            <div class="medic-info-item">
+              <div class="medic-info-icon">⏱</div>
+              <div>
+                <h3>Business Hours</h3>
+                <p><?= e($cf_business_hours) ?></p>
+              </div>
+            </div>
+          <?php endif; ?>
+
+          <?php if ($cf_office_address === '' && $cf_contact_phone === '' && $cf_contact_email === '' && $cf_business_hours === ''): ?>
+            <div class="medic-info-item">
+              <p>Contact information will appear here after setup.</p>
+            </div>
+          <?php endif; ?>
         </div>
 
-        <div class="medic-map-box">
-          Map Area
-        </div>
+        <?php if ($cf_map_embed_code !== ''): ?>
+          <div class="medic-map-box"><?= $cf_map_embed_code ?></div>
+        <?php else: ?>
+          <div class="medic-map-box">
+            Map Area
+          </div>
+        <?php endif; ?>
       </aside>
     </section>
   </div>

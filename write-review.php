@@ -8,6 +8,7 @@ if ($slug === '') {
 
     $page_title = 'Doctor Not Found';
     $meta_description = 'The doctor profile you are looking for could not be found.';
+    $robots_meta = 'noindex,follow';
 
     include __DIR__ . '/includes/header.php';
     echo '<main class="page"><div class="container"><div class="card"><h2>Doctor not found</h2><p>Please go back to doctor list.</p><a href="' . e(site_url('doctors')) . '" class="btn btn-primary">Doctors</a></div></div></main>';
@@ -22,6 +23,7 @@ if (!$doctor) {
 
     $page_title = 'Doctor Not Found';
     $meta_description = 'The doctor profile you are looking for could not be found.';
+    $robots_meta = 'noindex,follow';
 
     include __DIR__ . '/includes/header.php';
     echo '<main class="page"><div class="container"><div class="card"><h2>Doctor not found</h2><p>Please go back to doctor list.</p><a href="' . e(site_url('doctors')) . '" class="btn btn-primary">Doctors</a></div></div></main>';
@@ -204,6 +206,54 @@ function wr_review_redirect(string $slug, string $status): void
     redirect(site_url('doctor/' . $slug . '/write-review/?review=' . urlencode($status)));
 }
 
+function wr_recaptcha_enabled(): bool
+{
+    return trim((string)get_site_setting('enable_recaptcha', '0')) === '1'
+        && trim((string)get_site_setting('recaptcha_site_key', '')) !== '';
+}
+
+function wr_verify_recaptcha(string $token): bool
+{
+    $secret_key = trim((string)get_site_setting('recaptcha_secret_key', ''));
+
+    if ($secret_key === '') {
+        return true;
+    }
+
+    if ($token === '') {
+        return false;
+    }
+
+    try {
+        $response = file_get_contents(
+            'https://www.google.com/recaptcha/api/siteverify',
+            false,
+            stream_context_create([
+                'http' => [
+                    'method' => 'POST',
+                    'header' => 'Content-Type: application/x-www-form-urlencoded',
+                    'content' => http_build_query([
+                        'secret' => $secret_key,
+                        'response' => $token,
+                        'remoteip' => (string)($_SERVER['REMOTE_ADDR'] ?? ''),
+                    ]),
+                    'timeout' => 8,
+                ],
+            ])
+        );
+
+        if ($response === false) {
+            return true;
+        }
+
+        $result = json_decode($response, true);
+
+        return !empty($result['success']);
+    } catch (Throwable $e) {
+        return true;
+    }
+}
+
 function wr_get_submitted_review(int $review_id, int $doctor_id): array
 {
     global $pdo;
@@ -336,6 +386,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         wr_review_redirect($slug, 'math');
     }
 
+    if (wr_recaptcha_enabled() && !wr_verify_recaptcha((string)($_POST['g-recaptcha-response'] ?? ''))) {
+        wr_review_redirect($slug, 'recaptcha');
+    }
+
     if ($doctor_id <= 0 || $raw_rating < 1 || $raw_rating > 5 || $comment === '') {
         wr_review_redirect($slug, 'missing');
     }
@@ -386,15 +440,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $page_title = 'Write a Review for ' . ($doctor['name'] ?? 'Doctor');
 $meta_description = 'Share your experience and write a patient review for ' . ($doctor['name'] ?? 'this doctor') . '.';
+$robots_meta = 'noindex,follow';
 
 $doctor_name = trim((string)($doctor['name'] ?? 'Doctor'));
 $doctor_subtitle = trim((string)(
     ($doctor['designation'] ?? '') .
     (!empty($doctor['degree']) ? ' | ' . $doctor['degree'] : '')
 ));
+function wr_default_doctor_image(array $doctor): string
+{
+    $gender = strtolower(trim((string)($doctor['gender'] ?? '')));
+
+    if (in_array($gender, ['male', 'm'], true)) {
+        $value = get_site_setting('default_doctor_male_image', '');
+
+        if (trim($value) !== '') {
+            return $value;
+        }
+    }
+
+    if (in_array($gender, ['female', 'f'], true)) {
+        $value = get_site_setting('default_doctor_female_image', '');
+
+        if (trim($value) !== '') {
+            return $value;
+        }
+    }
+
+    return get_site_setting('default_doctor_image', 'assets/images/default-doctor.webp');
+}
+
 $doctor_image = !empty($doctor['image'])
     ? site_url(ltrim((string)$doctor['image'], '/'))
-    : site_url('assets/images/default-doctor.png');
+    : site_url(ltrim(preg_replace('#^\.\./+#', '', wr_default_doctor_image($doctor)), '/'));
 
 $math_questions = [
     ['a' => 5, 'op' => '-', 'b' => 1],
@@ -570,6 +648,8 @@ if ($form_status === 'submitted') {
           <div class="wr-alert error">Date of experience cannot be a future date. Please select today or a previous date.</div>
         <?php elseif ($form_status === 'short_title'): ?>
           <div class="wr-alert error">Review title is too short. Please write a longer title with at least 15 characters.</div>
+        <?php elseif ($form_status === 'recaptcha'): ?>
+          <div class="wr-alert error">reCAPTCHA verification failed. Please check the "I'm not a robot" box and submit again.</div>
         <?php elseif ($form_status === 'failed'): ?>
           <div class="wr-alert error">Review could not be submitted right now. Please try again later.</div>
         <?php elseif ($form_status === 'submitted'): ?>
@@ -635,6 +715,11 @@ if ($form_status === 'submitted') {
             This site is protected by reCAPTCHA. We collect device and interaction
             signals for security purposes as described in our <a href="#" class="wr-noop-link">Privacy Policy</a>.
           </div>
+
+          <?php if (wr_recaptcha_enabled()): ?>
+            <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+            <div class="g-recaptcha" data-sitekey="<?= e(get_site_setting('recaptcha_site_key', '')) ?>"></div>
+          <?php endif; ?>
 
           <div class="wr-form-details" id="wrFormDetails">
             <section class="wr-section">

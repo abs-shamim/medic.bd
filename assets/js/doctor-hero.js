@@ -220,7 +220,7 @@
         context.fill();
 
         context.fillStyle = '#ffffff';
-        context.font = '700 86px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif';
+        context.font = '700 86px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif';
         context.textAlign = 'center';
         context.textBaseline = 'middle';
         context.fillText(initials, x + (width / 2), y + (height / 2));
@@ -479,11 +479,11 @@
             context.fill();
 
             context.fillStyle = '#1f5f9d';
-            context.font = '700 24px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif';
+            context.font = '700 24px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif';
             context.fillText(profileCardData.siteName || 'MedicBD', 74, 88);
 
             context.fillStyle = '#6387aa';
-            context.font = '500 15px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif';
+            context.font = '500 15px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif';
             context.fillText(profileCardData.profileLabel || 'Doctor Profile', 75, 116);
 
             drawMedicalMark(context, 323, 92, 54);
@@ -540,18 +540,18 @@
             }
 
             context.fillStyle = '#6387aa';
-            context.font = '500 15px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif';
+            context.font = '500 15px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif';
             context.fillText('MEDICBD', 75, 530);
 
             context.fillStyle = '#234566';
-            context.font = '700 19px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif';
+            context.font = '700 19px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif';
             drawWrappedText(context, profileCardData.name, 75, 560, 260, 25, 2);
 
             const mainX = 431;
             const mainWidth = 674;
 
             context.fillStyle = '#2f8ff0';
-            context.font = '600 16px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif';
+            context.font = '600 16px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif';
             context.fillText(profileCardData.profileLabel || 'Doctor Profile', mainX, 92);
 
             /*
@@ -568,7 +568,7 @@
              * and no chamber row. The footer still shows the profile URL.
              */
             context.fillStyle = '#1b3855';
-            context.font = '700 34px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif';
+            context.font = '700 34px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif';
             const nameEndY = drawWrappedText(
                 context,
                 profileCardData.name,
@@ -594,7 +594,7 @@
                 27,
                 2,
                 '#294862',
-                '500 21px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif'
+                '500 21px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif'
             );
 
             /* Blank line after Degree. */
@@ -609,7 +609,7 @@
                 29,
                 2,
                 '#2f8ff0',
-                '700 22px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif'
+                '700 22px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif'
             );
 
             /* Blank line after Specialty. */
@@ -624,7 +624,7 @@
                 26,
                 2,
                 '#294862',
-                '500 20px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif'
+                '500 20px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif'
             );
 
             contentY += 10;
@@ -638,7 +638,7 @@
                 26,
                 2,
                 '#294862',
-                '500 20px "Segoe UI", "Noto Sans Bengali", Arial, sans-serif'
+                '500 20px "Segoe UI", "Noto Serif Bengali", Arial, sans-serif'
             );
 
             const footerY = 540;

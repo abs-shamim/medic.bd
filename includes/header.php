@@ -301,6 +301,12 @@ $site_email = medic_header_setting('contact_email', medic_header_setting('suppor
 $site_emergency_phone = medic_header_setting('emergency_number', medic_header_setting('hotline_number', medic_header_setting('contact_phone', '')));
 $admin_login_url = medic_header_setting('admin_login_url', 'admin/login.php');
 
+$show_topbar = medic_header_setting('show_topbar', '1') !== '0';
+$show_login_button = medic_header_setting('show_login_button', '1') !== '0';
+$show_register_button = medic_header_setting('show_register_button', '1') !== '0';
+$header_button_text = medic_header_setting('header_button_text', __t('add_doctor', 'Add Doctor'));
+$header_button_url = medic_header_setting('header_button_url', 'user/new-profile.php');
+
 $site_logo = medic_header_asset_url(
     medic_header_setting('site_logo', ''),
     ''
@@ -521,7 +527,7 @@ $language_bn_url = medic_header_language_url('bn');
      * immediately in that fallback and swaps to the web font once it
      * loads - no invisible-text flash, just an earlier first paint.
      */
-    $google_fonts_href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap';
+    $google_fonts_href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif+Bengali:wght@400;500;600;700;800&display=swap';
   ?>
   <link rel="preload" as="style" href="<?= e($google_fonts_href) ?>">
   <link rel="stylesheet" href="<?= e($google_fonts_href) ?>" media="print" onload="this.media='all'">
@@ -551,7 +557,7 @@ $language_bn_url = medic_header_language_url('bn');
 </head>
 <body>
 
-<?php if ($site_emergency_phone !== '' || $site_email !== ''): ?>
+<?php if ($show_topbar && ($site_emergency_phone !== '' || $site_email !== '')): ?>
   <div class="medic-topbar">
     <div class="container medic-topbar-inner">
       <div class="medic-topbar-left">
@@ -620,9 +626,21 @@ $language_bn_url = medic_header_language_url('bn');
           <?= e(__t('contact', 'Contact')) ?>
         </a>
 
-        <a href="<?= e(site_url('user/new-profile.php')) ?>" class="medic-add-link">
-          <?= e(__t('add_doctor', 'Add Doctor')) ?>
+        <a href="<?= e(site_url($header_button_url)) ?>" class="medic-add-link">
+          <?= e($header_button_text) ?>
         </a>
+
+        <?php if ($show_login_button): ?>
+          <a href="<?= e(site_url('user/login.php')) ?>" class="medic-login-link">
+            <?= e(__t('login', 'Login')) ?>
+          </a>
+        <?php endif; ?>
+
+        <?php if ($show_register_button): ?>
+          <a href="<?= e(site_url('user/register.php')) ?>" class="medic-register-link">
+            <?= e(__t('register', 'Register')) ?>
+          </a>
+        <?php endif; ?>
 
         <span class="medic-lang-switch" aria-label="Language switch">
           <a href="<?= e($language_en_url) ?>" class="<?= $current_lang === 'en' ? 'active' : '' ?>">EN</a>
@@ -658,9 +676,21 @@ $language_bn_url = medic_header_language_url('bn');
         <?= e(__t('contact', 'Contact')) ?>
       </a>
 
-      <a href="<?= e(site_url('user/new-profile.php')) ?>">
-        <?= e(__t('add_doctor', 'Add Doctor')) ?>
+      <a href="<?= e(site_url($header_button_url)) ?>">
+        <?= e($header_button_text) ?>
       </a>
+
+      <?php if ($show_login_button): ?>
+        <a href="<?= e(site_url('user/login.php')) ?>">
+          <?= e(__t('login', 'Login')) ?>
+        </a>
+      <?php endif; ?>
+
+      <?php if ($show_register_button): ?>
+        <a href="<?= e(site_url('user/register.php')) ?>">
+          <?= e(__t('register', 'Register')) ?>
+        </a>
+      <?php endif; ?>
 
       <div class="medic-mobile-lang-switch" aria-label="Language switch">
         <a href="<?= e($language_en_url) ?>" class="<?= $current_lang === 'en' ? 'active' : '' ?>">EN</a>

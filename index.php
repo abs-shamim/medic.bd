@@ -40,7 +40,9 @@ $home_featured_specialties_limit = front_setting_int('home_featured_specialties_
 $home_featured_doctors_limit = front_setting_int('home_featured_doctors_limit', 3, 0, 50);
 $home_featured_hospitals_limit = front_setting_int('home_featured_hospitals_limit', 3, 0, 50);
 
-$home_search_status = front_site_setting('home_search_status', 'active');
+$home_search_status = front_site_setting('show_search_bar', '1') === '0'
+    ? 'inactive'
+    : front_site_setting('home_search_status', 'active');
 $home_search_default_type = front_site_setting('home_search_default_type', 'doctors');
 $home_search_placeholder = __t('search_placeholder', front_site_setting('home_search_placeholder', 'Search doctor, hospital or specialty'));
 $home_search_button_text = __t('search_button', front_site_setting('home_search_button_text', 'Search'));

@@ -611,14 +611,29 @@ if (!function_exists('admin_render_settings_field')) {
             }
             echo '</select>';
         } elseif ($type === 'file') {
-            echo '<input type="file" id="' . e($key) . '" name="' . e($key) . '" accept="' . e((string)($field['accept'] ?? 'image/*')) . '">';
+            echo '<div class="settings-upload">';
+
+            echo '<div class="settings-upload-thumb">';
+            if ($value !== '') {
+                echo '<img src="' . e(admin_site_cache_bust_url($value)) . '" alt="' . e($label) . '">';
+            } else {
+                echo '<span>No file</span>';
+            }
+            echo '</div>';
+
+            echo '<div class="settings-upload-controls">';
+            echo '<span class="settings-upload-btn-wrap">';
+            echo '<input type="file" class="settings-upload-input" id="' . e($key) . '" name="' . e($key) . '" accept="' . e((string)($field['accept'] ?? 'image/*')) . '">';
+            echo '<span class="settings-upload-btn">Choose File</span>';
+            echo '</span>';
+            echo '<span class="settings-upload-filename" data-empty-text="No file chosen">No file chosen</span>';
 
             if ($value !== '') {
-                echo '<div class="settings-current-file">';
-                echo '<a href="' . e($value) . '" target="_blank" rel="noopener">View current file</a>';
-                echo '<div class="settings-image-preview"><img src="' . e(admin_site_cache_bust_url($value)) . '" alt="' . e($label) . '"></div>';
-                echo '</div>';
+                echo '<a href="' . e($value) . '" target="_blank" rel="noopener" class="settings-upload-view">View current file</a>';
             }
+            echo '</div>';
+
+            echo '</div>';
         } elseif ($type === 'color') {
             $color = admin_site_normalize_hex_color($value, (string)($field['default'] ?? '#0f766e'));
             echo '<div class="settings-color-wrap">';
@@ -975,7 +990,7 @@ if (!function_exists('admin_site_write_robots_txt')) {
 
 $settings_schema = [
     'Website Identity' => [
-        'icon' => 'W',
+        'icon' => '🌐',
         'description' => 'Website name, logo, favicon, language and timezone.',
         'fields' => [
             ['key' => 'site_name', 'label' => 'Site Name', 'type' => 'text', 'default' => 'Deluti'],
@@ -983,15 +998,15 @@ $settings_schema = [
             ['key' => 'site_tagline', 'label' => 'Site Tagline', 'type' => 'text', 'default' => 'Doctor and Hospital Directory'],
             ['key' => 'site_language', 'label' => 'Default Language', 'type' => 'select', 'default' => 'en', 'options' => ['en' => 'English', 'bn' => 'Bangla']],
             ['key' => 'site_timezone', 'label' => 'Timezone', 'type' => 'text', 'default' => 'Asia/Dhaka'],
-            ['key' => 'site_logo', 'label' => 'Site Logo', 'type' => 'file', 'accept' => 'image/*', 'default' => '../assets/images/site-logo.webp', 'help' => 'JPG, PNG, GIF or WebP will be saved as /assets/images/site-logo-YYMMDDHHMMSS.webp.'],
-            ['key' => 'site_dark_logo', 'label' => 'Dark Logo', 'type' => 'file', 'accept' => 'image/*', 'default' => '../assets/images/site-dark-logo.webp', 'help' => 'JPG, PNG, GIF or WebP will be saved as /assets/images/site-dark-logo-YYMMDDHHMMSS.webp.'],
-            ['key' => 'site_favicon', 'label' => 'Favicon', 'type' => 'file', 'accept' => 'image/*,.ico', 'default' => '../assets/images/favicon.ico', 'help' => 'ICO files will be saved as /assets/images/favicon-YYMMDDHHMMSS.ico. Other image formats will be converted to /assets/images/favicon-YYMMDDHHMMSS.webp.'],
-            ['key' => 'site_apple_touch_icon', 'label' => 'Apple Touch Icon', 'type' => 'file', 'accept' => 'image/*', 'default' => '../assets/images/apple-touch-icon.webp', 'help' => 'Converted and saved as /assets/images/apple-touch-icon-YYMMDDHHMMSS.webp.'],
+            ['key' => 'site_logo', 'label' => 'Site Logo', 'type' => 'file', 'full' => true, 'accept' => 'image/*', 'default' => '../assets/images/site-logo.webp', 'help' => 'JPG, PNG, GIF or WebP will be saved as /assets/images/site-logo-YYMMDDHHMMSS.webp.'],
+            ['key' => 'site_dark_logo', 'label' => 'Dark Logo', 'type' => 'file', 'full' => true, 'accept' => 'image/*', 'default' => '../assets/images/site-dark-logo.webp', 'help' => 'JPG, PNG, GIF or WebP will be saved as /assets/images/site-dark-logo-YYMMDDHHMMSS.webp.'],
+            ['key' => 'site_favicon', 'label' => 'Favicon', 'type' => 'file', 'full' => true, 'accept' => 'image/*,.ico', 'default' => '../assets/images/favicon.ico', 'help' => 'ICO files will be saved as /assets/images/favicon-YYMMDDHHMMSS.ico. Other image formats will be converted to /assets/images/favicon-YYMMDDHHMMSS.webp.'],
+            ['key' => 'site_apple_touch_icon', 'label' => 'Apple Touch Icon', 'type' => 'file', 'full' => true, 'accept' => 'image/*', 'default' => '../assets/images/apple-touch-icon.webp', 'help' => 'Converted and saved as /assets/images/apple-touch-icon-YYMMDDHHMMSS.webp.'],
             ['key' => 'site_description', 'label' => 'Site Description', 'type' => 'textarea', 'full' => true],
         ],
     ],
     'Contact Information' => [
-        'icon' => 'C',
+        'icon' => '📞',
         'description' => 'Email, phone, hotline, WhatsApp, address and map.',
         'fields' => [
             ['key' => 'admin_email', 'label' => 'Admin Email', 'type' => 'email'],
@@ -1007,7 +1022,7 @@ $settings_schema = [
         ],
     ],
     'Social Links' => [
-        'icon' => 'S',
+        'icon' => '🔗',
         'description' => 'Social media and community profile URLs.',
         'fields' => [
             ['key' => 'facebook_url', 'label' => 'Facebook URL', 'type' => 'url'],
@@ -1021,7 +1036,7 @@ $settings_schema = [
         ],
     ],
     'SEO Settings' => [
-        'icon' => 'O',
+        'icon' => '🔍',
         'description' => 'Meta title, description, robots and verification codes.',
         'fields' => [
             ['key' => 'meta_title', 'label' => 'Default Meta Title', 'type' => 'text', 'full' => true],
@@ -1043,11 +1058,11 @@ $settings_schema = [
             ['key' => 'google_site_verification', 'label' => 'Google Site Verification', 'type' => 'text'],
             ['key' => 'bing_site_verification', 'label' => 'Bing Site Verification', 'type' => 'text'],
             ['key' => 'yandex_site_verification', 'label' => 'Yandex Site Verification', 'type' => 'text'],
-            ['key' => 'default_og_image', 'label' => 'Default OG Image', 'type' => 'file', 'accept' => 'image/*', 'default' => '../assets/images/default-og-image.webp', 'help' => 'Converted and saved as /assets/images/default-og-image-YYMMDDHHMMSS.webp.'],
+            ['key' => 'default_og_image', 'label' => 'Default OG Image', 'type' => 'file', 'full' => true, 'accept' => 'image/*', 'default' => '../assets/images/default-og-image.webp', 'help' => 'Converted and saved as /assets/images/default-og-image-YYMMDDHHMMSS.webp.'],
         ],
     ],
     'Robots.txt Control' => [
-        'icon' => 'R',
+        'icon' => '🤖',
         'description' => 'Manage search engines, AI search crawlers, training bots, protected paths and the live robots.txt output.',
         'fields' => [
             [
@@ -1272,7 +1287,7 @@ $settings_schema = [
         ],
     ],
     'Homepage Settings' => [
-        'icon' => 'H',
+        'icon' => '🏠',
         'description' => 'Hero section, featured doctors, hospitals and homepage limits.',
         'fields' => [
             ['key' => 'home_hero_title', 'label' => 'Hero Title', 'type' => 'text', 'default' => 'Find the Right Doctor Near You'],
@@ -1287,7 +1302,7 @@ $settings_schema = [
         ],
     ],
     'Directory Settings' => [
-        'icon' => 'D',
+        'icon' => '📋',
         'description' => 'Doctor/hospital listing, reviews, claim and update request controls.',
         'fields' => [
             ['key' => 'doctors_per_page', 'label' => 'Doctors Per Page', 'type' => 'number', 'default' => '12'],
@@ -1297,15 +1312,15 @@ $settings_schema = [
             ['key' => 'enable_hospital_reviews', 'label' => 'Enable Hospital Reviews', 'type' => 'checkbox', 'default' => '1'],
             ['key' => 'enable_profile_claim', 'label' => 'Enable Profile Claim', 'type' => 'checkbox', 'default' => '1'],
             ['key' => 'enable_profile_update_request', 'label' => 'Enable Profile Update Request', 'type' => 'checkbox', 'default' => '1'],
-            ['key' => 'default_doctor_male_image', 'label' => 'Default Doctor Image - Male', 'type' => 'file', 'accept' => 'image/*', 'default' => '../assets/images/default-doctor-male.webp', 'help' => 'Used when doctor gender is Male and no profile image is uploaded. JPG, PNG, GIF or WebP will be converted and saved as /assets/images/default-doctor-male-YYMMDDHHMMSS.webp.'],
-            ['key' => 'default_doctor_female_image', 'label' => 'Default Doctor Image - Female', 'type' => 'file', 'accept' => 'image/*', 'default' => '../assets/images/default-doctor-female.webp', 'help' => 'Used when doctor gender is Female and no profile image is uploaded. JPG, PNG, GIF or WebP will be converted and saved as /assets/images/default-doctor-female-YYMMDDHHMMSS.webp.'],
-            ['key' => 'default_doctor_image', 'label' => 'Default Doctor Image - Fallback', 'type' => 'file', 'accept' => 'image/*', 'default' => '../assets/images/default-doctor.webp', 'help' => 'Used when gender is missing/Other or Male/Female default image is not set. JPG, PNG, GIF or WebP will be converted and saved as /assets/images/default-doctor-YYMMDDHHMMSS.webp.'],
-            ['key' => 'default_hospital_image', 'label' => 'Default Hospital Logo', 'type' => 'file', 'accept' => 'image/*', 'default' => '../assets/images/default-hospital.webp', 'help' => 'Small square logo shown next to a hospital\'s name when that hospital has not uploaded its own logo. JPG, PNG, GIF or WebP will be converted and saved as /assets/images/default-hospital-YYMMDDHHMMSS.webp.'],
-            ['key' => 'default_hospital_cover_image', 'label' => 'Default Hospital Cover Image', 'type' => 'file', 'accept' => 'image/*', 'default' => '../assets/images/default-hospital.webp', 'help' => 'Wide banner image shown behind a hospital\'s profile when that hospital has not uploaded its own cover photo. Kept separate from the logo above so a small logo is never stretched to fill the banner. JPG, PNG, GIF or WebP will be converted and saved as /assets/images/default-hospital-cover-YYMMDDHHMMSS.webp.'],
+            ['key' => 'default_doctor_male_image', 'label' => 'Default Doctor Image - Male', 'type' => 'file', 'full' => true, 'accept' => 'image/*', 'default' => '../assets/images/default-doctor-male.webp', 'help' => 'Used when doctor gender is Male and no profile image is uploaded. JPG, PNG, GIF or WebP will be converted and saved as /assets/images/default-doctor-male-YYMMDDHHMMSS.webp.'],
+            ['key' => 'default_doctor_female_image', 'label' => 'Default Doctor Image - Female', 'type' => 'file', 'full' => true, 'accept' => 'image/*', 'default' => '../assets/images/default-doctor-female.webp', 'help' => 'Used when doctor gender is Female and no profile image is uploaded. JPG, PNG, GIF or WebP will be converted and saved as /assets/images/default-doctor-female-YYMMDDHHMMSS.webp.'],
+            ['key' => 'default_doctor_image', 'label' => 'Default Doctor Image - Fallback', 'type' => 'file', 'full' => true, 'accept' => 'image/*', 'default' => '../assets/images/default-doctor.webp', 'help' => 'Used when gender is missing/Other or Male/Female default image is not set. JPG, PNG, GIF or WebP will be converted and saved as /assets/images/default-doctor-YYMMDDHHMMSS.webp.'],
+            ['key' => 'default_hospital_image', 'label' => 'Default Hospital Logo', 'type' => 'file', 'full' => true, 'accept' => 'image/*', 'default' => '../assets/images/default-hospital.webp', 'help' => 'Small square logo shown next to a hospital\'s name when that hospital has not uploaded its own logo. JPG, PNG, GIF or WebP will be converted and saved as /assets/images/default-hospital-YYMMDDHHMMSS.webp.'],
+            ['key' => 'default_hospital_cover_image', 'label' => 'Default Hospital Cover Image', 'type' => 'file', 'full' => true, 'accept' => 'image/*', 'default' => '../assets/images/default-hospital.webp', 'help' => 'Wide banner image shown behind a hospital\'s profile when that hospital has not uploaded its own cover photo. Kept separate from the logo above so a small logo is never stretched to fill the banner. JPG, PNG, GIF or WebP will be converted and saved as /assets/images/default-hospital-cover-YYMMDDHHMMSS.webp.'],
         ],
     ],
     'User Settings' => [
-        'icon' => 'U',
+        'icon' => '👤',
         'description' => 'Registration, login and verification options.',
         'fields' => [
             ['key' => 'enable_user_registration', 'label' => 'Enable User Registration', 'type' => 'checkbox', 'default' => '1'],
@@ -1316,7 +1331,7 @@ $settings_schema = [
         ],
     ],
     'Email & SMTP' => [
-        'icon' => 'M',
+        'icon' => '📧',
         'description' => 'Mail sender and SMTP configuration.',
         'fields' => [
             ['key' => 'mail_from_name', 'label' => 'Mail From Name', 'type' => 'text', 'default' => 'Deluti'],
@@ -1330,7 +1345,7 @@ $settings_schema = [
         ],
     ],
     'SMS & WhatsApp API' => [
-        'icon' => 'P',
+        'icon' => '💬',
         'description' => 'SMS provider and WhatsApp API settings.',
         'fields' => [
             ['key' => 'sms_enabled', 'label' => 'Enable SMS', 'type' => 'checkbox', 'default' => '0'],
@@ -1342,7 +1357,7 @@ $settings_schema = [
         ],
     ],
     'Analytics & Tracking' => [
-        'icon' => 'T',
+        'icon' => '📊',
         'description' => 'Analytics, Tag Manager, Pixel and custom scripts.',
         'fields' => [
             ['key' => 'google_analytics_id', 'label' => 'Google Analytics ID', 'type' => 'text'],
@@ -1353,7 +1368,7 @@ $settings_schema = [
         ],
     ],
     'Design Settings' => [
-        'icon' => 'G',
+        'icon' => '🎨',
         'description' => 'Brand colors, header/footer style and dark mode.',
         'fields' => [
             ['key' => 'primary_color', 'label' => 'Primary Color', 'type' => 'color', 'default' => '#0f766e'],
@@ -1366,7 +1381,7 @@ $settings_schema = [
         ],
     ],
     'Header & Footer' => [
-        'icon' => 'F',
+        'icon' => '🧩',
         'description' => 'Header buttons, topbar, footer text and footer visibility.',
         'fields' => [
             ['key' => 'show_topbar', 'label' => 'Show Topbar', 'type' => 'checkbox', 'default' => '1'],
@@ -1383,7 +1398,7 @@ $settings_schema = [
         ],
     ],
     'Legal Pages' => [
-        'icon' => 'L',
+        'icon' => '📄',
         'description' => 'Privacy, terms, refund, cookie and disclaimer pages.',
         'fields' => [
             ['key' => 'privacy_policy_url', 'label' => 'Privacy Policy URL', 'type' => 'text'],
@@ -1394,12 +1409,14 @@ $settings_schema = [
         ],
     ],
     'Security & System' => [
-        'icon' => 'X',
+        'icon' => '🔒',
         'description' => 'Maintenance mode, reCAPTCHA, debug and system emails.',
         'fields' => [
             ['key' => 'maintenance_mode', 'label' => 'Maintenance Mode', 'type' => 'checkbox', 'default' => '0'],
             ['key' => 'maintenance_title', 'label' => 'Maintenance Title', 'type' => 'text', 'default' => 'Website Under Maintenance'],
             ['key' => 'maintenance_message', 'label' => 'Maintenance Message', 'type' => 'textarea', 'full' => true],
+            ['key' => 'maintenance_until', 'label' => 'Back Online At', 'type' => 'datetime-local', 'help' => 'Optional. Shows a live countdown on the maintenance page. Leave blank to hide the countdown.'],
+            ['key' => 'maintenance_auto_disable', 'label' => 'Auto Disable When Time Ends', 'type' => 'checkbox', 'default' => '1', 'help' => 'When "Back Online At" passes, automatically turn Maintenance Mode off instead of waiting for a manual switch. Requires "Back Online At" to be set.'],
             ['key' => 'enable_recaptcha', 'label' => 'Enable reCAPTCHA', 'type' => 'checkbox', 'default' => '0'],
             ['key' => 'recaptcha_site_key', 'label' => 'reCAPTCHA Site Key', 'type' => 'text'],
             ['key' => 'recaptcha_secret_key', 'label' => 'reCAPTCHA Secret Key', 'type' => 'password'],
@@ -1498,6 +1515,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        // Maintenance Mode was just turned off (or wasn't turned on) in this
+        // save - clear "Back Online At" so a stale past/old date is never
+        // left sitting there the next time Maintenance Mode gets switched on.
+        if (!isset($_POST['maintenance_mode'])) {
+            admin_update_site_setting('maintenance_until', '');
+        }
+
         $should_write_robots_txt = true;
         $success = 'Site settings updated successfully.';
     }
@@ -1528,25 +1552,79 @@ $first_tab_key = admin_settings_slug((string)reset($schema_keys));
 $active_tab = admin_settings_slug(trim((string)($_GET['tab'] ?? '')));
 $active_tab = $active_tab !== '' ? $active_tab : $first_tab_key;
 $robots_preview = admin_site_build_robots_txt($settings);
+
+if (!function_exists('admin_settings_hex_to_rgba')) {
+    function admin_settings_hex_to_rgba(string $hex, float $alpha): string
+    {
+        $hex = ltrim($hex, '#');
+
+        if (strlen($hex) !== 6) {
+            return 'rgba(9, 105, 218, ' . $alpha . ')';
+        }
+
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+
+        return "rgba({$r}, {$g}, {$b}, {$alpha})";
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Single Accent Color
+|--------------------------------------------------------------------------
+| One quiet accent color (the site's own configured primary color, when
+| set) is reused everywhere a tab, icon or highlight needs one. A single
+| consistent accent reads calmer and more premium than a different color
+| per section.
+*/
+$settings_accent = admin_site_normalize_hex_color((string)($settings['primary_color'] ?? ''), '#0969da');
+$settings_accent_soft = admin_settings_hex_to_rgba($settings_accent, 0.10);
+$settings_accent_border = admin_settings_hex_to_rgba($settings_accent, 0.22);
 ?>
 
 <style>
     .settings-page {
         color: #24292f;
+        --accent: <?= e($settings_accent) ?>;
+        --accent-soft: <?= e($settings_accent_soft) ?>;
+        --accent-border: <?= e($settings_accent_border) ?>;
     }
 
     .settings-hero {
+        position: relative;
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
         gap: 16px;
         flex-wrap: wrap;
         margin-bottom: 16px;
-        padding: 18px;
-        border-radius: 10px;
+        padding: 22px;
+        border-radius: 12px;
         border: 1px solid #d0d7de;
-        background: #ffffff;
+        background: linear-gradient(135deg, #ffffff 0%, #f6f8fa 60%, var(--accent-soft, #f6f8fa) 100%);
         box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
+        overflow: hidden;
+    }
+
+    .settings-hero-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .settings-hero-icon {
+        width: 46px;
+        height: 46px;
+        flex: 0 0 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: #ffffff;
+        border: 1px solid var(--accent-border, #d0d7de);
+        font-size: 22px;
     }
 
     .settings-hero h2 {
@@ -1566,7 +1644,32 @@ $robots_preview = admin_site_build_robots_txt($settings);
         line-height: 1.6;
     }
 
+    .settings-hero-stats {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+    }
+
+    .settings-hero-stat {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 11px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid #d0d7de;
+        color: #24292f;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .settings-hero-stat strong {
+        color: var(--accent, #0969da);
+    }
+
     .settings-hero-actions {
+        position: relative;
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
@@ -1641,31 +1744,34 @@ $robots_preview = admin_site_build_robots_txt($settings);
     .settings-tab-btn {
         width: 100%;
         min-height: 38px;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
         gap: 10px;
-        padding: 8px 9px !important;
-        border: 0 !important;
+        padding: 8px 9px;
+        border: 0;
+        border-left: 3px solid transparent;
         border-radius: 6px;
-        background: transparent !important;
-        color: #24292f !important;
-        text-align: left !important;
+        background: transparent;
+        color: #24292f;
+        text-align: left;
         font-size: 13px;
         font-weight: 700;
         line-height: 1.2;
         cursor: pointer;
-        box-shadow: none !important;
+        box-shadow: none;
+        transition: background .15s ease, color .15s ease;
     }
 
     .settings-tab-btn:hover {
-        background: #f6f8fa !important;
-        color: #24292f !important;
+        background: #f6f8fa;
+        color: #24292f;
     }
 
     .settings-tab-btn.active {
-        background: #ddf4ff !important;
-        color: #0969da !important;
+        background: var(--accent-soft, #ddf4ff);
+        color: var(--accent, #0969da);
+        border-left-color: var(--accent, #0969da);
     }
 
     .settings-tab-btn span {
@@ -1682,21 +1788,20 @@ $robots_preview = admin_site_build_robots_txt($settings);
         width: 28px;
         height: 28px;
         flex: 0 0 28px;
-        display: inline-flex !important;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
         border-radius: 6px;
         background: #f6f8fa;
         border: 1px solid #d8dee4;
         color: #57606a;
-        font-size: 12px;
-        font-weight: 800;
+        font-size: 14px;
     }
 
     .settings-tab-btn.active .settings-tab-icon {
         background: #ffffff;
-        color: #0969da;
-        border-color: rgba(9, 105, 218, 0.18);
+        color: var(--accent, #0969da);
+        border-color: var(--accent, #0969da);
     }
 
     .settings-main {
@@ -1717,9 +1822,26 @@ $robots_preview = admin_site_build_robots_txt($settings);
     }
 
     .settings-section-head {
-        padding: 15px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 18px;
         border-bottom: 1px solid #d0d7de;
         background: #f6f8fa;
+    }
+
+    .settings-section-icon {
+        width: 38px;
+        height: 38px;
+        flex: 0 0 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #ffffff;
+        border: 1px solid var(--accent-border, #d8dee4);
+        color: var(--accent, #57606a);
+        font-size: 17px;
     }
 
     .settings-section-head h3 {
@@ -1795,9 +1917,9 @@ $robots_preview = admin_site_build_robots_txt($settings);
     }
 
     .settings-code-textarea {
-        min-height: 170px !important;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-        font-size: 13px !important;
+        min-height: 170px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 13px;
     }
 
     .settings-color-wrap {
@@ -1854,19 +1976,108 @@ $robots_preview = admin_site_build_robots_txt($settings);
         transform: translateX(22px);
     }
 
-    .settings-current-file {
-        margin-top: 2px;
+    .settings-upload {
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
 
-    .settings-current-file a {
+    .settings-upload-thumb {
+        width: 56px;
+        height: 56px;
+        flex: 0 0 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #d0d7de;
+        border-radius: 8px;
+        background: #f6f8fa;
+        overflow: hidden;
+    }
+
+    .settings-upload-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 5px;
+    }
+
+    .settings-upload-thumb span {
+        color: #8c959f;
+        font-size: 10px;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .settings-upload-controls {
+        min-width: 0;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .settings-upload-btn-wrap {
+        position: relative;
         display: inline-flex;
+    }
+
+    .settings-upload-input {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .settings-upload-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 32px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid rgba(27, 31, 36, 0.15);
+        background: #f6f8fa;
+        color: #24292f;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+        pointer-events: none;
+    }
+
+    .settings-upload-btn-wrap:hover .settings-upload-btn {
+        background: #eef1f4;
+    }
+
+    .settings-upload-input:focus-visible + .settings-upload-btn {
+        outline: 2px solid var(--accent, #0969da);
+        outline-offset: 2px;
+    }
+
+    .settings-upload-filename {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: #57606a;
+        font-size: 12px;
+    }
+
+    .settings-upload-view {
         color: #0969da;
         font-size: 12px;
         font-weight: 700;
         text-decoration: none;
+        white-space: nowrap;
     }
 
-    .settings-current-file a:hover {
+    .settings-upload-view:hover {
         text-decoration: underline;
     }
 
@@ -1886,6 +2097,17 @@ $robots_preview = admin_site_build_robots_txt($settings);
         justify-content: space-between;
         gap: 12px;
         flex-wrap: wrap;
+        transition: border-color .15s ease, background .15s ease;
+    }
+
+    .settings-save-bar.has-changes {
+        border-color: rgba(191, 135, 0, 0.4);
+        background: rgba(255, 248, 231, 0.96);
+    }
+
+    .settings-save-bar.has-changes span {
+        color: #9a6700;
+        font-weight: 700;
     }
 
     .settings-save-bar span {
@@ -1941,6 +2163,7 @@ $robots_preview = admin_site_build_robots_txt($settings);
         background: #f6f8fa;
         font-size: 14px;
         font-weight: 700;
+        color: #24292f;
     }
 
     .settings-preview-body {
@@ -1988,27 +2211,6 @@ $robots_preview = admin_site_build_robots_txt($settings);
     }
 
 
-    .settings-image-preview {
-        margin-top: 8px;
-        width: 120px;
-        height: 86px;
-        border: 1px solid #d0d7de;
-        border-radius: 8px;
-        background: #f6f8fa;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .settings-image-preview img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        padding: 6px;
-    }
-
-
     /* Premium robots.txt crawler controls */
     .settings-crawler-field {
         position: relative;
@@ -2040,9 +2242,9 @@ $robots_preview = admin_site_build_robots_txt($settings);
         align-items: center;
         justify-content: center;
         border-radius: 9px;
-        background: #ddf4ff;
-        border: 1px solid rgba(9, 105, 218, .16);
-        color: #0969da;
+        background: var(--accent-soft, #ddf4ff);
+        border: 1px solid var(--accent-border, rgba(9, 105, 218, .16));
+        color: var(--accent, #0969da);
         font-size: 13px;
         font-weight: 800;
     }
@@ -2096,8 +2298,8 @@ $robots_preview = admin_site_build_robots_txt($settings);
     }
 
     .crawler-mode-select {
-        background: #ffffff !important;
-        font-size: 13px !important;
+        background: #ffffff;
+        font-size: 13px;
         font-weight: 700;
     }
 
@@ -2148,7 +2350,7 @@ $robots_preview = admin_site_build_robots_txt($settings);
         flex-wrap: wrap;
         padding: 15px 16px;
         border-bottom: 1px solid #d0d7de;
-        background: linear-gradient(135deg, #f6f8fa 0%, #ddf4ff 100%);
+        background: linear-gradient(135deg, #f6f8fa 0%, var(--accent-soft, #ddf4ff) 100%);
     }
 
     .robots-preview-title {
@@ -2164,7 +2366,7 @@ $robots_preview = admin_site_build_robots_txt($settings);
         align-items: center;
         justify-content: center;
         border-radius: 9px;
-        background: #0969da;
+        background: var(--accent, #0969da);
         color: #ffffff;
         font-size: 15px;
         font-weight: 800;
@@ -2209,11 +2411,6 @@ $robots_preview = admin_site_build_robots_txt($settings);
         .settings-tab-list {
             grid-template-columns: repeat(2, 1fr);
         }
-
-        .settings-tab-btn {
-            justify-content: flex-start !important;
-            text-align: left !important;
-        }
     }
 
     @media(max-width: 720px) {
@@ -2228,11 +2425,6 @@ $robots_preview = admin_site_build_robots_txt($settings);
             grid-template-columns: 1fr;
         }
 
-        .settings-tab-btn {
-            justify-content: flex-start !important;
-            text-align: left !important;
-        }
-
         .settings-save-bar {
             bottom: 10px;
         }
@@ -2245,9 +2437,18 @@ $robots_preview = admin_site_build_robots_txt($settings);
 
 <div class="settings-page">
     <div class="settings-hero">
-        <div>
-            <h2>Site Settings</h2>
-            <p>Manage website identity, contact information, social links, SEO, homepage content, directory controls, email, analytics, design, legal pages and security options.</p>
+        <div class="settings-hero-top">
+            <span class="settings-hero-icon">⚙️</span>
+
+            <div>
+                <h2>Site Settings</h2>
+                <p>Manage website identity, contact information, social links, SEO, homepage content, directory controls, email, analytics, design, legal pages and security options.</p>
+
+                <div class="settings-hero-stats">
+                    <span class="settings-hero-stat"><strong><?= e((string)count($settings_schema)) ?></strong> Sections</span>
+                    <span class="settings-hero-stat"><strong><?= e((string)count($all_fields)) ?></strong> Settings</span>
+                </div>
+            </div>
         </div>
 
         <div class="settings-hero-actions">
@@ -2321,8 +2522,11 @@ $robots_preview = admin_site_build_robots_txt($settings);
 
                     <section class="settings-section <?= $active_tab === $tab_key ? 'active' : '' ?>" data-tab-panel="<?= e($tab_key) ?>">
                         <div class="settings-section-head">
-                            <h3><?= e($section_title) ?></h3>
-                            <p><?= e((string)$section['description']) ?></p>
+                            <span class="settings-section-icon"><?= e((string)$section['icon']) ?></span>
+                            <div>
+                                <h3><?= e($section_title) ?></h3>
+                                <p><?= e((string)$section['description']) ?></p>
+                            </div>
                         </div>
 
                         <div class="settings-section-body">
@@ -2393,12 +2597,12 @@ $robots_preview = admin_site_build_robots_txt($settings);
                     </section>
                 <?php endforeach; ?>
 
-                <div class="settings-save-bar">
-                    <span>After changing settings, click save to update your website configuration.</span>
+                <div class="settings-save-bar" id="settingsSaveBar">
+                    <span id="settingsSaveBarText">After changing settings, click save to update your website configuration.</span>
 
                     <div class="settings-hero-actions">
                         <a href="dashboard.php" class="settings-btn">Cancel</a>
-                        <button type="submit" class="settings-btn settings-btn-primary">Save Settings</button>
+                        <button type="submit" class="settings-btn settings-btn-primary" id="settingsSaveBtn">Save Settings</button>
                     </div>
                 </div>
             </main>
@@ -2455,6 +2659,38 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    document.querySelectorAll('.settings-upload-input').forEach(function (input) {
+        const filenameEl = input.closest('.settings-upload-controls').querySelector('.settings-upload-filename');
+
+        if (!filenameEl) {
+            return;
+        }
+
+        input.addEventListener('change', function () {
+            filenameEl.textContent = input.files && input.files.length > 0
+                ? input.files[0].name
+                : filenameEl.getAttribute('data-empty-text');
+        });
+    });
+
+    const settingsForm = document.getElementById('siteSettingsForm');
+    const saveBar = document.getElementById('settingsSaveBar');
+    const saveBarText = document.getElementById('settingsSaveBarText');
+
+    if (settingsForm && saveBar && saveBarText) {
+        const defaultSaveBarText = saveBarText.textContent;
+
+        settingsForm.addEventListener('input', function () {
+            saveBar.classList.add('has-changes');
+            saveBarText.textContent = 'You have unsaved changes.';
+        });
+
+        settingsForm.addEventListener('submit', function () {
+            saveBar.classList.remove('has-changes');
+            saveBarText.textContent = defaultSaveBarText;
+        });
+    }
 });
 </script>
 

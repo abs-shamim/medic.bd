@@ -129,7 +129,7 @@ if (function_exists('get_site_setting')) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -159,7 +159,7 @@ if (function_exists('get_site_setting')) {
         radial-gradient(circle at top left, rgba(9, 105, 218, 0.10), transparent 32%),
         radial-gradient(circle at bottom right, rgba(45, 164, 78, 0.12), transparent 30%),
         var(--login-bg);
-      font-family: "Inter", "Noto Sans Bengali", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: "Inter", "Noto Serif Bengali", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;

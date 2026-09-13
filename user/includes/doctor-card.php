@@ -240,6 +240,31 @@ if (!function_exists('user_dc_site_setting')) {
     }
 }
 
+if (!function_exists('user_dc_default_doctor_image_setting')) {
+    function user_dc_default_doctor_image_setting(array $doctor): string
+    {
+        $gender = strtolower(trim((string)($doctor['gender'] ?? '')));
+
+        if (in_array($gender, ['male', 'm'], true)) {
+            $value = user_dc_site_setting('default_doctor_male_image', '');
+
+            if ($value !== '') {
+                return $value;
+            }
+        }
+
+        if (in_array($gender, ['female', 'f'], true)) {
+            $value = user_dc_site_setting('default_doctor_female_image', '');
+
+            if ($value !== '') {
+                return $value;
+            }
+        }
+
+        return user_dc_site_setting('default_doctor_image', 'assets/images/default-doctor.webp');
+    }
+}
+
 if (!function_exists('user_dc_years_experience_text')) {
     function user_dc_years_experience_text($starting_year): string
     {
@@ -405,10 +430,7 @@ $card_consultation_fee_text = $card_consultation_fee > 0
 
 $profile_link = user_dc_doctor_url($doctor);
 
-$doctor_default_image_setting = user_dc_site_setting(
-    'default_doctor_image',
-    'assets/images/default-doctor.webp'
-);
+$doctor_default_image_setting = user_dc_default_doctor_image_setting($doctor);
 
 $doctor_image_url = user_dc_asset_url(
     (string)($doctor['image'] ?? ''),
